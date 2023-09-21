@@ -6,6 +6,7 @@ using SocialNetwork.Entity;
 public class DataContext : DbContext
 {
     public DbSet<User> User { get; set; }
+    public DbSet<PinCode> PinCode { get; set; }
 
 
 

@@ -23,14 +23,32 @@ namespace SocialNetwork.Controller
         }
 
         [AllowAnonymous]
+        [HttpPost("sendpincode")]
+        public async Task<IActionResult> sendpincode([FromBody] SendPinEmailModel rsg)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid data");
+            }
+            // Gọi AuthService để xử lý việc đăng ký tài khoản
+            var isRegistered = await _userService.SendPinEmail(rsg);
+            if (isRegistered)
+            {
+                return Ok("SendCode successful");
+            }
+            else
+            {
+                return BadRequest("Email already exists");
+            }
+        }
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel rsg)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid registration data");
+                return BadRequest("Invalid data");
             }
-
             // Gọi AuthService để xử lý việc đăng ký tài khoản
             var isRegistered = await _userService.RegisterUser(rsg);
             if (isRegistered)
