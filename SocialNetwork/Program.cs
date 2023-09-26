@@ -1,15 +1,12 @@
 ﻿using firstapi.Service;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.Mail;
+using SocialNetwork.Service;
+using SocialNetwork.Service.Implement;
 using System.Text;
 using System.Text.Json.Serialization;
-using WebApi.Authorization;
 using WebApi.Helpers;
-using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +28,7 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IJwtUtils, JwtUtils>();
     services.AddScoped<IUserService, UserService>();
     services.AddScoped<IEmailService, EmailService>();
-    
+
 }
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
@@ -63,13 +60,6 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 
-
-
-// global error handler
-//app.UseMiddleware<ErrorHandlerMiddleware>();
-
-// custom jwt auth middleware
-//app.UseMiddleware<JwtMiddleware>();
 app.UseForbiddenResponse();
 app.UseUnauthorizedResponse();
 app.UseSwagger();

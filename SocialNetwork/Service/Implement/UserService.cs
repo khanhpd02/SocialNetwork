@@ -1,33 +1,15 @@
-﻿namespace WebApi.Services;
+﻿namespace SocialNetwork.Service.Implement;
 
 using BCrypt.Net;
+using firstapi.Service;
 using Microsoft.Extensions.Options;
-using WebApi.Helpers;
-using WebApi.Authorization;
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
-
-using SocialNetwork.Model.User;
 using SocialNetwork.Entity;
 using SocialNetwork.Mail;
-using firstapi.Service;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.Http.HttpResults;
+using SocialNetwork.Model.User;
+using System.Text.RegularExpressions;
+using WebApi.Helpers;
 
-public interface IUserService
-{
-    /*AuthenticateResponse Authenticate(AuthenticateRequest model);
-    AuthenticateResponse RefreshToken(string token);
-*/
-    Task<bool> SendPinEmail(SendPinEmailModel rsg);
-    Task<bool> RegisterUser(RegisterModel rsg);
-    /*  void RevokeToken(string token);
-      IEnumerable<User> GetAll();
-      User GetById(int id);
 
-      void RemoveAllRefreshTokens(string baseToken);*/
-}
 
 public class UserService : IUserService
 {
@@ -35,7 +17,7 @@ public class UserService : IUserService
     private IJwtUtils _jwtUtils;
     private readonly AppSettings _appSettings;
     private IEmailService _emailService;
-    private static string baseToken="";
+    private static string baseToken = "";
 
     public UserService(
         DataContext context,
@@ -70,7 +52,7 @@ public class UserService : IUserService
         _context.SaveChanges();
 
         string uniqueId = NanoidDotNet.Nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10);
-        PinCode pin1 = new PinCode { Id = uniqueId, Email = rsg.Email, Pin = RandomPIN(), CreateDate = DateTime.Now, ExpiredTime = DateTime.Now.AddMinutes(3), IsDeleted = false };
+        PinCode pin1 = new PinCode { Email = rsg.Email, Pin = RandomPIN(), CreateDate = DateTime.Now, ExpiredTime = DateTime.Now.AddMinutes(3), IsDeleted = false };
         //
         _context.PinCode.Add(pin1);
         _context.SaveChanges();
@@ -81,18 +63,14 @@ public class UserService : IUserService
             Mailrequest mailrequest = new Mailrequest();
             mailrequest.ToEmail = pin1.Email;
             mailrequest.Subject = "Mã Pin Xác Nhận";
-            mailrequest.Body = _emailService.GetHtmlcontent("Mã pin của bạn là: "+pin1.Pin);
+            mailrequest.Body = _emailService.GetHtmlcontent("Mã pin của bạn là: " + pin1.Pin);
             await _emailService.SendEmailAsync(mailrequest);
-            
+
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw;
         }
-        // Thêm người dùng mới vào danh sách
-        //_context.User.Add(new User { Id = uniqueId, Email = rsg.Email, Password = BCrypt.HashPassword(rsg.Password),Status=true,CreateDate=DateTime.Now,UpdateDate=DateTime.Now });
-        
-
         return true;
     }
     public async Task<bool> RegisterUser(RegisterModel rsg)
@@ -111,14 +89,14 @@ public class UserService : IUserService
         try
         {
             var firstPin = _context.PinCode.First(user => user.Email == rsg.Email);
-            if(firstPin != null)
+            if (firstPin != null)
             {
                 if (firstPin.Pin == rsg.Pin && firstPin.ExpiredTime >= DateTime.Now)
                 {
                     firstPin.IsDeleted = true;
                     // Thêm người dùng mới vào danh sách
                     string uniqueId = NanoidDotNet.Nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10);
-                    _context.User.Add(new User { Id = uniqueId, Email = rsg.Email, Password = BCrypt.HashPassword(rsg.Password), Status = true, CreateDate = DateTime.Now, UpdateDate = DateTime.Now });
+                    _context.User.Add(new User { Email = rsg.Email, Password = BCrypt.HashPassword(rsg.Password), Status = true, CreateDate = DateTime.Now, UpdateDate = DateTime.Now });
                     _context.SaveChanges();
                 }
                 else
@@ -127,13 +105,27 @@ public class UserService : IUserService
                 }
             }
         }
-        catch(Exception ex){
+        catch (Exception ex)
+        {
             throw new AppException(ex.Message);
         }
-        
+
         return true;
     }
-    private string RandomPIN() {
+    public async Task<string> Authenticate(LoginModel loginModel)
+    {
+        var user = _context.User.SingleOrDefault(u => u.Email == loginModel.Email);
+
+        if (user == null || !BCrypt.Verify(loginModel.Password, user.Password))
+        {
+            return null;
+        }
+
+        return _jwtUtils.GenerateJwtToken(user);
+    }
+
+    private string RandomPIN()
+    {
         Random random = new Random();
         string sixDigitNumber = string.Empty;
 
@@ -152,5 +144,5 @@ public class UserService : IUserService
         return Regex.IsMatch(email, pattern);
     }
 
-    
+
 }

@@ -2,7 +2,6 @@ namespace WebApi.Authorization;
 
 using Microsoft.Extensions.Options;
 using WebApi.Helpers;
-using WebApi.Services;
 
 public class JwtMiddleware
 {
@@ -15,16 +14,5 @@ public class JwtMiddleware
         _appSettings = appSettings.Value;
     }
 
-   /* public async Task Invoke(HttpContext context, IUserService userService, IJwtUtils jwtUtils)
-    {
-        var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-        var userId = jwtUtils.ValidateJwtToken(token);
-        if (userId != null)
-        {
-            // attach user to context on successful jwt validation
-            context.Items["ROLE_USER"] = userService.GetById(userId.Value);
-        }
 
-        await _next(context);
-    }*/
 }

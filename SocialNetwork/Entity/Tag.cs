@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class Role
+public partial class Tag
 {
     public Guid Id { get; set; }
 
-    public string? Role1 { get; set; }
-
-    public string? Description { get; set; }
+    public string? Content { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -21,5 +19,5 @@ public partial class Role
 
     public bool IsDeleted { get; set; }
 
-    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual ICollection<TagPost> TagPosts { get; set; } = new List<TagPost>();
 }

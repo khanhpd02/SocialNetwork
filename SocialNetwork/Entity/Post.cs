@@ -3,15 +3,13 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class User
+public partial class Post
 {
     public Guid Id { get; set; }
 
-    public string? Email { get; set; }
+    public string? Content { get; set; }
 
-    public string? Password { get; set; }
-
-    public bool? Status { get; set; }
+    public Guid? UserId { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -23,19 +21,15 @@ public partial class User
 
     public bool IsDeleted { get; set; }
 
-    public int? Pin { get; set; }
-
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
-    public virtual ICollection<GroupChat> GroupChats { get; set; } = new List<GroupChat>();
-
-    public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
-
-    public virtual ICollection<Infor> Infors { get; set; } = new List<Infor>();
+    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
-    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual ICollection<TagPost> TagPosts { get; set; } = new List<TagPost>();
+
+    public virtual ICollection<Video> Videos { get; set; } = new List<Video>();
 }

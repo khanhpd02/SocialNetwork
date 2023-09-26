@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
-using WebApi.Services;
+using SocialNetwork.Service;
 
 namespace SocialNetwork.Controller
 {
@@ -16,7 +16,7 @@ namespace SocialNetwork.Controller
         private IUserService _userService;
         private IEmailService _emailService;
 
-        public AuthController(IUserService userService,IEmailService emailService)
+        public AuthController(IUserService userService, IEmailService emailService)
         {
             _userService = userService;
             _emailService = emailService;
@@ -60,7 +60,24 @@ namespace SocialNetwork.Controller
                 return BadRequest("Email already exists");
             }
         }
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid data");
+            }
 
+            var token = await _userService.Authenticate(loginModel);
+
+            if (token == null)
+            {
+                return Unauthorized("Invalid email or password");
+            }
+
+            return Ok(new { Token = token });
+        }
         [AllowAnonymous]
         [HttpPost("SendMail")]
         public async Task<IActionResult> SendMail()
@@ -74,11 +91,11 @@ namespace SocialNetwork.Controller
                 await _emailService.SendEmailAsync(mailrequest);
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
-        
+
     }
 }

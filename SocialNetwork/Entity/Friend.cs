@@ -3,13 +3,15 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class Role
+public partial class Friend
 {
     public Guid Id { get; set; }
 
-    public string? Role1 { get; set; }
+    public Guid User1 { get; set; }
 
-    public string? Description { get; set; }
+    public Guid User2 { get; set; }
+
+    public int Level { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -20,6 +22,4 @@ public partial class Role
     public int? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
-
-    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }
