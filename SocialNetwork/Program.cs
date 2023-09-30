@@ -1,12 +1,17 @@
 ﻿using firstapi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SocialNetwork.Entity;
 using SocialNetwork.Mail;
 using SocialNetwork.Service;
 using SocialNetwork.Service.Implement;
 using System.Text;
 using System.Text.Json.Serialization;
 using WebApi.Helpers;
+
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
     var services = builder.Services;
     var env = builder.Environment;
 
-    services.AddDbContext<DataContext>();
+    //services.AddDbContext<DataContext>();
+    services.AddDbContext<SocialNetworkContext>();
     services.AddCors();
     services.AddControllers()
         .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
@@ -30,6 +36,7 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IEmailService, EmailService>();
 
 }
+
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 //Authorization
@@ -68,5 +75,3 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-
-

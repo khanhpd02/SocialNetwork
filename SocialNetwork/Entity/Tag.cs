@@ -11,11 +11,11 @@ public partial class Tag
 
     public DateTime? CreateDate { get; set; }
 
-    public int? CreateBy { get; set; }
+    public Guid? CreateBy { get; set; }
 
     public DateTime? UpdateDate { get; set; }
 
-    public int? UpdateBy { get; set; }
+    public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
 

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using SocialNetwork.Entity;
 using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
+using System.Runtime.ConstrainedExecution;
 using System.Text.RegularExpressions;
 using WebApi.Helpers;
 
@@ -13,14 +14,14 @@ using WebApi.Helpers;
 
 public class UserService : IUserService
 {
-    private DataContext _context;
+    private SocialNetworkContext _context;
     private IJwtUtils _jwtUtils;
     private readonly AppSettings _appSettings;
     private IEmailService _emailService;
     private static string baseToken = "";
 
     public UserService(
-        DataContext context,
+        SocialNetworkContext context,
         IJwtUtils jwtUtils,
         IOptions<AppSettings> appSettings,
         IEmailService emailService)
@@ -34,7 +35,7 @@ public class UserService : IUserService
     public async Task<bool> SendPinEmail(SendPinEmailModel rsg)
     {
         // Kiểm tra xem email đã tồn tại hay chưa
-        if (_context.User.Any(u => u.Email == rsg.Email))
+        if (_context.Users.Any(u => u.Email == rsg.Email))
         {
             return false;
         }
@@ -44,17 +45,17 @@ public class UserService : IUserService
             throw new AppException("Invalid email");
         }
         //
-        var duplicatePinCode = _context.PinCode.Where(u => u.Email == rsg.Email).ToList();
+        var duplicatePinCode = _context.PinCodes.Where(u => u.Email == rsg.Email).ToList();
         foreach (var pincode in duplicatePinCode)
         {
-            _context.PinCode.Remove(pincode);
+            _context.PinCodes.Remove(pincode);
         }
         _context.SaveChanges();
 
-        string uniqueId = NanoidDotNet.Nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10);
+        //string uniqueId = NanoidDotNet.Nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10);
         PinCode pin1 = new PinCode { Email = rsg.Email, Pin = RandomPIN(), CreateDate = DateTime.Now, ExpiredTime = DateTime.Now.AddMinutes(3), IsDeleted = false };
         //
-        _context.PinCode.Add(pin1);
+        _context.PinCodes.Add(pin1);
         _context.SaveChanges();
         //send code email
         try
@@ -76,7 +77,7 @@ public class UserService : IUserService
     public async Task<bool> RegisterUser(RegisterModel rsg)
     {
         // Kiểm tra xem email đã tồn tại hay chưa
-        if (_context.User.Any(u => u.Email == rsg.Email))
+        if (_context.Users.Any(u => u.Email == rsg.Email))
         {
             return false;
         }
@@ -86,35 +87,45 @@ public class UserService : IUserService
             throw new AppException("Invalid email");
         }
         //
-        try
-        {
-            var firstPin = _context.PinCode.First(user => user.Email == rsg.Email);
-            if (firstPin != null)
+        using (var transaction =_context.Database.BeginTransaction()) {
+            try
             {
-                if (firstPin.Pin == rsg.Pin && firstPin.ExpiredTime >= DateTime.Now)
+                var firstPin = _context.PinCodes.First(user => user.Email == rsg.Email);
+                if (firstPin != null)
                 {
-                    firstPin.IsDeleted = true;
-                    // Thêm người dùng mới vào danh sách
-                    string uniqueId = NanoidDotNet.Nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10);
-                    _context.User.Add(new User { Email = rsg.Email, Password = BCrypt.HashPassword(rsg.Password), Status = true, CreateDate = DateTime.Now, UpdateDate = DateTime.Now });
-                    _context.SaveChanges();
-                }
-                else
-                {
-                    throw new AppException("Code sai hoặc hết hạn");
+                    if (firstPin.Pin == rsg.Pin && firstPin.ExpiredTime >= DateTime.Now)
+                    {
+                        firstPin.IsDeleted = true;
+                        // Thêm người dùng mới vào danh sách
+                        //string uniqueId = NanoidDotNet.Nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10);
+                        _context.Users.Add(new User { Email = rsg.Email, Password = BCrypt.HashPassword(rsg.Password), Status = true, CreateDate = DateTime.Now, UpdateDate = DateTime.Now });
+                        _context.SaveChanges();
+                        User users = _context.Users.SingleOrDefault(u => u.Email == rsg.Email);
+                        string role = "User";
+                        Role roles = _context.Roles.SingleOrDefault(r => r.RoleName == role);
+                        _context.UserRoles.Add(new UserRole { UserId = users.Id, RoleId = roles.Id, CreateDate = DateTime.Now, IsDeleted = false });
+                        _context.SaveChanges();
+                        
+                    }
+                    else
+                    {
+                        throw new AppException("Code sai hoặc hết hạn");
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw new AppException("Đăng kí bị hủy bỏ. Lỗi: " + ex.Message);
+            }
         }
-        catch (Exception ex)
-        {
-            throw new AppException(ex.Message);
-        }
+            
 
         return true;
     }
     public async Task<string> Authenticate(LoginModel loginModel)
     {
-        var user = _context.User.SingleOrDefault(u => u.Email == loginModel.Email);
+        var user = _context.Users.SingleOrDefault(u => u.Email == loginModel.Email);
 
         if (user == null || !BCrypt.Verify(loginModel.Password, user.Password))
         {

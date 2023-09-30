@@ -16,4 +16,10 @@ public partial class PinCode
     public DateTime? ExpiredTime { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public Guid? CreateBy { get; set; }
+
+    public DateTime? UpdateDate { get; set; }
+
+    public Guid? UpdateBy { get; set; }
 }

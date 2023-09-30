@@ -19,11 +19,12 @@ public interface IJwtUtils
 
 public class JwtUtils : IJwtUtils
 {
-    private DataContext _context;
+    private SocialNetworkContext _context;
+
     private readonly AppSettings _appSettings;
 
     public JwtUtils(
-        DataContext context,
+        SocialNetworkContext context,
         IOptions<AppSettings> appSettings)
     {
         _context = context;

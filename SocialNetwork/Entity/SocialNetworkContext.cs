@@ -49,13 +49,13 @@ public partial class SocialNetworkContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=SocialNetwork;User Id=sa;Password=123456;Trusted_Connection=True;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Server=localhost;Database=SocialNetwork;User Id=sa;Password=123456;Trusted_Connection=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC079167C932");
+            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC078421B0ED");
 
             entity.ToTable("Comment");
 
@@ -76,7 +76,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<Friend>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Friends__3214EC07E7BEB8F5");
+            entity.HasKey(e => e.Id).HasName("PK__Friends__3214EC076102A013");
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
@@ -86,7 +86,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<Group>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Group__3214EC07C7EDCAF7");
+            entity.HasKey(e => e.Id).HasName("PK__Group__3214EC0725AA12FA");
 
             entity.ToTable("Group");
 
@@ -102,7 +102,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<GroupChat>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__GroupCha__3214EC0720DBD4C4");
+            entity.HasKey(e => e.Id).HasName("PK__GroupCha__3214EC0710245997");
 
             entity.ToTable("GroupChat");
 
@@ -118,7 +118,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<Image>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Image__3214EC070F35F8DC");
+            entity.HasKey(e => e.Id).HasName("PK__Image__3214EC076E751726");
 
             entity.ToTable("Image");
 
@@ -134,7 +134,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<Infor>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Infor__3214EC07C93F304C");
+            entity.HasKey(e => e.Id).HasName("PK__Infor__3214EC07E1B6020B");
 
             entity.ToTable("Infor");
 
@@ -151,7 +151,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<Like>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Like__3214EC07C25074B0");
+            entity.HasKey(e => e.Id).HasName("PK__Like__3214EC07D9E0E880");
 
             entity.ToTable("Like");
 
@@ -177,11 +177,12 @@ public partial class SocialNetworkContext : DbContext
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
             entity.Property(e => e.ExpiredTime).HasColumnType("datetime");
+            entity.Property(e => e.UpdateDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Post__3214EC077815F001");
+            entity.HasKey(e => e.Id).HasName("PK__Post__3214EC07AEAE4846");
 
             entity.ToTable("Post");
 
@@ -192,7 +193,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<Report>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Report__3214EC07F126A598");
+            entity.HasKey(e => e.Id).HasName("PK__Report__3214EC07EBF6E0E6");
 
             entity.ToTable("Report");
 
@@ -213,19 +214,18 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Role__3214EC07AB6D0361");
+            entity.HasKey(e => e.Id).HasName("PK__Role__3214EC07D5C682E9");
 
             entity.ToTable("Role");
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
-            entity.Property(e => e.Role1).HasColumnName("Role");
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Tag>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tag__3214EC079759D540");
+            entity.HasKey(e => e.Id).HasName("PK__Tag__3214EC07EC690B77");
 
             entity.ToTable("Tag");
 
@@ -255,7 +255,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__User__3214EC07BCA0DF12");
+            entity.HasKey(e => e.Id).HasName("PK__User__3214EC0723AE3EE4");
 
             entity.ToTable("User");
 
@@ -285,7 +285,7 @@ public partial class SocialNetworkContext : DbContext
 
         modelBuilder.Entity<Video>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Video__3214EC07B4B63998");
+            entity.HasKey(e => e.Id).HasName("PK__Video__3214EC071786E80C");
 
             entity.ToTable("Video");
 
