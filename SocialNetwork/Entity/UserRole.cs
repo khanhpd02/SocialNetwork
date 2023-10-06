@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class UserRole
+public partial class UserRole : IEntity
 {
     public Guid UserId { get; set; }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class Image
+public partial class Image : IEntity
 {
     public Guid Id { get; set; }
 

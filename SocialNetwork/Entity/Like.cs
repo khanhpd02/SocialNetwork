@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class Like
+public partial class Like : IEntity
 {
     public Guid Id { get; set; }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class TagPost
+public partial class TagPost : IEntity
 {
     public Guid TagId { get; set; }
 

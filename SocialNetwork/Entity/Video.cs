@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class Video
+public partial class Video : IEntity
 {
     public Guid Id { get; set; }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class PinCode
+public partial class PinCode : IEntity
 {
     public Guid Id { get; set; }
 
