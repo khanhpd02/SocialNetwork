@@ -1,12 +1,15 @@
 ﻿namespace SocialNetwork.Service.Implement;
 
+using AutoMapper;
 using BCrypt.Net;
 using firstapi.Service;
+using global::Service.Implement.ObjectMapping;
 using Microsoft.Extensions.Options;
 using SocialNetwork.Entity;
+using SocialNetwork.ExceptionModel;
 using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
-using System.Runtime.ConstrainedExecution;
+using SocialNetwork.Repository;
 using System.Text.RegularExpressions;
 using WebApi.Helpers;
 
@@ -19,122 +22,179 @@ public class UserService : IUserService
     private readonly AppSettings _appSettings;
     private IEmailService _emailService;
     private static string baseToken = "";
+    private readonly IUserRepository userRepository;
+    private readonly IRoleRepository roleRepository;
+    private readonly IUserRoleRepository userRoleRepository;
+    private readonly IPinCodeRepository pinCodeRepository;
 
+    private readonly IMapper mapper = new MapperConfiguration(cfg =>
+    {
+        cfg.AddProfile(new MappingProfile());
+    }).CreateMapper();
     public UserService(
         SocialNetworkContext context,
         IJwtUtils jwtUtils,
         IOptions<AppSettings> appSettings,
-        IEmailService emailService)
+        IEmailService emailService,
+        IUserRepository userRepository, IRoleRepository roleRepository,
+     IUserRoleRepository userRoleRepository, IPinCodeRepository pinCodeRepository)
     {
         _context = context;
         _jwtUtils = jwtUtils;
         _appSettings = appSettings.Value;
         _emailService = emailService;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.pinCodeRepository = pinCodeRepository;
     }
 
-    public async Task<bool> SendPinEmail(SendPinEmailModel rsg)
+    public RegisterModel RegisterUser(RegisterModel dto)
     {
-        // Kiểm tra xem email đã tồn tại hay chưa
-        if (_context.Users.Any(u => u.Email == rsg.Email))
+        if (_context.Users.Any(u => u.Email == dto.Email))
         {
-            return false;
+            throw new BadRequestException("Email is exist");
+
         }
-        // Kiểm tra xem email có đúng cấu trúc hay không
-        if (!IsValidEmail(rsg.Email))
+        if (dto.Email == null)
         {
-            throw new AppException("Invalid email");
+            throw new BadRequestException("Email field cannot be empty");
         }
-        //
-        var duplicatePinCode = _context.PinCodes.Where(u => u.Email == rsg.Email).ToList();
+
+        if (!IsValidEmail(dto.Email))
+        {
+            throw new BadRequestException("Email format is not valid");
+        }
+
+        var user = userRepository.FindByCondition(u => u.Email == dto.Email).FirstOrDefault();
+        if (user != null)
+        {
+            throw new BadRequestException("Email existed");
+        }
+
+        if (dto.Password == null)
+        {
+            throw new BadRequestException("Password field cannot be empty");
+        }
+
+        dto.Password = HashPassword(dto.Password);
+
+        User entity = mapper.Map<User>(dto);
+        userRepository.CreateIsTemp(entity);
+        userRepository.Save();
+        dto.Password = "";
+        var users = userRepository.FindByCondition(u => u.Email == dto.Email).FirstOrDefault();
+        string role = "User";
+        var roles = roleRepository.FindByCondition(r => r.RoleName == role).FirstOrDefault();
+        UserRole userRole = new UserRole
+        {
+            UserId = users.Id,
+            RoleId = roles.Id
+        };
+        userRoleRepository.Create(userRole);
+        userRoleRepository.Save();
+
+        try
+        {
+            SendPinEmail(dto.Email);
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+        // Gửi mã PIN
+
+        return dto;
+    }
+
+    public void SendPinEmail(string email)
+    {
+
+
+        // Loại bỏ các mã PIN cũ
+        var duplicatePinCode = _context.PinCodes.Where(u => u.Email == email).ToList();
         foreach (var pincode in duplicatePinCode)
         {
             _context.PinCodes.Remove(pincode);
         }
         _context.SaveChanges();
 
-        //string uniqueId = NanoidDotNet.Nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10);
-        PinCode pin1 = new PinCode { Email = rsg.Email, Pin = RandomPIN(), CreateDate = DateTime.Now, ExpiredTime = DateTime.Now.AddMinutes(3), IsDeleted = false };
-        //
+        // Tạo mã PIN mới và lưu vào cơ sở dữ liệu
+        PinCode pin1 = new PinCode
+        {
+            Email = email,
+            Pin = RandomPIN(),
+            CreateDate = DateTime.Now,
+            ExpiredTime = DateTime.Now.AddMinutes(3),
+            IsDeleted = false
+        };
         _context.PinCodes.Add(pin1);
         _context.SaveChanges();
-        //send code email
+
+        // Gửi mã PIN qua email
         try
         {
-
             Mailrequest mailrequest = new Mailrequest();
             mailrequest.ToEmail = pin1.Email;
             mailrequest.Subject = "Mã Pin Xác Nhận";
             mailrequest.Body = _emailService.GetHtmlcontent("Mã pin của bạn là: " + pin1.Pin);
-            await _emailService.SendEmailAsync(mailrequest);
-
+            _emailService.SendEmailAsync(mailrequest).Wait(); // Đợi cho đến khi gửi xong email
         }
         catch (Exception)
         {
             throw;
         }
-        return true;
     }
-    public async Task<bool> RegisterUser(RegisterModel rsg)
+    public VerifyPin VerifyPin(VerifyPin VerifyPin, string email)
     {
-        // Kiểm tra xem email đã tồn tại hay chưa
-        if (_context.Users.Any(u => u.Email == rsg.Email))
-        {
-            return false;
-        }
-        // Kiểm tra xem email có đúng cấu trúc hay không
-        if (!IsValidEmail(rsg.Email))
-        {
-            throw new AppException("Invalid email");
-        }
-        //
-        using (var transaction =_context.Database.BeginTransaction()) {
-            try
-            {
-                var firstPin = _context.PinCodes.First(user => user.Email == rsg.Email);
-                if (firstPin != null)
-                {
-                    if (firstPin.Pin == rsg.Pin && firstPin.ExpiredTime >= DateTime.Now)
-                    {
-                        firstPin.IsDeleted = true;
-                        // Thêm người dùng mới vào danh sách
-                        //string uniqueId = NanoidDotNet.Nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10);
-                        _context.Users.Add(new User { Email = rsg.Email, Password = BCrypt.HashPassword(rsg.Password), Status = true, CreateDate = DateTime.Now, UpdateDate = DateTime.Now });
-                        _context.SaveChanges();
-                        User users = _context.Users.SingleOrDefault(u => u.Email == rsg.Email);
-                        string role = "User";
-                        Role roles = _context.Roles.SingleOrDefault(r => r.RoleName == role);
-                        _context.UserRoles.Add(new UserRole { UserId = users.Id, RoleId = roles.Id, CreateDate = DateTime.Now, IsDeleted = false });
-                        _context.SaveChanges();
-                        
-                    }
-                    else
-                    {
-                        throw new AppException("Code sai hoặc hết hạn");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                throw new AppException("Đăng kí bị hủy bỏ. Lỗi: " + ex.Message);
-            }
-        }
-            
+        var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == false && x.Email == email).FirstOrDefault();
+        var user = userRepository.FindByCondition(x => x.Email == email).FirstOrDefault();
 
-        return true;
+        if (pin != null)
+        {
+            if (pin.Pin == VerifyPin.Pin && pin.ExpiredTime >= DateTime.Now)
+            {
+                user.IsDeleted = false;
+                pin.IsDeleted = true;
+                userRepository.Update(user);
+                pinCodeRepository.Update(pin);
+                userRepository.Save();
+                pinCodeRepository.Save();
+            }
+            else
+            {
+                userRepository.Delete(user);
+                pin.IsDeleted = true;
+                userRepository.Update(user);
+                pinCodeRepository.Update(pin);
+                userRepository.Save();
+                pinCodeRepository.Save();
+
+            }
+        }
+        return VerifyPin;
+    }
+    public string HashPassword(string password)
+    {
+        return BCrypt.EnhancedHashPassword(password, HashType.SHA256);
     }
     public async Task<string> Authenticate(LoginModel loginModel)
     {
         var user = _context.Users.SingleOrDefault(u => u.Email == loginModel.Email);
 
-        if (user == null || !BCrypt.Verify(loginModel.Password, user.Password))
+        if (user == null || !VerifyPassword(loginModel.Password, user.Password))
         {
             return null;
         }
 
         return _jwtUtils.GenerateJwtToken(user);
     }
-
+    public bool VerifyPassword(string password, string hashedPassword)
+    {
+        return BCrypt.EnhancedVerify(password, hashedPassword, HashType.SHA256);
+    }
     private string RandomPIN()
     {
         Random random = new Random();
@@ -157,3 +217,4 @@ public class UserService : IUserService
 
 
 }
+

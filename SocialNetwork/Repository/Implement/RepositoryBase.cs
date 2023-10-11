@@ -68,7 +68,12 @@ namespace SocialNetwork.Repository.Implement
             entity.CreateDate = DateTime.Now;
             context.Set<T>().Add(entity);
         }
-
+        public void CreateIsTemp(T entity)
+        {
+            entity.IsDeleted = true;
+            entity.CreateDate = DateTime.Now;
+            context.Set<T>().Add(entity);
+        }
         public void Update(T entity) => context.Set<T>().Update(entity);
 
         public void Delete(T entity) => context.Set<T>().Remove(entity);

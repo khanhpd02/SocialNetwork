@@ -13,7 +13,7 @@ namespace SocialNetwork.Repository
         T FindById(Guid Id, params Expression<Func<T, object>>[] includes);
 
         void Create(T entity);
-
+        void CreateIsTemp(T entity);
         void Update(T entity);
 
         void Delete(T entity);

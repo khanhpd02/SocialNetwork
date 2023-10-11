@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace SocialNetwork.Entity;
 
-namespace SocialNetwork.Entity;
-
-public partial class Comment:IEntity
+public partial class Comment : IEntity
 {
     public Guid Id { get; set; }
 

@@ -1,8 +1,8 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class Role : IEntity
+public class RoleDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public string? RoleName { get; set; }
 
@@ -18,5 +18,4 @@ public partial class Role : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

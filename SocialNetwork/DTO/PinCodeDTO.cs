@@ -1,8 +1,8 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class PinCode : IEntity
+public class PinCodeDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public string? Email { get; set; }
 

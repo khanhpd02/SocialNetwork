@@ -1,12 +1,12 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class Video : IEntity
+public class GroupDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
-    public string? Link { get; set; }
+    public string? GroupName { get; set; }
 
-    public Guid? PostId { get; set; }
+    public Guid? UserId { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -18,5 +18,4 @@ public partial class Video : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual Post? Post { get; set; }
 }

@@ -1,8 +1,8 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class Infor : IEntity
+public class InforDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public Guid? UserId { get; set; }
 
@@ -29,6 +29,4 @@ public partial class Infor : IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
-
-    public virtual User? User { get; set; }
 }

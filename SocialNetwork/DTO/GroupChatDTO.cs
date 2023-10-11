@@ -1,14 +1,12 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class Friend : IEntity
+public class GroupChatDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
-    public Guid User1 { get; set; }
+    public string? GroupName { get; set; }
 
-    public Guid User2 { get; set; }
-
-    public int Level { get; set; }
+    public Guid? UserId { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

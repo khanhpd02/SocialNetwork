@@ -1,7 +1,9 @@
 ﻿namespace SocialNetwork.Model.User
 {
-    public class SendPinEmailModel
+    public class VerifyPin
     {
-        public String Email { get; set; }
+
+
+        public string Pin { get; set; }
     }
 }

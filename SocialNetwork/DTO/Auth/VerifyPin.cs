@@ -1,8 +1,7 @@
 ﻿namespace SocialNetwork.Model.User
 {
-    public class RegisterModel
+    public class SendPinEmailModel
     {
         public String Email { get; set; }
-        public String Password { get; set; }
     }
 }

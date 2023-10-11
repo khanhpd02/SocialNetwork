@@ -1,8 +1,8 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class Friend : IEntity
+public class FriendDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public Guid User1 { get; set; }
 

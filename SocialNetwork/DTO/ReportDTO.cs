@@ -1,14 +1,14 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class Like : IEntity
+public class ReportDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public Guid? UserId { get; set; }
 
     public Guid? PostId { get; set; }
 
-    public bool Status { get; set; }
+    public string? Content { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -20,7 +20,4 @@ public partial class Like : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual Post? Post { get; set; }
-
-    public virtual User? User { get; set; }
 }

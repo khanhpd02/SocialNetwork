@@ -1,8 +1,8 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class Tag : IEntity
+public class TagDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public string? Content { get; set; }
 
@@ -16,5 +16,4 @@ public partial class Tag : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual ICollection<TagPost> TagPosts { get; set; } = new List<TagPost>();
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.Entity;
 using SocialNetwork.Mail;
+using SocialNetwork.Repository;
 using SocialNetwork.Service;
 using SocialNetwork.Service.Implement;
 using System.Text;
@@ -33,6 +34,11 @@ var builder = WebApplication.CreateBuilder(args);
     // configure DI for application services
     services.AddScoped<IJwtUtils, JwtUtils>();
     services.AddScoped<IUserService, UserService>();
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IRoleRepository, RoleRepository>();
+    services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+    services.AddScoped<IPinCodeRepository, PinCodeRepository>();
+
     services.AddScoped<IEmailService, EmailService>();
 
 }

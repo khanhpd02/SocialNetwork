@@ -12,6 +12,7 @@ namespace SocialNetwork.Controller
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
+        private readonly IRefreshTokenService refreshTokenService;
 
         private IUserService _userService;
         private IEmailService _emailService;
@@ -23,36 +24,39 @@ namespace SocialNetwork.Controller
         }
 
         [AllowAnonymous]
-        [HttpPost("sendpincode")]
-        public async Task<IActionResult> sendpincode([FromBody] SendPinEmailModel rsg)
+        [HttpPost("VerifyPin")]
+        public IActionResult VerifyPin([FromBody] VerifyPin rsg)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest("Invalid data");
             }
+            string userEmail = Request.Cookies["UserEmail"];
             // Gọi AuthService để xử lý việc đăng ký tài khoản
-            var isRegistered = await _userService.SendPinEmail(rsg);
-            if (isRegistered)
+            var isRegistered = _userService.VerifyPin(rsg, userEmail);
+            if (isRegistered != null)
             {
-                return Ok("SendCode successful");
+                return Ok("VerifyPin successful");
             }
             else
             {
-                return BadRequest("Email already exists");
+                return BadRequest("VerifyPin fail");
             }
         }
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel rsg)
+        public IActionResult Register([FromBody] RegisterModel rsg)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest("Invalid data");
             }
             // Gọi AuthService để xử lý việc đăng ký tài khoản
-            var isRegistered = await _userService.RegisterUser(rsg);
-            if (isRegistered)
+            var isRegistered = _userService.RegisterUser(rsg);
+            if (isRegistered != null)
             {
+                Response.Cookies.Append("UserEmail", rsg.Email);
+
                 return Ok("Registration successful");
             }
             else
@@ -78,6 +82,16 @@ namespace SocialNetwork.Controller
 
             return Ok(new { Token = token });
         }
+        //[HttpPost("login")]
+        //public IActionResult Login(LoginModel loginModel)
+        //{
+        //    var user = _userService.Authenticate(loginModel);
+        //    var authResponse = refreshTokenService.GenerateLoginTokens(user);
+        //    Response.Cookies.Append("X-Refresh-Token", authResponse.Token?.RefreshToken!, new CookieOptions()
+        //    { HttpOnly = true, SameSite = SameSiteMode.None, Expires = DateTime.UtcNow.AddDays(7), Secure = true });
+
+        //    return Ok(new { accessToken = authResponse.Token?.AccessToken, user = authResponse.User });
+        //}
         [AllowAnonymous]
         [HttpPost("SendMail")]
         public async Task<IActionResult> SendMail()

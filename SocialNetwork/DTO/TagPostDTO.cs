@@ -1,6 +1,6 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class TagPost : IEntity
+public class TagPostDTO
 {
     public Guid TagId { get; set; }
 
@@ -16,9 +16,7 @@ public partial class TagPost : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
-    public virtual Post Post { get; set; } = null!;
 
-    public virtual Tag Tag { get; set; } = null!;
 }

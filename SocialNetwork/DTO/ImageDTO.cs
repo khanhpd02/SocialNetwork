@@ -1,8 +1,8 @@
-﻿namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.DTO;
 
-public partial class Video : IEntity
+public class ImageDTO
 {
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     public string? Link { get; set; }
 
@@ -18,5 +18,4 @@ public partial class Video : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual Post? Post { get; set; }
 }
