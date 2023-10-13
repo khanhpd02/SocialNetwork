@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.Entity
 {
-    public partial class RefreshToken
+    public partial class RefreshToken 
     {
         public Guid Id { get; set; }
 

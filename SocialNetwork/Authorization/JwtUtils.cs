@@ -9,6 +9,7 @@ using WebApi.Helpers;
 using NanoidDotNet;
 using System.Reflection.Emit;
 using SocialNetwork.Entity;
+using SocialNetwork.Repository;
 
 public interface IJwtUtils
 {
@@ -22,13 +23,18 @@ public class JwtUtils : IJwtUtils
     private SocialNetworkContext _context;
 
     private readonly AppSettings _appSettings;
+    private readonly IRoleRepository roleRepository;
+    private readonly IUserRoleRepository userRoleRepository;
 
     public JwtUtils(
-        SocialNetworkContext context,
+        SocialNetworkContext context, IRoleRepository roleRepository,
+     IUserRoleRepository userRoleRepository,
         IOptions<AppSettings> appSettings)
     {
         _context = context;
         _appSettings = appSettings.Value;
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
     }
 
     public string GenerateJwtToken(User user)
@@ -36,10 +42,20 @@ public class JwtUtils : IJwtUtils
         // generate token that is valid for 15 minutes
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+        List<UserRole> userRole = userRoleRepository.FindByConditionWithTracking(u => u.UserId == user.Id);
+        List<string> roles = new List<string>();   
+        foreach (var UserRole in userRole)
+        {
+            var role = roleRepository.FindByCondition(u => u.Id == UserRole.RoleId).FirstOrDefault();
+            roles.Add(role.RoleName.ToString());
+        }
+        var roleClaims = roles.Select(role => new Claim("role", role)).ToList();
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()),
-             /*new Claim("role", user.Role.ToString())*/}),
+             }.Concat(roleClaims)
+            ),
             Expires = DateTime.UtcNow.AddMinutes(15),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };

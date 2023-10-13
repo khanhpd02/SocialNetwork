@@ -1,6 +1,8 @@
 ﻿using firstapi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.DTO;
+using SocialNetwork.DTO.Response;
 using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
 using SocialNetwork.Service;
@@ -73,14 +75,14 @@ namespace SocialNetwork.Controller
                 return BadRequest("Invalid data");
             }
 
-            var token = await _userService.Authenticate(loginModel);
+            LoginResponse loginResponse =  _userService.Authenticate(loginModel);
 
-            if (token == null)
+            if (loginResponse == null)
             {
                 return Unauthorized("Invalid email or password");
             }
 
-            return Ok(new { Token = token });
+            return Ok(loginResponse);
         }
         //[HttpPost("login")]
         //public IActionResult Login(LoginModel loginModel)
@@ -93,22 +95,22 @@ namespace SocialNetwork.Controller
         //    return Ok(new { accessToken = authResponse.Token?.AccessToken, user = authResponse.User });
         //}
         [AllowAnonymous]
-        [HttpPost("SendMail")]
-        public async Task<IActionResult> SendMail()
+        [HttpPost("ReSendMail")]
+        public async Task<IActionResult> ReSendMail()
         {
-            try
+            if (!ModelState.IsValid)
             {
-                Mailrequest mailrequest = new Mailrequest();
-                mailrequest.ToEmail = "duykhanhphan2002@gmail.com";
-                mailrequest.Subject = "Welcome to KCT NetWork";
-                mailrequest.Body = _emailService.GetHtmlcontent("Cảm ơn đã sử dụng dịch vụ");
-                await _emailService.SendEmailAsync(mailrequest);
-                return Ok();
+                return BadRequest("Invalid data");
             }
-            catch (Exception)
+            else
             {
-                throw;
+                string userEmail = Request.Cookies["UserEmail"];
+                _userService.SendPinEmail(userEmail);
+                return Ok("ReSendMail successful");
             }
+            // Gọi AuthService để xử lý việc đăng ký tài khoản
+            
+
         }
 
     }

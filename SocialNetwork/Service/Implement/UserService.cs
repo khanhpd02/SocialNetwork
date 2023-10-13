@@ -4,7 +4,10 @@ using AutoMapper;
 using BCrypt.Net;
 using firstapi.Service;
 using global::Service.Implement.ObjectMapping;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
+using SocialNetwork.DTO;
+using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Mail;
@@ -180,16 +183,32 @@ public class UserService : IUserService
     {
         return BCrypt.EnhancedHashPassword(password, HashType.SHA256);
     }
-    public async Task<string> Authenticate(LoginModel loginModel)
+    public LoginResponse Authenticate(LoginModel loginModel)
+
     {
+        if (!IsValidEmail(loginModel.Email))
+        {
+            throw new BadRequestException("Email format is not valid");
+        }
         var user = _context.Users.SingleOrDefault(u => u.Email == loginModel.Email);
 
-        if (user == null || !VerifyPassword(loginModel.Password, user.Password))
+        if (user == null || !VerifyPassword(loginModel.Password, user.Password)|| user.IsDeleted==true)
         {
-            return null;
+            throw new BadRequestException("Login failed");
         }
-
-        return _jwtUtils.GenerateJwtToken(user);
+        //lấy role
+        List<UserRole> userRole = userRoleRepository.FindByConditionWithTracking(u => u.UserId == user.Id);
+        List<string> roles = new List<string>();
+        foreach (var UserRole in userRole)
+        {
+            var role = roleRepository.FindByCondition(u => u.Id == UserRole.RoleId).FirstOrDefault();
+            roles.Add(role.RoleName.ToString());
+        }
+        //
+        LoginDataResponse loginDataResponse = new LoginDataResponse { Id = user.Id.ToString(),Email=user.Email,JwtToken= _jwtUtils.GenerateJwtToken(user),Role=roles };
+        
+        LoginResponse loginResponse = new LoginResponse {Success=true,Code=1,Data=loginDataResponse,Message="Đăng nhập thành Công"};
+        return loginResponse;
     }
     public bool VerifyPassword(string password, string hashedPassword)
     {

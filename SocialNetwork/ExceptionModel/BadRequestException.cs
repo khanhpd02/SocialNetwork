@@ -5,6 +5,7 @@
         public BadRequestException(string message)
             : base(message)
         {
+           
         }
     }
 }
