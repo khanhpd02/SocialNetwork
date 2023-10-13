@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.Entity;
 
 public partial class User : IEntity
 {
@@ -23,7 +20,6 @@ public partial class User : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public string? Pin { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

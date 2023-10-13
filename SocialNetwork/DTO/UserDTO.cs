@@ -20,7 +20,6 @@
 
         public bool IsDeleted { get; set; }
 
-        public string? Pin { get; set; }
 
 
     }

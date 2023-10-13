@@ -50,7 +50,7 @@ namespace SocialNetwork.Repository.Implement
             return query.ToList();
         }
 
-        public T FindById(Guid Id, params Expression<Func<T, object>>[] includes)
+        public T FindById(Guid? Id, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = context.Set<T>().Where(x => x.Id == Id & x.IsDeleted == false);
 

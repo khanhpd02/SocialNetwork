@@ -10,7 +10,7 @@ namespace SocialNetwork.Repository
 
         List<T> FindByConditionWithTracking(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes);
 
-        T FindById(Guid Id, params Expression<Func<T, object>>[] includes);
+        T FindById(Guid? Id, params Expression<Func<T, object>>[] includes);
 
         void Create(T entity);
         void CreateIsTemp(T entity);

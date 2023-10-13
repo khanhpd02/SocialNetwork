@@ -1,17 +1,16 @@
 ﻿using firstapi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialNetwork.DTO;
 using SocialNetwork.DTO.Response;
-using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
 using SocialNetwork.Service;
 
 namespace SocialNetwork.Controller
 {
+
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IRefreshTokenService refreshTokenService;
@@ -75,7 +74,7 @@ namespace SocialNetwork.Controller
                 return BadRequest("Invalid data");
             }
 
-            LoginResponse loginResponse =  _userService.Authenticate(loginModel);
+            LoginResponse loginResponse = _userService.Authenticate(loginModel);
 
             if (loginResponse == null)
             {
@@ -109,7 +108,7 @@ namespace SocialNetwork.Controller
                 return Ok("ReSendMail successful");
             }
             // Gọi AuthService để xử lý việc đăng ký tài khoản
-            
+
 
         }
 

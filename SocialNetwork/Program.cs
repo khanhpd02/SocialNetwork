@@ -1,8 +1,10 @@
 ﻿using firstapi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SocialNetwork.Entity;
 using SocialNetwork.Mail;
+using SocialNetwork.Middlewares;
 using SocialNetwork.Repository;
 using SocialNetwork.Service;
 using SocialNetwork.Service.Implement;
@@ -10,12 +12,42 @@ using System.Text;
 using System.Text.Json.Serialization;
 using WebApi.Helpers;
 
-
-
-
-
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllers(config =>
+{
+    config.Filters.Add(new ResponseFilter());
+});
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(option =>
+{
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
 
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type=ReferenceType.SecurityScheme,
+                                Id="Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
+    option.EnableAnnotations();
+});
 // Add services to the container.
 // add services to DI container
 {
@@ -38,7 +70,9 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IRoleRepository, RoleRepository>();
     services.AddScoped<IUserRoleRepository, UserRoleRepository>();
     services.AddScoped<IPinCodeRepository, PinCodeRepository>();
+    services.AddScoped<IPostRepository, PostRepository>();
 
+    services.AddScoped<IPostService, PostService>();
     services.AddScoped<IEmailService, EmailService>();
 
 }
@@ -65,18 +99,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 
-
+if (true)//app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseForbiddenResponse();
 app.UseUnauthorizedResponse();
-app.UseSwagger();
-app.UseSwaggerUI();
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

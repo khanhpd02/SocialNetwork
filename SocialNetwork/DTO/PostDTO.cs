@@ -4,9 +4,9 @@ public class PostDTO
 {
     public Guid? Id { get; set; }
 
-    public string? Content { get; set; }
+    public string Content { get; set; }
 
-    public Guid? UserId { get; set; }
+    public Guid UserId { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -16,7 +16,7 @@ public class PostDTO
 
     public Guid? UpdateBy { get; set; }
 
-    public bool IsDeleted { get; set; }
+    public bool? IsDeleted { get; set; }
 
 
 }
