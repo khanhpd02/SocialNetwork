@@ -8,11 +8,13 @@ using SocialNetwork.Middlewares;
 using SocialNetwork.Repository;
 using SocialNetwork.Service;
 using SocialNetwork.Service.Implement;
+using SocialNetwork.Socket;
 using System.Text;
 using System.Text.Json.Serialization;
 using WebApi.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSignalR();
 builder.Services.AddControllers(config =>
 {
     config.Filters.Add(new ResponseFilter());
@@ -110,6 +112,8 @@ if (true)//app.Environment.IsDevelopment())
 }
 app.UseForbiddenResponse();
 app.UseUnauthorizedResponse();
+app.UseRouting();
+app.MapHub<ChatHub>("/chathub");
 app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthorization();
