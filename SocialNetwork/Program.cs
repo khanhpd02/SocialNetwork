@@ -56,7 +56,7 @@ builder.Services.AddSwaggerGen(option =>
 
     //services.AddDbContext<DataContext>();
     services.AddDbContext<SocialNetworkContext>();
-    services.AddCors();
+    services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
     services.AddControllers()
         .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
@@ -110,7 +110,7 @@ if (true)//app.Environment.IsDevelopment())
 }
 app.UseForbiddenResponse();
 app.UseUnauthorizedResponse();
-
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

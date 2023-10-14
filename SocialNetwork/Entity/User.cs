@@ -1,4 +1,7 @@
-﻿namespace SocialNetwork.Entity;
+﻿using System;
+using System.Collections.Generic;
+
+namespace SocialNetwork.Entity;
 
 public partial class User : IEntity
 {
@@ -19,7 +22,6 @@ public partial class User : IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
-
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
