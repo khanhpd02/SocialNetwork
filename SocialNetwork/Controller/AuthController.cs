@@ -1,4 +1,5 @@
-﻿using firstapi.Service;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using firstapi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.DTO.Response;
@@ -26,7 +27,7 @@ namespace SocialNetwork.Controller
 
         [AllowAnonymous]
         [HttpPost("VerifyPin")]
-        public IActionResult VerifyPin([FromBody] VerifyPin rsg)
+        public async Task<IActionResult> VerifyPinAsync([FromBody] VerifyPin rsg)
         {
             if (!ModelState.IsValid)
             {
@@ -34,19 +35,22 @@ namespace SocialNetwork.Controller
             }
             string userEmail = Request.Cookies["UserEmail"];
             // Gọi AuthService để xử lý việc đăng ký tài khoản
-            var isRegistered = _userService.VerifyPin(rsg, userEmail);
-            if (isRegistered != null)
+            var isRegistered = await _userService.VerifyPin(rsg, userEmail);
+            if (!isRegistered)
             {
-                return Ok("VerifyPin successful");
+                return Ok("Xác thực thất bại");
             }
             else
             {
-                return BadRequest("VerifyPin fail");
+                return Ok("Xác thực thành công");
             }
+
+
         }
+
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterModel rsg)
+        public IActionResult Register( RegisterModel rsg)
         {
             if (!ModelState.IsValid)
             {

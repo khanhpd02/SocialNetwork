@@ -110,6 +110,7 @@ if (true)//app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseForbiddenResponse();
 app.UseUnauthorizedResponse();
 app.UseRouting();

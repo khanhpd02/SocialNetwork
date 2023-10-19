@@ -6,6 +6,7 @@ using firstapi.Service;
 using global::Service.Implement.ObjectMapping;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.DTO;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
@@ -15,6 +16,7 @@ using SocialNetwork.Model.User;
 using SocialNetwork.Repository;
 using System.Text.RegularExpressions;
 using WebApi.Helpers;
+
 
 
 
@@ -54,28 +56,20 @@ public class UserService : IUserService
 
     public RegisterModel RegisterUser(RegisterModel dto)
     {
+        if (dto.Email.IsNullOrEmpty())
+        {
+            throw new BadRequestException("Email field cannot be empty");
+        }
         if (_context.Users.Any(u => u.Email == dto.Email))
         {
             throw new BadRequestException("Email is exist");
 
         }
-        if (dto.Email == null)
-        {
-            throw new BadRequestException("Email field cannot be empty");
-        }
-
         if (!IsValidEmail(dto.Email))
         {
             throw new BadRequestException("Email format is not valid");
         }
-
-        var user = userRepository.FindByCondition(u => u.Email == dto.Email).FirstOrDefault();
-        if (user != null)
-        {
-            throw new BadRequestException("Email existed");
-        }
-
-        if (dto.Password == null)
+        if (dto.Password.IsNullOrEmpty())
         {
             throw new BadRequestException("Password field cannot be empty");
         }
@@ -150,7 +144,7 @@ public class UserService : IUserService
             throw;
         }
     }
-    public VerifyPin VerifyPin(VerifyPin VerifyPin, string email)
+    public async Task<bool> VerifyPin(VerifyPin VerifyPin, string email)
     {
         var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == false && x.Email == email).FirstOrDefault();
         var user = userRepository.FindByCondition(x => x.Email == email).FirstOrDefault();
@@ -165,36 +159,50 @@ public class UserService : IUserService
                 pinCodeRepository.Update(pin);
                 userRepository.Save();
                 pinCodeRepository.Save();
+                return true;
             }
             else
             {
                 userRepository.Delete(user);
-                pin.IsDeleted = true;
+                //pin.IsDeleted = true;
                 userRepository.Update(user);
                 pinCodeRepository.Update(pin);
                 userRepository.Save();
                 pinCodeRepository.Save();
+                throw new BadRequestException("Mã pin sai hoặc hết hạn");
 
             }
         }
-        return VerifyPin;
+        else
+        {
+            return false;
+        }
     }
     public string HashPassword(string password)
     {
         return BCrypt.EnhancedHashPassword(password, HashType.SHA256);
     }
     public LoginResponse Authenticate(LoginModel loginModel)
-
     {
+        if (loginModel.Email.IsNullOrEmpty())
+        {
+            throw new BadRequestException("Email field cannot be empty");
+        }
         if (!IsValidEmail(loginModel.Email))
         {
             throw new BadRequestException("Email format is not valid");
         }
+        if (loginModel.Password.IsNullOrEmpty())
+        {
+            throw new BadRequestException("Password field cannot be empty");
+        }
+
         var user = _context.Users.SingleOrDefault(u => u.Email == loginModel.Email);
 
         if (user == null || !VerifyPassword(loginModel.Password, user.Password)|| user.IsDeleted==true)
         {
-            throw new BadRequestException("Login failed");
+            throw new BadRequestException("Tài khoản hoặc mật khẩu không đúng");
+     
         }
         //lấy role
         List<UserRole> userRole = userRoleRepository.FindByConditionWithTracking(u => u.UserId == user.Id);
