@@ -65,6 +65,10 @@ builder.Services.AddSwaggerGen(option =>
 
     // configure strongly typed settings object
     services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+    services.Configure<IISServerOptions>(options =>
+    {
+        options.AllowSynchronousIO = true;
+    });
 
     // configure DI for application services
     services.AddScoped<IJwtUtils, JwtUtils>();
@@ -82,13 +86,12 @@ builder.Services.AddSwaggerGen(option =>
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     // Configure Cloudinary
-    var cloudinaryAccount = new Account(
-        "dchu3wh6l",
-        "Cloudinary:382577841913334",
-        "Cloudinary:XjbmTfNbI1k4CTI6vVrm4rL6Nyc"
-    );
+    Account account = new Account(
+  "dchu3wh6l",
+  "382577841913334",
+  "XjbmTfNbI1k4CTI6vVrm4rL6Nyc");
 
-    var cloudinary = new Cloudinary(cloudinaryAccount);
+    Cloudinary cloudinary = new Cloudinary(account);
     builder.Services.AddSingleton(cloudinary);
 
 }

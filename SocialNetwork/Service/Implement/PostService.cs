@@ -3,6 +3,7 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
+using SocialNetwork.DTO.Cloudinary;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Repository;
@@ -33,8 +34,31 @@ namespace SocialNetwork.Service.Implement
             this._context = _context;
             this._cloudinary = _cloudinary;
         }
+        public string UploadFileToCloudinary(FileUploadDTO fileUploadDTO)
+        {
+            if (fileUploadDTO.File != null && fileUploadDTO.File.Length > 0)
+            {
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(fileUploadDTO.File.FileName, fileUploadDTO.File.OpenReadStream()),
+                    Folder = "SocialNetwork/", // Đặt tên thư mục cụ thể tại đây
+                };
 
-        public PostDTO Create(PostDTO dto, string userEmail)
+                try
+                {
+                    var uploadResult = _cloudinary.Upload(uploadParams);
+                    return uploadResult.SecureUrl.AbsoluteUri;
+                }
+                catch (Exception)
+                {
+                    // Xử lý lỗi tải lên, ví dụ: ghi log hoặc trả về lỗi tải lên
+                    return null;
+                }
+            }
+
+            return null;
+        }
+        public PostDTO Create(PostDTO dto, string userEmail, string cloudinaryUrl)
         {
             var user = userRepository.FindByCondition(x => x.Email == userEmail).FirstOrDefault();
             Guid id = user.Id;
@@ -45,47 +69,26 @@ namespace SocialNetwork.Service.Implement
             _context.SaveChanges();
             postRepository.Update(post);
             postRepository.Save();
-            var link = UploadImage(dto.Image);
-            if (link != null)
+
+            //Kiểm tra xem có tệp GIF được tải lên không
+            if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
             {
-                Image image = new Image
+                var link = cloudinaryUrl;
+                if (link != null)
                 {
-                    PostId = post.Id,
-                    Link = link,
-                    CreateDate = DateTime.Now,
-                    CreateBy = id,
-                    IsDeleted = false
-                };
-                imageRepository.Create(image);
-                imageRepository.Save();
+                    Image image = new Image
+                    {
+                        PostId = post.Id,
+                        Link = link,
+                        CreateDate = DateTime.Now,
+                        CreateBy = id,
+                        IsDeleted = false
+                    };
+                    imageRepository.Create(image);
+                    imageRepository.Save();
+                }
             }
             return dto;
-        }
-        private string UploadImage(string base64Image)
-        {
-            if (!string.IsNullOrEmpty(base64Image))
-            {
-                var uploadParams = new ImageUploadParams
-                {
-                    File = new FileDescription("image", new MemoryStream(Convert.FromBase64String(base64Image))),
-                    Folder = "SocialNetwork/", // Đặt tên thư mục cụ thể tại đây
-                };
-
-                try
-                {
-                    var uploadResult = _cloudinary.Upload(uploadParams);
-
-                    return uploadResult.SecureUrl?.AbsoluteUri;
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-
-            }
-
-            return null;
         }
 
 
@@ -123,5 +126,6 @@ namespace SocialNetwork.Service.Implement
             post.IsDeleted = true;
 
         }
+
     }
 }
