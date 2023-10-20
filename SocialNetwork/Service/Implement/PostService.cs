@@ -7,6 +7,7 @@ using SocialNetwork.DTO.Cloudinary;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Repository;
+using Video = SocialNetwork.Entity.Video;
 
 namespace SocialNetwork.Service.Implement
 {
@@ -18,6 +19,8 @@ namespace SocialNetwork.Service.Implement
         private readonly IPostRepository postRepository;
         private readonly IUserRepository userRepository;
         private readonly IImageRepository imageRepository;
+        private readonly IVideoRepository videoRepository;
+
 
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
@@ -25,7 +28,7 @@ namespace SocialNetwork.Service.Implement
         }).CreateMapper();
 
         public PostService(IPostRepository postRepository, IUserRepository userRepository, IImageRepository imageRepository,
-            IHttpContextAccessor _httpContextAccessor, SocialNetworkContext _context, Cloudinary _cloudinary)
+            IHttpContextAccessor _httpContextAccessor, SocialNetworkContext _context, Cloudinary _cloudinary, IVideoRepository videoRepository)
         {
             this.postRepository = postRepository;
             this.userRepository = userRepository;
@@ -33,27 +36,52 @@ namespace SocialNetwork.Service.Implement
             this._httpContextAccessor = _httpContextAccessor;
             this._context = _context;
             this._cloudinary = _cloudinary;
+            this.videoRepository = videoRepository;
         }
         public string UploadFileToCloudinary(FileUploadDTO fileUploadDTO)
         {
             if (fileUploadDTO.File != null && fileUploadDTO.File.Length > 0)
             {
-                var uploadParams = new ImageUploadParams
+                if (Path.GetExtension(fileUploadDTO.File.FileName).Equals(".mp4", StringComparison.OrdinalIgnoreCase))
                 {
-                    File = new FileDescription(fileUploadDTO.File.FileName, fileUploadDTO.File.OpenReadStream()),
-                    Folder = "SocialNetwork/", // Đặt tên thư mục cụ thể tại đây
-                };
+                    var uploadParamsVideo = new VideoUploadParams
+                    {
+                        File = new FileDescription(fileUploadDTO.File.FileName, fileUploadDTO.File.OpenReadStream()),
+                        Folder = "SocialNetwork/Video/",
+                    };
 
-                try
-                {
-                    var uploadResult = _cloudinary.Upload(uploadParams);
-                    return uploadResult.SecureUrl.AbsoluteUri;
+                    try
+                    {
+                        var uploadResult = _cloudinary.Upload(uploadParamsVideo);
+                        return uploadResult.SecureUrl.AbsoluteUri;
+                    }
+                    catch (Exception)
+                    {
+                        return null;
+                    }
                 }
-                catch (Exception)
+                if (Path.GetExtension(fileUploadDTO.File.FileName).Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetExtension(fileUploadDTO.File.FileName).Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetExtension(fileUploadDTO.File.FileName).Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetExtension(fileUploadDTO.File.FileName).Equals(".gif", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Xử lý lỗi tải lên, ví dụ: ghi log hoặc trả về lỗi tải lên
-                    return null;
+                    var uploadParams = new ImageUploadParams
+                    {
+                        File = new FileDescription(fileUploadDTO.File.FileName, fileUploadDTO.File.OpenReadStream()),
+                        Folder = "SocialNetwork/Image/",
+                    };
+
+                    try
+                    {
+                        var uploadResult = _cloudinary.Upload(uploadParams);
+                        return uploadResult.SecureUrl.AbsoluteUri;
+                    }
+                    catch (Exception)
+                    {
+                        return null;
+                    }
                 }
+
             }
 
             return null;
@@ -70,22 +98,45 @@ namespace SocialNetwork.Service.Implement
             postRepository.Update(post);
             postRepository.Save();
 
-            //Kiểm tra xem có tệp GIF được tải lên không
             if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
             {
-                var link = cloudinaryUrl;
-                if (link != null)
+                string fileExtension = Path.GetExtension(cloudinaryUrl);
+                if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                       fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                       fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                       fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
                 {
-                    Image image = new Image
+                    var link = cloudinaryUrl;
+                    if (link != null)
                     {
-                        PostId = post.Id,
-                        Link = link,
-                        CreateDate = DateTime.Now,
-                        CreateBy = id,
-                        IsDeleted = false
-                    };
-                    imageRepository.Create(image);
-                    imageRepository.Save();
+                        Image image = new Image
+                        {
+                            PostId = post.Id,
+                            Link = link,
+                            CreateDate = DateTime.Now,
+                            CreateBy = id,
+                            IsDeleted = false
+                        };
+                        imageRepository.Create(image);
+                        imageRepository.Save();
+                    }
+                }
+                if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+                {
+                    var link = cloudinaryUrl;
+                    if (link != null)
+                    {
+                        Video video = new Video
+                        {
+                            PostId = post.Id,
+                            Link = link,
+                            CreateDate = DateTime.Now,
+                            CreateBy = id,
+                            IsDeleted = false
+                        };
+                        videoRepository.Create(video);
+                        videoRepository.Save();
+                    }
                 }
             }
             return dto;
@@ -96,7 +147,13 @@ namespace SocialNetwork.Service.Implement
         {
             Post entity = postRepository.FindById(id) ?? throw new PostNotFoundException(id);
 
+            List<Image> images = imageRepository.FindByCondition(img => img.PostId == id).ToList();
+            List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == id).ToList();
+
             PostDTO dto = mapper.Map<PostDTO>(entity);
+
+            dto.Images = images;
+            dto.Videos = videos;
 
             return dto;
         }

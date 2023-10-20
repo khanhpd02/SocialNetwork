@@ -83,6 +83,8 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IPinCodeRepository, PinCodeRepository>();
     services.AddScoped<IPostRepository, PostRepository>();
     services.AddScoped<IImageRepository, ImageRepository>();
+    services.AddScoped<IVideoRepository, VideoRepository>();
+
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     // Configure Cloudinary

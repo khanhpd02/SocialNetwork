@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.DTO;
+﻿using SocialNetwork.Entity;
+
+namespace SocialNetwork.DTO;
 
 public class PostDTO
 {
@@ -17,5 +19,13 @@ public class PostDTO
 
     public bool? IsDeleted { get; set; }
 
+    public List<Image> Images { get; set; }
+    public List<Video> Videos { get; set; }
 
+
+    public PostDTO()
+    {
+        Images = new List<Image>();
+        Videos = new List<Video>();
+    }
 }
