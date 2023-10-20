@@ -84,7 +84,7 @@ namespace SocialNetwork.Controller
             {
                 return Unauthorized("Invalid email or password");
             }
-
+            Response.Cookies.Append("UserEmail", loginModel.Email);
             return Ok(loginResponse);
         }
         //[HttpPost("login")]

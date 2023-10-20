@@ -1,4 +1,5 @@
-﻿using firstapi.Service;
+﻿using CloudinaryDotNet;
+using firstapi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -68,14 +69,27 @@ builder.Services.AddSwaggerGen(option =>
     // configure DI for application services
     services.AddScoped<IJwtUtils, JwtUtils>();
     services.AddScoped<IUserService, UserService>();
+    services.AddScoped<IPostService, PostService>();
+    services.AddScoped<IEmailService, EmailService>();
+
+
     services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<IRoleRepository, RoleRepository>();
     services.AddScoped<IUserRoleRepository, UserRoleRepository>();
     services.AddScoped<IPinCodeRepository, PinCodeRepository>();
     services.AddScoped<IPostRepository, PostRepository>();
+    services.AddScoped<IImageRepository, ImageRepository>();
 
-    services.AddScoped<IPostService, PostService>();
-    services.AddScoped<IEmailService, EmailService>();
+    services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+    // Configure Cloudinary
+    var cloudinaryAccount = new Account(
+        "dchu3wh6l",
+        "Cloudinary:382577841913334",
+        "Cloudinary:XjbmTfNbI1k4CTI6vVrm4rL6Nyc"
+    );
+
+    var cloudinary = new Cloudinary(cloudinaryAccount);
+    builder.Services.AddSingleton(cloudinary);
 
 }
 
@@ -97,11 +111,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ClockSkew = TimeSpan.Zero,
     };
 });
-
-
-
-
-
 
 var app = builder.Build();
 

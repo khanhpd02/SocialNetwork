@@ -11,6 +11,7 @@ namespace SocialNetwork.Controller.User
     [Route("api/post")]
     public class PostController : ControllerBase
     {
+
         private readonly IPostService postService;
 
         public PostController(IPostService postService)
@@ -34,12 +35,14 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "Create a Post")]
         public IActionResult Create([FromBody] PostDTO postDTO)
         {
+            string userEmail = Request.Cookies["UserEmail"];
+
             if (postDTO == null)
             {
                 return BadRequest("Invalid data");
             }
 
-            var createdPost = postService.Create(postDTO);
+            var createdPost = postService.Create(postDTO, userEmail);
 
             return Ok(createdPost);
         }

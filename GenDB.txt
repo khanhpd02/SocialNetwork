@@ -1,0 +1,1 @@
+Scaffold-DbContext "Server=.\SQLEXPRESS;Database=SocialNetwork;User Id=sa;Password=123456;Trusted_Connection=True;TrustServerCertificate=True" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Entity -Force
