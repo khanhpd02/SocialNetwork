@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.Entity;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace SocialNetwork.Entity;
 
 public partial class SocialNetworkContext : DbContext
 {
