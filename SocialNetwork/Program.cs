@@ -59,7 +59,15 @@ builder.Services.AddSwaggerGen(option =>
 
     //services.AddDbContext<DataContext>();
     services.AddDbContext<SocialNetworkContext>();
-    services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+    //services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+    services.AddCors(options => options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:3000") // Thay thế bằng tên miền của ứng dụng React của bạn
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials().AllowAnyOrigin();
+    }));
     services.AddControllers()
         .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
