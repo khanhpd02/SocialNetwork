@@ -11,8 +11,6 @@ public partial class Like : IEntity
 
     public Guid? PostId { get; set; }
 
-    public bool Status { get; set; }
-
     public DateTime? CreateDate { get; set; }
 
     public Guid? CreateBy { get; set; }

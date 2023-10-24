@@ -56,7 +56,7 @@ public class JwtUtils : IJwtUtils
             Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()),
              }.Concat(roleClaims)
             ),
-            Expires = DateTime.UtcNow.AddMinutes(15),
+            Expires = DateTime.UtcNow.AddMinutes(60),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);

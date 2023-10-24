@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class GroupChat : IEntity
+public partial class GroupChat: IEntity
 {
     public Guid Id { get; set; }
 

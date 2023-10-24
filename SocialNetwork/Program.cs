@@ -7,6 +7,7 @@ using SocialNetwork.Entity;
 using SocialNetwork.Mail;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Repository;
+using SocialNetwork.Repository.Implement;
 using SocialNetwork.Service;
 using SocialNetwork.Service.Implement;
 using SocialNetwork.Socket;
@@ -59,15 +60,15 @@ builder.Services.AddSwaggerGen(option =>
 
     //services.AddDbContext<DataContext>();
     services.AddDbContext<SocialNetworkContext>();
-    //services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
-    services.AddCors(options => options.AddDefaultPolicy(policy =>
+    services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+    /*services.AddCors(options => options.AddDefaultPolicy(policy =>
     {
         policy
             .WithOrigins("http://localhost:3000") // Thay thế bằng tên miền của ứng dụng React của bạn
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials().AllowAnyOrigin();
-    }));
+    }));*/
     services.AddControllers()
         .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
@@ -83,6 +84,8 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IUserService, UserService>();
     services.AddScoped<IPostService, PostService>();
     services.AddScoped<IEmailService, EmailService>();
+    services.AddScoped<ILikeService, LikeService>();
+    services.AddScoped<ICommentService, CommentService>();
 
 
     services.AddScoped<IUserRepository, UserRepository>();
@@ -92,6 +95,8 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IPostRepository, PostRepository>();
     services.AddScoped<IImageRepository, ImageRepository>();
     services.AddScoped<IVideoRepository, VideoRepository>();
+    services.AddScoped<ILikeRepository, LikeRepository>();
+    services.AddScoped<ICommentRepository,CommentRepository>();
 
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
