@@ -1,11 +1,8 @@
-﻿using DocumentFormat.OpenXml.Office2010.Excel;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.DTO;
-using SocialNetwork.DTO.Cloudinary;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
-using SocialNetwork.Service.Implement;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SocialNetwork.Controller.User
@@ -25,7 +22,7 @@ namespace SocialNetwork.Controller.User
 
         [HttpPost("create")]
         [SwaggerOperation(Summary = "Create Comment")]
-        public IActionResult Create([FromBody]CommentDTO dto)
+        public IActionResult Create([FromBody] CommentDTO dto)
         {
             Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
 
@@ -34,7 +31,7 @@ namespace SocialNetwork.Controller.User
 
             return Ok(response);
         }
-        [HttpPost("update")]
+        [HttpPut("update")]
         [SwaggerOperation(Summary = "Update Comment")]
         public IActionResult Update([FromBody] CommentDTO dto)
         {
@@ -67,7 +64,7 @@ namespace SocialNetwork.Controller.User
         public IActionResult deleteOrUndo(Guid id)
         {
             Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
-            var response = commentService.deleteOfUndo(id,userid);
+            var response = commentService.deleteOfUndo(id, userid);
             return Ok(response);
         }
     }

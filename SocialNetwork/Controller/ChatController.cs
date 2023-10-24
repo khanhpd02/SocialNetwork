@@ -28,8 +28,8 @@ namespace SocialNetwork.Controller
 
     public class ChatMessage
     {
-        public required string User { get; set; }
-        public required string Message { get; set; }
+        public string User { get; set; }
+        public string Message { get; set; }
     }
 
 }

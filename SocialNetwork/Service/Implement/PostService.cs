@@ -20,7 +20,8 @@ namespace SocialNetwork.Service.Implement
         private readonly IUserRepository userRepository;
         private readonly IImageRepository imageRepository;
         private readonly IVideoRepository videoRepository;
-
+        private readonly ILikeRepository likeRepository;
+        private readonly ICommentRepository commentRepository;
 
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
@@ -28,7 +29,8 @@ namespace SocialNetwork.Service.Implement
         }).CreateMapper();
 
         public PostService(IPostRepository postRepository, IUserRepository userRepository, IImageRepository imageRepository,
-            IHttpContextAccessor _httpContextAccessor, SocialNetworkContext _context, Cloudinary _cloudinary, IVideoRepository videoRepository)
+            IHttpContextAccessor _httpContextAccessor, SocialNetworkContext _context, Cloudinary _cloudinary,
+            IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository)
         {
             this.postRepository = postRepository;
             this.userRepository = userRepository;
@@ -37,6 +39,8 @@ namespace SocialNetwork.Service.Implement
             this._context = _context;
             this._cloudinary = _cloudinary;
             this.videoRepository = videoRepository;
+            this.likeRepository = likeRepository;
+            this.commentRepository = commentRepository;
         }
         public string UploadFileToCloudinary(FileUploadDTO fileUploadDTO)
         {
@@ -141,19 +145,38 @@ namespace SocialNetwork.Service.Implement
             }
             return dto;
         }
+        public PostDTO Update(PostDTO dto, string userEmail)
+        {
+            var user = userRepository.FindByCondition(x => x.Email == userEmail).FirstOrDefault();
+            var postcheck = postRepository.FindByCondition(x => x.Id == dto.Id).FirstOrDefault();
+            if (postcheck == null)
+            {
+                throw new PostNotFoundException(dto.Id);
+            }
+            Guid id = user.Id;
+            Post post = mapper.Map<Post>(dto);
+            post.UpdateBy = id;
+            _context.Update(post);
+            _context.SaveChanges();
+            postRepository.Update(post);
+            postRepository.Save();
 
-
+            return dto;
+        }
         public PostDTO GetById(Guid id)
         {
             Post entity = postRepository.FindById(id) ?? throw new PostNotFoundException(id);
 
             List<Image> images = imageRepository.FindByCondition(img => img.PostId == id).ToList();
             List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == id).ToList();
-
+            List<Like> likes = likeRepository.FindByCondition(img => img.PostId == id).ToList();
+            List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == id).ToList();
             PostDTO dto = mapper.Map<PostDTO>(entity);
 
             dto.Images = images;
             dto.Videos = videos;
+            dto.Likes = likes;
+            dto.Comments = comments;
 
             return dto;
         }
@@ -172,7 +195,15 @@ namespace SocialNetwork.Service.Implement
             List<PostDTO> dtoList = new List<PostDTO>();
             foreach (Post entity in entityList)
             {
+                List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id).ToList();
+                List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id).ToList();
+                List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id).ToList();
+                List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == entity.Id).ToList();
                 PostDTO dto = mapper.Map<PostDTO>(entity);
+                dto.Images = images;
+                dto.Videos = videos;
+                dto.Likes = likes;
+                dto.Comments = comments;
                 dtoList.Add(dto);
             }
             return dtoList;

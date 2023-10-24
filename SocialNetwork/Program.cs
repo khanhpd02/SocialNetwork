@@ -96,7 +96,7 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IImageRepository, ImageRepository>();
     services.AddScoped<IVideoRepository, VideoRepository>();
     services.AddScoped<ILikeRepository, LikeRepository>();
-    services.AddScoped<ICommentRepository,CommentRepository>();
+    services.AddScoped<ICommentRepository, CommentRepository>();
 
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -141,9 +141,12 @@ app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseForbiddenResponse();
 app.UseUnauthorizedResponse();
 app.UseRouting();
-app.MapHub<ChatHub>("/chathub");
 app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<ChatHub>("/chatHub");
+});
 app.Run();

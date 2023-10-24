@@ -47,6 +47,19 @@ namespace SocialNetwork.Controller.User
             Response.Cookies.Delete("CloudinaryUrl");
             return Ok(createdPost);
         }
+        [HttpPut]
+        [SwaggerOperation(Summary = "Create a Post")]
+        public IActionResult Update([FromBody] PostDTO postDTO)
+        {
+            string userEmail = Request.Cookies["UserEmail"];
+
+            if (postDTO == null)
+            {
+                return BadRequest("Invalid data");
+            }
+            var createdPost = postService.Update(postDTO, userEmail);
+            return Ok(createdPost);
+        }
         [HttpPost("upload")]
         [SwaggerOperation(Summary = "Upload File to Cloudinary")]
         public IActionResult UploadFileToCloudinary([FromForm] FileUploadDTO file)
