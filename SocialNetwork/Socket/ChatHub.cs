@@ -4,10 +4,20 @@
 
     public class ChatHub : Hub
     {
-        public async Task SendMessage(string user, string message)
+        //public async Task SendMessage(string user, string message)
+        //{
+        //    await Clients.All.SendAsync("ReceiveMessage", user, message);
+        //}
+        public async Task JoinGroup(string groupName)
         {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         }
+
+        public async Task SendMessage(string groupName, string user, string message)
+        {
+            await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);
+        }
+
     }
 
 

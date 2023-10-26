@@ -60,15 +60,15 @@ builder.Services.AddSwaggerGen(option =>
 
     //services.AddDbContext<DataContext>();
     services.AddDbContext<SocialNetworkContext>();
-    services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
-    /*services.AddCors(options => options.AddDefaultPolicy(policy =>
+    //services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+    services.AddCors(options => options.AddDefaultPolicy(policy =>
     {
         policy
             .WithOrigins("http://localhost:3000") // Thay thế bằng tên miền của ứng dụng React của bạn
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials().AllowAnyOrigin();
-    }));*/
+            .AllowCredentials();
+    }));
     services.AddControllers()
         .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
@@ -97,6 +97,9 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IVideoRepository, VideoRepository>();
     services.AddScoped<ILikeRepository, LikeRepository>();
     services.AddScoped<ICommentRepository, CommentRepository>();
+    services.AddScoped<IInforRepository, InforRepository>();
+    services.AddScoped<IGroupChatRepository, GroupChatRepository>();
+    services.AddScoped<IUserGroupChatRepository, UserGroupChatRepository>();
 
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

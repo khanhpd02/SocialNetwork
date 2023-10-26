@@ -1,5 +1,4 @@
-﻿using SocialNetwork.DTO;
-using SocialNetwork.DTO.Response;
+﻿using SocialNetwork.DTO.Response;
 using SocialNetwork.Model.User;
 
 namespace SocialNetwork.Service
@@ -8,7 +7,7 @@ namespace SocialNetwork.Service
     {
         //Task<bool> SendPinEmail(SendPinEmailModel rsg);
         Task<bool> VerifyPin(VerifyPin VerifyPin, string email);
-        RegisterModel RegisterUser(RegisterModel rsg);
+        AppResponse RegisterUser(RegisterModel rsg);
         LoginResponse Authenticate(LoginModel loginModel);
         void SendPinEmail(string email);
     }

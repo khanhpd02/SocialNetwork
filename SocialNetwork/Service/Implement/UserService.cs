@@ -4,10 +4,8 @@ using AutoMapper;
 using BCrypt.Net;
 using firstapi.Service;
 using global::Service.Implement.ObjectMapping;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using SocialNetwork.DTO;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
@@ -54,17 +52,19 @@ public class UserService : IUserService
         this.pinCodeRepository = pinCodeRepository;
     }
 
-    public RegisterModel RegisterUser(RegisterModel dto)
+    public AppResponse RegisterUser(RegisterModel dto)
     {
         if (dto.Email.IsNullOrEmpty())
         {
             throw new BadRequestException("Email field cannot be empty");
         }
-        if (_context.Users.Any(u => u.Email == dto.Email))
-        {
-            throw new BadRequestException("Email is exist");
+        //if (_context.Users.Any(u => u.Email == dto.Email))
+        //{
+        //    throw new BadRequestException("Email is exist");
 
-        }
+        //}
+        var emailUSER = userRepository.FindByCondition(x => x.Email == dto.Email).FirstOrDefault();
+
         if (!IsValidEmail(dto.Email))
         {
             throw new BadRequestException("Email format is not valid");
@@ -73,37 +73,63 @@ public class UserService : IUserService
         {
             throw new BadRequestException("Password field cannot be empty");
         }
-
-        dto.Password = HashPassword(dto.Password);
-
-        User entity = mapper.Map<User>(dto);
-        userRepository.CreateIsTemp(entity);
-        userRepository.Save();
-        dto.Password = "";
-        var users = userRepository.FindByCondition(u => u.Email == dto.Email).FirstOrDefault();
-        string role = "User";
-        var roles = roleRepository.FindByCondition(r => r.RoleName == role).FirstOrDefault();
-        UserRole userRole = new UserRole
+        if (emailUSER != null && emailUSER.IsDeleted == false)
         {
-            UserId = users.Id,
-            RoleId = roles.Id
-        };
-        userRoleRepository.Create(userRole);
-        userRoleRepository.Save();
-
-        try
-        {
-            SendPinEmail(dto.Email);
+            throw new BadRequestException("Email is exist");
 
         }
-        catch (Exception)
+        else if (emailUSER != null && emailUSER.IsDeleted == true)
         {
+            emailUSER.Password = HashPassword(dto.Password);
+            userRepository.Update(emailUSER);
+            userRepository.Save();
 
-            throw;
+            try
+            {
+                SendPinEmail(dto.Email);
+                return new AppResponse { message = "Gửi mã pin thành công" };
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
+        else
+        {
+            dto.Password = HashPassword(dto.Password);
+
+            User entity = mapper.Map<User>(dto);
+            userRepository.CreateIsTemp(entity);
+            userRepository.Save();
+            dto.Password = "";
+            var users = userRepository.FindByCondition(u => u.Email == dto.Email).FirstOrDefault();
+            string role = "User";
+            var roles = roleRepository.FindByCondition(r => r.RoleName == role).FirstOrDefault();
+            UserRole userRole = new UserRole
+            {
+                UserId = users.Id,
+                RoleId = roles.Id
+            };
+            userRoleRepository.Create(userRole);
+            userRoleRepository.Save();
+
+            try
+            {
+                SendPinEmail(dto.Email);
+                return new AppResponse { message = "Gửi mã pin thành công" };
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        return new AppResponse { message = "Gửi mã pin thất bại" };
         // Gửi mã PIN
 
-        return dto;
+
     }
 
     public void SendPinEmail(string email)
@@ -199,10 +225,10 @@ public class UserService : IUserService
 
         var user = _context.Users.SingleOrDefault(u => u.Email == loginModel.Email);
 
-        if (user == null || !VerifyPassword(loginModel.Password, user.Password)|| user.IsDeleted==true)
+        if (user == null || !VerifyPassword(loginModel.Password, user.Password) || user.IsDeleted == true)
         {
             throw new BadRequestException("Tài khoản hoặc mật khẩu không đúng");
-     
+
         }
         //lấy role
         List<UserRole> userRole = userRoleRepository.FindByConditionWithTracking(u => u.UserId == user.Id);
@@ -213,9 +239,9 @@ public class UserService : IUserService
             roles.Add(role.RoleName.ToString());
         }
         //
-        LoginDataResponse loginDataResponse = new LoginDataResponse { Id = user.Id.ToString(),Email=user.Email,JwtToken= _jwtUtils.GenerateJwtToken(user),Role=roles };
-        
-        LoginResponse loginResponse = new LoginResponse {Success=true,Code=1,Data=loginDataResponse,Message="Đăng nhập thành Công"};
+        LoginDataResponse loginDataResponse = new LoginDataResponse { Id = user.Id.ToString(), Email = user.Email, JwtToken = _jwtUtils.GenerateJwtToken(user), Role = roles };
+
+        LoginResponse loginResponse = new LoginResponse { Success = true, Code = 1, Data = loginDataResponse, Message = "Đăng nhập thành Công" };
         return loginResponse;
     }
     public bool VerifyPassword(string password, string hashedPassword)

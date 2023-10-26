@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using firstapi.Service;
+﻿using firstapi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.DTO.Response;
@@ -50,7 +49,7 @@ namespace SocialNetwork.Controller
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register( RegisterModel rsg)
+        public IActionResult Register(RegisterModel rsg)
         {
             if (!ModelState.IsValid)
             {
@@ -58,16 +57,12 @@ namespace SocialNetwork.Controller
             }
             // Gọi AuthService để xử lý việc đăng ký tài khoản
             var isRegistered = _userService.RegisterUser(rsg);
-            if (isRegistered != null)
-            {
-                Response.Cookies.Append("UserEmail", rsg.Email);
 
-                return Ok("Registration successful");
-            }
-            else
-            {
-                return BadRequest("Email already exists");
-            }
+            Response.Cookies.Append("UserEmail", rsg.Email);
+
+            return Ok(isRegistered);
+
+
         }
         [AllowAnonymous]
         [HttpPost("login")]
