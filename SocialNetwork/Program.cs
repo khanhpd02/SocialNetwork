@@ -58,6 +58,14 @@ builder.Services.AddSwaggerGen(option =>
     var services = builder.Services;
     var env = builder.Environment;
 
+    services.AddDistributedMemoryCache(); // Register an in-memory cache implementation for IDistributedCache
+    services.AddSession(options =>
+    {
+        options.IdleTimeout = TimeSpan.FromMinutes(30); // Configure your session options
+    });
+
+    services.AddHttpContextAccessor();
+
     //services.AddDbContext<DataContext>();
     services.AddDbContext<SocialNetworkContext>();
     //services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
@@ -86,6 +94,8 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IEmailService, EmailService>();
     services.AddScoped<ILikeService, LikeService>();
     services.AddScoped<ICommentService, CommentService>();
+    services.AddScoped<IGeneralService, GeneralService>();
+
 
 
     services.AddScoped<IUserRepository, UserRepository>();
@@ -103,6 +113,8 @@ builder.Services.AddSwaggerGen(option =>
 
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+    services.AddSingleton<IGeneralService, GeneralService>();
+
     // Configure Cloudinary
     Account account = new Account(
   "dchu3wh6l",

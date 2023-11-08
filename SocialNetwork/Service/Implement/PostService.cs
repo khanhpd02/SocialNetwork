@@ -22,7 +22,7 @@ namespace SocialNetwork.Service.Implement
         private readonly IVideoRepository videoRepository;
         private readonly ILikeRepository likeRepository;
         private readonly ICommentRepository commentRepository;
-
+        private IGeneralService _generalService;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile(new MappingProfile());
@@ -30,7 +30,7 @@ namespace SocialNetwork.Service.Implement
 
         public PostService(IPostRepository postRepository, IUserRepository userRepository, IImageRepository imageRepository,
             IHttpContextAccessor _httpContextAccessor, SocialNetworkContext _context, Cloudinary _cloudinary,
-            IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository)
+            IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository, IGeneralService generalService)
         {
             this.postRepository = postRepository;
             this.userRepository = userRepository;
@@ -41,6 +41,7 @@ namespace SocialNetwork.Service.Implement
             this.videoRepository = videoRepository;
             this.likeRepository = likeRepository;
             this.commentRepository = commentRepository;
+            _generalService = generalService;
         }
         public string UploadFileToCloudinary(FileUploadDTO fileUploadDTO)
         {
@@ -90,10 +91,10 @@ namespace SocialNetwork.Service.Implement
 
             return null;
         }
-        public PostDTO Create(PostDTO dto, string userEmail, string cloudinaryUrl)
+        public PostDTO Create(PostDTO dto, string cloudinaryUrl)
         {
-            var user = userRepository.FindByCondition(x => x.Email == userEmail).FirstOrDefault();
-            Guid id = user.Id;
+            //var user = userRepository.FindByCondition(x => x.Email == userEmail).FirstOrDefault();
+            Guid id = _generalService.UserId;
             Post post = mapper.Map<Post>(dto);
             post.UserId = id;
             post.CreateBy = id;

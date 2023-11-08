@@ -6,9 +6,9 @@ namespace SocialNetwork.Service
     public interface IUserService
     {
         //Task<bool> SendPinEmail(SendPinEmailModel rsg);
-        Task<bool> VerifyPin(VerifyPin VerifyPin, string email);
+        Task<bool> VerifyPin(VerifyPin VerifyPin);
         AppResponse RegisterUser(RegisterModel rsg);
         LoginResponse Authenticate(LoginModel loginModel);
-        void SendPinEmail(string email);
+        void SendPinEmail();
     }
 }

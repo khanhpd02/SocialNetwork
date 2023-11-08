@@ -29,7 +29,7 @@ public class UserService : IUserService
     private readonly IRoleRepository roleRepository;
     private readonly IUserRoleRepository userRoleRepository;
     private readonly IPinCodeRepository pinCodeRepository;
-
+    private IGeneralService _generalService;
     private readonly IMapper mapper = new MapperConfiguration(cfg =>
     {
         cfg.AddProfile(new MappingProfile());
@@ -40,7 +40,7 @@ public class UserService : IUserService
         IOptions<AppSettings> appSettings,
         IEmailService emailService,
         IUserRepository userRepository, IRoleRepository roleRepository,
-     IUserRoleRepository userRoleRepository, IPinCodeRepository pinCodeRepository)
+     IUserRoleRepository userRoleRepository, IPinCodeRepository pinCodeRepository, IGeneralService generalService)
     {
         _context = context;
         _jwtUtils = jwtUtils;
@@ -50,6 +50,7 @@ public class UserService : IUserService
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
         this.pinCodeRepository = pinCodeRepository;
+        _generalService = generalService;
     }
 
     public AppResponse RegisterUser(RegisterModel dto)
@@ -86,7 +87,7 @@ public class UserService : IUserService
 
             try
             {
-                SendPinEmail(dto.Email);
+                SendPinEmail();
                 return new AppResponse { message = "Gửi mã pin thành công" };
             }
             catch (Exception)
@@ -117,7 +118,8 @@ public class UserService : IUserService
 
             try
             {
-                SendPinEmail(dto.Email);
+                _generalService.Email = dto.Email;
+                SendPinEmail();
                 return new AppResponse { message = "Gửi mã pin thành công" };
             }
             catch (Exception)
@@ -132,12 +134,12 @@ public class UserService : IUserService
 
     }
 
-    public void SendPinEmail(string email)
+    public void SendPinEmail()
     {
 
 
         // Loại bỏ các mã PIN cũ
-        var duplicatePinCode = _context.PinCodes.Where(u => u.Email == email).ToList();
+        var duplicatePinCode = _context.PinCodes.Where(u => u.Email == _generalService.Email).ToList();
         foreach (var pincode in duplicatePinCode)
         {
             _context.PinCodes.Remove(pincode);
@@ -147,7 +149,7 @@ public class UserService : IUserService
         // Tạo mã PIN mới và lưu vào cơ sở dữ liệu
         PinCode pin1 = new PinCode
         {
-            Email = email,
+            Email = _generalService.Email,
             Pin = RandomPIN(),
             CreateDate = DateTime.Now,
             ExpiredTime = DateTime.Now.AddMinutes(3),
@@ -170,10 +172,10 @@ public class UserService : IUserService
             throw;
         }
     }
-    public async Task<bool> VerifyPin(VerifyPin VerifyPin, string email)
+    public async Task<bool> VerifyPin(VerifyPin VerifyPin)
     {
-        var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == false && x.Email == email).FirstOrDefault();
-        var user = userRepository.FindByCondition(x => x.Email == email).FirstOrDefault();
+        var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == false && x.Email == _generalService.Email).FirstOrDefault();
+        var user = userRepository.FindByCondition(x => x.Email == _generalService.Email).FirstOrDefault();
 
         if (pin != null)
         {
@@ -190,7 +192,6 @@ public class UserService : IUserService
             else
             {
                 userRepository.Delete(user);
-                //pin.IsDeleted = true;
                 userRepository.Update(user);
                 pinCodeRepository.Update(pin);
                 userRepository.Save();
@@ -238,11 +239,19 @@ public class UserService : IUserService
             var role = roleRepository.FindByCondition(u => u.Id == UserRole.RoleId).FirstOrDefault();
             roles.Add(role.RoleName.ToString());
         }
-        //
+        // Lấy UserId sau khi đã xác thực người dùng
+        Guid userId = GetUserId(loginModel.Email);
+        _generalService.UserId = userId;
         LoginDataResponse loginDataResponse = new LoginDataResponse { Id = user.Id.ToString(), Email = user.Email, JwtToken = _jwtUtils.GenerateJwtToken(user), Role = roles };
 
         LoginResponse loginResponse = new LoginResponse { Success = true, Code = 1, Data = loginDataResponse, Message = "Đăng nhập thành Công" };
+
         return loginResponse;
+    }
+    public Guid GetUserId(string userMail)
+    {
+        Guid userId = userRepository.FindByCondition(x => x.Email == userMail).FirstOrDefault().Id;
+        return userId;
     }
     public bool VerifyPassword(string password, string hashedPassword)
     {

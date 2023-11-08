@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Model.User;
+using SocialNetwork.Repository;
 using SocialNetwork.Service;
 
 namespace SocialNetwork.Controller
@@ -17,6 +18,7 @@ namespace SocialNetwork.Controller
 
         private IUserService _userService;
         private IEmailService _emailService;
+        private readonly IUserRepository userRepository;
 
         public AuthController(IUserService userService, IEmailService emailService)
         {
@@ -32,9 +34,8 @@ namespace SocialNetwork.Controller
             {
                 return BadRequest("Invalid data");
             }
-            string userEmail = Request.Cookies["UserEmail"];
             // Gọi AuthService để xử lý việc đăng ký tài khoản
-            var isRegistered = await _userService.VerifyPin(rsg, userEmail);
+            var isRegistered = await _userService.VerifyPin(rsg);
             if (!isRegistered)
             {
                 return Ok("Xác thực thất bại");
@@ -58,7 +59,6 @@ namespace SocialNetwork.Controller
             // Gọi AuthService để xử lý việc đăng ký tài khoản
             var isRegistered = _userService.RegisterUser(rsg);
 
-            Response.Cookies.Append("UserEmail", rsg.Email);
 
             return Ok(isRegistered);
 
@@ -79,7 +79,6 @@ namespace SocialNetwork.Controller
             {
                 return Unauthorized("Invalid email or password");
             }
-            Response.Cookies.Append("UserEmail", loginModel.Email);
             return Ok(loginResponse);
         }
         //[HttpPost("login")]
@@ -102,8 +101,7 @@ namespace SocialNetwork.Controller
             }
             else
             {
-                string userEmail = Request.Cookies["UserEmail"];
-                _userService.SendPinEmail(userEmail);
+                _userService.SendPinEmail();
                 return Ok("ReSendMail successful");
             }
             // Gọi AuthService để xử lý việc đăng ký tài khoản

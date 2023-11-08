@@ -36,14 +36,14 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "Create a Post")]
         public IActionResult Create([FromBody] PostDTO postDTO)
         {
-            string userEmail = Request.Cookies["UserEmail"];
+            //string userEmail = Request.Cookies["UserEmail"];
 
             if (postDTO == null)
             {
                 return BadRequest("Invalid data");
             }
             string cloudinaryUrl = Request.Cookies["CloudinaryUrl"];
-            var createdPost = postService.Create(postDTO, userEmail, cloudinaryUrl);
+            var createdPost = postService.Create(postDTO, cloudinaryUrl);
             Response.Cookies.Delete("CloudinaryUrl");
             return Ok(createdPost);
         }
