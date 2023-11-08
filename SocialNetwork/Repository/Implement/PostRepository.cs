@@ -1,12 +1,13 @@
 ﻿using SocialNetwork.Entity;
 using SocialNetwork.Repository.Implement;
+using SocialNetwork.Service;
 
 namespace SocialNetwork.Repository
 {
 
     public class PostRepository : RepositoryBase<Post>, IPostRepository
     {
-        public PostRepository(SocialNetworkContext context) : base(context)
+        public PostRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
         {
         }
     }

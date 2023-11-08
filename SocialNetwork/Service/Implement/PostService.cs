@@ -91,13 +91,12 @@ namespace SocialNetwork.Service.Implement
 
             return null;
         }
-        public PostDTO Create(PostDTO dto, string cloudinaryUrl)
+        public PostDTO Create(PostDTO dto)
         {
-            //var user = userRepository.FindByCondition(x => x.Email == userEmail).FirstOrDefault();
-            Guid id = _generalService.UserId;
+            string cloudinaryUrl = _generalService.CloudinaryUrl;
             Post post = mapper.Map<Post>(dto);
-            post.UserId = id;
-            post.CreateBy = id;
+            post.UserId = _generalService.UserId;
+            post.CreateBy = _generalService.UserId;
             _context.Add(post);
             _context.SaveChanges();
             postRepository.Update(post);
@@ -119,7 +118,7 @@ namespace SocialNetwork.Service.Implement
                             PostId = post.Id,
                             Link = link,
                             CreateDate = DateTime.Now,
-                            CreateBy = id,
+                            CreateBy = _generalService.UserId,
                             IsDeleted = false
                         };
                         imageRepository.Create(image);
@@ -136,7 +135,7 @@ namespace SocialNetwork.Service.Implement
                             PostId = post.Id,
                             Link = link,
                             CreateDate = DateTime.Now,
-                            CreateBy = id,
+                            CreateBy = _generalService.UserId,
                             IsDeleted = false
                         };
                         videoRepository.Create(video);
@@ -146,17 +145,15 @@ namespace SocialNetwork.Service.Implement
             }
             return dto;
         }
-        public PostDTO Update(PostDTO dto, string userEmail)
+        public PostDTO Update(PostDTO dto)
         {
-            var user = userRepository.FindByCondition(x => x.Email == userEmail).FirstOrDefault();
             var postcheck = postRepository.FindByCondition(x => x.Id == dto.Id).FirstOrDefault();
             if (postcheck == null)
             {
                 throw new PostNotFoundException(dto.Id);
             }
-            Guid id = user.Id;
             Post post = mapper.Map<Post>(dto);
-            post.UpdateBy = id;
+            post.UpdateBy = _generalService.UserId;
             _context.Update(post);
             _context.SaveChanges();
             postRepository.Update(post);

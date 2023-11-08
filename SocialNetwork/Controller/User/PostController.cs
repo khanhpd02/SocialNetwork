@@ -14,10 +14,11 @@ namespace SocialNetwork.Controller.User
     {
 
         private readonly IPostService postService;
-
-        public PostController(IPostService postService)
+        private IGeneralService _generalService;
+        public PostController(IPostService postService, IGeneralService generalService)
         {
             this.postService = postService;
+            _generalService = generalService;
         }
 
         [HttpGet("{id}")]
@@ -36,28 +37,24 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "Create a Post")]
         public IActionResult Create([FromBody] PostDTO postDTO)
         {
-            //string userEmail = Request.Cookies["UserEmail"];
 
             if (postDTO == null)
             {
                 return BadRequest("Invalid data");
             }
-            string cloudinaryUrl = Request.Cookies["CloudinaryUrl"];
-            var createdPost = postService.Create(postDTO, cloudinaryUrl);
-            Response.Cookies.Delete("CloudinaryUrl");
+            var createdPost = postService.Create(postDTO);
             return Ok(createdPost);
         }
         [HttpPut]
         [SwaggerOperation(Summary = "Create a Post")]
         public IActionResult Update([FromBody] PostDTO postDTO)
         {
-            string userEmail = Request.Cookies["UserEmail"];
 
             if (postDTO == null)
             {
                 return BadRequest("Invalid data");
             }
-            var createdPost = postService.Update(postDTO, userEmail);
+            var createdPost = postService.Update(postDTO);
             return Ok(createdPost);
         }
         [HttpPost("upload")]
@@ -74,7 +71,7 @@ namespace SocialNetwork.Controller.User
 
             if (cloudinaryUrl != null)
             {
-                Response.Cookies.Append("CloudinaryUrl", cloudinaryUrl);
+                _generalService.CloudinaryUrl = cloudinaryUrl;
                 return Ok(new { CloudinaryUrl = cloudinaryUrl });
             }
 

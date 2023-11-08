@@ -4,6 +4,6 @@
     {
         Guid UserId { get; set; }
         string Email { get; set; }
-
+        string CloudinaryUrl { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialNetwork.Entity;
+using SocialNetwork.Service;
 using System.Linq.Expressions;
 
 namespace SocialNetwork.Repository.Implement
@@ -8,10 +9,11 @@ namespace SocialNetwork.Repository.Implement
     {
 
         protected readonly SocialNetworkContext context;
-
-        protected RepositoryBase(SocialNetworkContext context)
+        private IGeneralService _generalService;
+        protected RepositoryBase(SocialNetworkContext context, IGeneralService generalService)
         {
             this.context = context;
+            this._generalService = generalService;
         }
 
         public List<T> FindAll(params Expression<Func<T, object>>[] includes)
@@ -64,17 +66,24 @@ namespace SocialNetwork.Repository.Implement
 
         public void Create(T entity)
         {
+            entity.CreateBy = _generalService.UserId;
             entity.IsDeleted = false;
             entity.CreateDate = DateTime.Now;
             context.Set<T>().Add(entity);
         }
         public void CreateIsTemp(T entity)
         {
+            entity.CreateBy = _generalService.UserId;
             entity.IsDeleted = true;
             entity.CreateDate = DateTime.Now;
             context.Set<T>().Add(entity);
         }
-        public void Update(T entity) => context.Set<T>().Update(entity);
+        public void Update(T entity)
+        {
+            entity.UpdateBy = _generalService.UserId;
+            entity.UpdateDate = DateTime.Now;
+            context.Set<T>().Update(entity);
+        }
 
         public void Delete(T entity) => context.Set<T>().Remove(entity);
 
