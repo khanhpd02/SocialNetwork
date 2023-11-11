@@ -1,69 +1,87 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using SocialNetwork.DTO.Chat;
-using SocialNetwork.Middlewares;
-using SocialNetwork.Repository;
 using SocialNetwork.Socket;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace SocialNetwork.Controller
 {
-    [TypeFilter(typeof(AuthenticationFilter))]
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ChatController : ControllerBase
     {
         private readonly IHubContext<ChatHub> _hubContext;
-        private readonly IUserRepository userRepository;
-        private readonly IInforRepository inforRepository;
-        private readonly IGroupChatRepository groupChatRepository;
-        private readonly IUserGroupChatRepository userGroupChatRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ChatController(IHubContext<ChatHub> hubContext, IUserRepository userRepository, IInforRepository inforRepository
-            , IGroupChatRepository groupChatRepository, IUserGroupChatRepository userGroupChatRepository)
+        public ChatController(IHubContext<ChatHub> hubContext, IHttpContextAccessor httpContextAccessor)
         {
             _hubContext = hubContext;
-            this.userRepository = userRepository;
-            this.inforRepository = inforRepository;
-            this.groupChatRepository = groupChatRepository;
-            this.userGroupChatRepository = userGroupChatRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        //[HttpPost]
-        //[SwaggerOperation(Summary = "Gửi tin nhắn")]
-        //public async Task<IActionResult> SendMessage([FromBody] ChatMessageDTO message)
-        //{
-        //    string userEmail = Request.Cookies["UserEmail"];
-        //    var user = userRepository.FindByCondition(x => x.Email == userEmail).FirstOrDefault();
-        //    var infor = inforRepository.FindByCondition(x => x.UserId == user.Id).FirstOrDefault();
-        //    message.User = infor.FullName;
-        //    await _hubContext.Clients.All.SendAsync("ReceiveMessage", message.User, message.Message);
-        //    return Ok(message);
-        //}
-        [HttpPost]
-        [SwaggerOperation(Summary = "Gửi tin nhắn")]
-        public async Task<IActionResult> SendMessage([FromBody] ChatMessageDTO message)
+        [HttpPost("SendMessage")]
+        public async Task<IActionResult> SendMessage([FromBody] MessageModel messageModel)
         {
-            string userEmail = Request.Cookies["UserEmail"];
-            var user = userRepository.FindByCondition(x => x.Email == userEmail).FirstOrDefault();
-            var infor = inforRepository.FindByCondition(x => x.UserId == user.Id).FirstOrDefault();
-            message.User = infor.FullName;
-
-            // Tham gia vào một group dựa trên logic của bạn
-            string groupName = "";
-            //var group = userGroupChatRepository.FindByCondition(x => x.UserId == user.Id && x.GroupChatId == message.groupId).ToList();
-            //foreach (var item in group)
-            //{
-            //    var groupCheck = groupChatRepository.FindByCondition(x => x.Id == item.GroupChatId).FirstOrDefault();                                                                // Lấy ConnectionId từ HTTP header (giả sử header có tên là "ConnectionId")
-            //    groupName = groupCheck.GroupName;
-            //}
-            string connectionId = Request.Headers["ConnectionId"];
-            await _hubContext.Clients.Client(connectionId).SendAsync("JoinGroup", groupName);
-
-            await _hubContext.Clients.Group(groupName).SendAsync("ReceiveMessage", message.User, message.Message);
-            return Ok(message);
+            if (ModelState.IsValid)
+            {
+                var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", messageModel.User, messageModel.Message);
+                return Ok();
+            }
+            return BadRequest("Invalid message model");
         }
 
+        [HttpPost("JoinGroup")]
+        public async Task<IActionResult> JoinGroup([FromBody] GroupModel groupModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
+                await _hubContext.Groups.AddToGroupAsync(connectionId, groupModel.GroupName);
+                await _hubContext.Clients.Group(groupModel.GroupName).SendAsync("GroupMessage", $"{connectionId} has joined the group {groupModel.GroupName}");
+                return Ok();
+            }
+            return BadRequest("Invalid group model");
+        }
+
+        [HttpPost("LeaveGroup")]
+        public async Task<IActionResult> LeaveGroup([FromBody] GroupModel groupModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
+                await _hubContext.Groups.RemoveFromGroupAsync(connectionId, groupModel.GroupName);
+                await _hubContext.Clients.Group(groupModel.GroupName).SendAsync("GroupMessage", $"{connectionId} has left the group {groupModel.GroupName}");
+                return Ok();
+            }
+            return BadRequest("Invalid group model");
+        }
+
+        [HttpPost("SendGroupMessage")]
+        public async Task<IActionResult> SendGroupMessage([FromBody] GroupMessageModel groupMessageModel)
+        {
+            if (ModelState.IsValid)
+            {
+                await _hubContext.Clients.Group(groupMessageModel.GroupName).SendAsync("ReceiveGroupMessage", groupMessageModel.User, groupMessageModel.Message);
+                return Ok();
+            }
+            return BadRequest("Invalid group message model");
+        }
     }
 
+    public class MessageModel
+    {
+        public string User { get; set; }
+        public string Message { get; set; }
+    }
+
+    public class GroupModel
+    {
+        public string GroupName { get; set; }
+    }
+
+    public class GroupMessageModel
+    {
+        public string GroupName { get; set; }
+        public string User { get; set; }
+        public string Message { get; set; }
+    }
 }
