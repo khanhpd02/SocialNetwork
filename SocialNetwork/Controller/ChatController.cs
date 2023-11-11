@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using SocialNetwork.Service;
 using SocialNetwork.Socket;
 
 namespace SocialNetwork.Controller
@@ -10,11 +11,12 @@ namespace SocialNetwork.Controller
     {
         private readonly IHubContext<ChatHub> _hubContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public ChatController(IHubContext<ChatHub> hubContext, IHttpContextAccessor httpContextAccessor)
+        private IGeneralService _generalService;
+        public ChatController(IHubContext<ChatHub> hubContext, IHttpContextAccessor httpContextAccessor, IGeneralService generalService)
         {
             _hubContext = hubContext;
             _httpContextAccessor = httpContextAccessor;
+            _generalService = generalService;
         }
 
         [HttpPost("SendMessage")]
@@ -23,7 +25,7 @@ namespace SocialNetwork.Controller
             if (ModelState.IsValid)
             {
                 var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", messageModel.User, messageModel.Message);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", _generalService.UserName, messageModel.Message);
                 return Ok();
             }
             return BadRequest("Invalid message model");
@@ -60,7 +62,7 @@ namespace SocialNetwork.Controller
         {
             if (ModelState.IsValid)
             {
-                await _hubContext.Clients.Group(groupMessageModel.GroupName).SendAsync("ReceiveGroupMessage", groupMessageModel.User, groupMessageModel.Message);
+                await _hubContext.Clients.Group(groupMessageModel.GroupName).SendAsync("ReceiveGroupMessage", _generalService.UserName, groupMessageModel.Message);
                 return Ok();
             }
             return BadRequest("Invalid group message model");
@@ -69,7 +71,6 @@ namespace SocialNetwork.Controller
 
     public class MessageModel
     {
-        public string User { get; set; }
         public string Message { get; set; }
     }
 
@@ -81,7 +82,6 @@ namespace SocialNetwork.Controller
     public class GroupMessageModel
     {
         public string GroupName { get; set; }
-        public string User { get; set; }
         public string Message { get; set; }
     }
 }

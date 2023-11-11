@@ -26,6 +26,7 @@ public class UserService : IUserService
     private IEmailService _emailService;
     private static string baseToken = "";
     private readonly IUserRepository userRepository;
+    private readonly IInforRepository inforRepository;
     private readonly IRoleRepository roleRepository;
     private readonly IUserRoleRepository userRoleRepository;
     private readonly IPinCodeRepository pinCodeRepository;
@@ -242,6 +243,7 @@ public class UserService : IUserService
         // Lấy UserId sau khi đã xác thực người dùng
         Guid userId = GetUserId(loginModel.Email);
         _generalService.UserId = userId;
+        _generalService.UserName = GetUserName(loginModel.Email);
         LoginDataResponse loginDataResponse = new LoginDataResponse { Id = user.Id.ToString(), Email = user.Email, JwtToken = _jwtUtils.GenerateJwtToken(user), Role = roles };
 
         LoginResponse loginResponse = new LoginResponse { Success = true, Code = 1, Data = loginDataResponse, Message = "Đăng nhập thành Công" };
@@ -252,6 +254,12 @@ public class UserService : IUserService
     {
         Guid userId = userRepository.FindByCondition(x => x.Email == userMail).FirstOrDefault().Id;
         return userId;
+    }
+    public string GetUserName(string userMail)
+    {
+        Guid userId = userRepository.FindByCondition(x => x.Email == userMail).FirstOrDefault().Id;
+        string userName = inforRepository.FindByCondition(x => x.UserId == userId).FirstOrDefault().FullName;
+        return userName;
     }
     public bool VerifyPassword(string password, string hashedPassword)
     {
