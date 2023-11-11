@@ -154,6 +154,7 @@ namespace SocialNetwork.Service.Implement
             }
             Post post = mapper.Map<Post>(dto);
             post.UpdateBy = _generalService.UserId;
+            post.UpdateDate = DateTime.Now;
             _context.Update(post);
             _context.SaveChanges();
             postRepository.Update(post);
@@ -163,18 +164,24 @@ namespace SocialNetwork.Service.Implement
         }
         public PostDTO GetById(Guid id)
         {
+            var CountLike = 0;
+            var CountComment = 0;
             Post entity = postRepository.FindById(id) ?? throw new PostNotFoundException(id);
 
             List<Image> images = imageRepository.FindByCondition(img => img.PostId == id).ToList();
             List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == id).ToList();
             List<Like> likes = likeRepository.FindByCondition(img => img.PostId == id).ToList();
             List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == id).ToList();
+            CountLike = likes.Count();
+            CountComment = comments.Count();
             PostDTO dto = mapper.Map<PostDTO>(entity);
 
             dto.Images = images;
             dto.Videos = videos;
             dto.Likes = likes;
             dto.Comments = comments;
+            dto.CountLike = CountLike;
+            dto.CountComment = CountComment;
 
             return dto;
         }
@@ -191,17 +198,24 @@ namespace SocialNetwork.Service.Implement
         {
             List<Post> entityList = postRepository.FindAll();
             List<PostDTO> dtoList = new List<PostDTO>();
+            var CountLike = 0;
+            var CountComment = 0;
+
             foreach (Post entity in entityList)
             {
                 List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id).ToList();
                 List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id).ToList();
                 List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id).ToList();
                 List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == entity.Id).ToList();
+                CountLike = likes.Count();
+                CountComment = comments.Count();
                 PostDTO dto = mapper.Map<PostDTO>(entity);
                 dto.Images = images;
                 dto.Videos = videos;
                 dto.Likes = likes;
                 dto.Comments = comments;
+                dto.CountLike = CountLike;
+                dto.CountComment = CountComment;
                 dtoList.Add(dto);
             }
             return dtoList;

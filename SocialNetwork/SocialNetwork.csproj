@@ -9,12 +9,20 @@
   <ItemGroup>
     <Compile Remove="Controller\NewFolder1\**" />
     <Compile Remove="Controller\NewFolder\**" />
+    <Compile Remove="DTO\NewFolder1\**" />
+    <Compile Remove="DTO\NewFolder\**" />
     <Content Remove="Controller\NewFolder1\**" />
     <Content Remove="Controller\NewFolder\**" />
+    <Content Remove="DTO\NewFolder1\**" />
+    <Content Remove="DTO\NewFolder\**" />
     <EmbeddedResource Remove="Controller\NewFolder1\**" />
     <EmbeddedResource Remove="Controller\NewFolder\**" />
+    <EmbeddedResource Remove="DTO\NewFolder1\**" />
+    <EmbeddedResource Remove="DTO\NewFolder\**" />
     <None Remove="Controller\NewFolder1\**" />
     <None Remove="Controller\NewFolder\**" />
+    <None Remove="DTO\NewFolder1\**" />
+    <None Remove="DTO\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,11 +51,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DTO\NewFolder1\" />
-    <Folder Include="DTO\NewFolder\" />
   </ItemGroup>
 
 </Project>

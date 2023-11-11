@@ -13,16 +13,12 @@ public class PostDTO
 
     public Guid? CreateBy { get; set; }
 
-    public DateTime? UpdateDate { get; set; }
-
-    public Guid? UpdateBy { get; set; }
-
-    public bool? IsDeleted { get; set; }
-
     public List<Image> Images { get; set; }
     public List<Video> Videos { get; set; }
     public List<Like> Likes { get; set; }
     public List<Comment> Comments { get; set; }
+    public int CountLike { get; set; }
+    public int CountComment { get; set; }
 
     public PostDTO()
     {
