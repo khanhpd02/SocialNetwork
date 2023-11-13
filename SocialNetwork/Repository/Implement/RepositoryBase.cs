@@ -66,21 +66,45 @@ namespace SocialNetwork.Repository.Implement
 
         public void Create(T entity)
         {
-            entity.CreateBy = _generalService.UserId;
+            if (_generalService.UserId != null)
+            {
+                entity.CreateBy = _generalService.UserId;
+
+            }
+            else
+            {
+                entity.CreateBy = null;
+            }
             entity.IsDeleted = false;
             entity.CreateDate = DateTime.Now;
             context.Set<T>().Add(entity);
         }
         public void CreateIsTemp(T entity)
         {
-            entity.CreateBy = _generalService.UserId;
+            if (_generalService.UserId != null)
+            {
+                entity.CreateBy = _generalService.UserId;
+
+            }
+            else
+            {
+                entity.CreateBy = null;
+            }
             entity.IsDeleted = true;
             entity.CreateDate = DateTime.Now;
             context.Set<T>().Add(entity);
         }
         public void Update(T entity)
         {
-            entity.UpdateBy = _generalService.UserId;
+            if (_generalService.UserId != null)
+            {
+                entity.UpdateBy = _generalService.UserId;
+
+            }
+            else
+            {
+                entity.UpdateBy = null;
+            }
             entity.UpdateDate = DateTime.Now;
             context.Set<T>().Update(entity);
         }

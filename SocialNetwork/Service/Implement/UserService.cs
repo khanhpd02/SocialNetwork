@@ -257,9 +257,8 @@ public class UserService : IUserService
     }
     public string GetUserName(string userMail)
     {
-        Guid userId = userRepository.FindByCondition(x => x.Email == userMail).FirstOrDefault().Id;
-        string userName = inforRepository.FindByCondition(x => x.UserId == userId).FirstOrDefault().FullName;
-        return userName;
+        string userEmail = userRepository.FindByCondition(x => x.Email == userMail).FirstOrDefault().Email;
+        return userEmail;
     }
     public bool VerifyPassword(string password, string hashedPassword)
     {
