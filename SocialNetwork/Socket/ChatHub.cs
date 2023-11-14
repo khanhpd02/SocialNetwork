@@ -5,6 +5,52 @@
 
     public class ChatHub : Hub
     {
+        //#region test chat to user
+        //private IGeneralService _generalService;
+        //private static Dictionary<string, string> userConnections = new Dictionary<string, string>();
+        //private static int userCounter = 1;
+
+        //public ChatHub(IGeneralService generalService)
+        //{
+        //    _generalService = generalService;
+        //}
+
+        //public async Task SendToUser(string userId, string message)
+        //{
+        //    if (userConnections.TryGetValue(userId, out var receiverConnectionId))
+        //    {
+        //        await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", userId, message);
+        //    }
+        //    else
+        //    {
+        //    }
+        //}
+
+        //public override Task OnConnectedAsync()
+        //{
+        //    var userId = $"userID{userCounter}";
+
+        //    if (!string.IsNullOrEmpty(userId))
+        //    {
+        //        userConnections[userId] = Context.ConnectionId;
+        //    }
+
+        //    userCounter++;
+
+        //    return base.OnConnectedAsync();
+        //}
+
+        //public override Task OnDisconnectedAsync(Exception exception)
+        //{
+        //    var userId = userConnections.FirstOrDefault(x => x.Value == Context.ConnectionId).Key;
+        //    if (userId != null)
+        //    {
+        //        userConnections.Remove(userId);
+        //    }
+
+        //    return base.OnDisconnectedAsync(exception);
+        //}
+        //#endregion
         private IGeneralService _generalService;
         public ChatHub(IGeneralService generalService)
         {
@@ -20,19 +66,15 @@
             }
             else
             {
-                // Handle the case where the user is not connected
-                // (you may want to send a different message or take other actions)
             }
         }
 
         public override Task OnConnectedAsync()
         {
-            // Get the userId from your authentication system or other source
-            var userId = _generalService.UserId.ToString(); // Replace this with your actual way of getting userId
+            var userId = _generalService.UserId.ToString();
 
             if (!string.IsNullOrEmpty(userId))
             {
-                // Map the userId to the connectionId
                 userConnections[userId] = Context.ConnectionId;
             }
 
@@ -41,7 +83,6 @@
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            // Remove the mapping when a connection is disconnected
             var userId = userConnections.FirstOrDefault(x => x.Value == Context.ConnectionId).Key;
             if (userId != null)
             {
