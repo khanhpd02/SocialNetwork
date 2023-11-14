@@ -18,6 +18,19 @@ namespace SocialNetwork.Controller
             _httpContextAccessor = httpContextAccessor;
             _generalService = generalService;
         }
+        [HttpPost("GetConnectionId")]
+        public IActionResult GetConnectionId()
+        {
+            try
+            {
+                var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
+                return Ok(new { ConnectionId = connectionId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
+        }
 
         [HttpPost("SendMessage")]
         public async Task<IActionResult> SendMessage([FromBody] MessageModel messageModel)
@@ -25,12 +38,22 @@ namespace SocialNetwork.Controller
             if (ModelState.IsValid)
             {
                 var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", _generalService.UserName, messageModel.Message);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", _generalService.Email, messageModel.Message);
                 return Ok();
             }
             return BadRequest("Invalid message model");
         }
-
+        [HttpPost("SendToUser")]
+        public async Task<IActionResult> SendToUser([FromBody] MessageModelToUser messageModelToUser)
+        {
+            if (ModelState.IsValid)
+            {
+                var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
+                await _hubContext.Clients.Client(messageModelToUser.receiverConnectionId).SendAsync("ReceiveMessage", _generalService.Email, messageModelToUser.Message);
+                return Ok();
+            }
+            return BadRequest("Invalid message model");
+        }
         [HttpPost("JoinGroup")]
         public async Task<IActionResult> JoinGroup([FromBody] GroupModel groupModel)
         {
@@ -62,7 +85,7 @@ namespace SocialNetwork.Controller
         {
             if (ModelState.IsValid)
             {
-                await _hubContext.Clients.Group(groupMessageModel.GroupName).SendAsync("ReceiveGroupMessage", _generalService.UserName, groupMessageModel.Message);
+                await _hubContext.Clients.Group(groupMessageModel.GroupName).SendAsync("ReceiveGroupMessage", _generalService.Email, groupMessageModel.Message);
                 return Ok();
             }
             return BadRequest("Invalid group message model");
@@ -73,7 +96,11 @@ namespace SocialNetwork.Controller
     {
         public string Message { get; set; }
     }
-
+    public class MessageModelToUser
+    {
+        public string receiverConnectionId { get; set; }
+        public string Message { get; set; }
+    }
     public class GroupModel
     {
         public string GroupName { get; set; }
