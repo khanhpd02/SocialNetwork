@@ -95,7 +95,7 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<ILikeService, LikeService>();
     services.AddScoped<ICommentService, CommentService>();
     services.AddScoped<IGeneralService, GeneralService>();
-
+    services.AddScoped<IInforService, InforService>();
 
 
     services.AddScoped<IUserRepository, UserRepository>();
@@ -110,6 +110,7 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IInforRepository, InforRepository>();
     services.AddScoped<IGroupChatRepository, GroupChatRepository>();
     services.AddScoped<IUserGroupChatRepository, UserGroupChatRepository>();
+    
 
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -117,9 +118,9 @@ builder.Services.AddSwaggerGen(option =>
 
     // Configure Cloudinary
     Account account = new Account(
-  "dchu3wh6l",
-  "382577841913334",
-  "XjbmTfNbI1k4CTI6vVrm4rL6Nyc");
+  "khanhpd",
+  "694226254617467",
+  "LRTR_fpACSFMKTH9il0cXC_rgvo");
 
     Cloudinary cloudinary = new Cloudinary(account);
     builder.Services.AddSingleton(cloudinary);

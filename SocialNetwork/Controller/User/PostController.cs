@@ -46,7 +46,7 @@ namespace SocialNetwork.Controller.User
             return Ok(createdPost);
         }
         [HttpPut]
-        [SwaggerOperation(Summary = "Create a Post")]
+        [SwaggerOperation(Summary = "Update a Post")]
         public IActionResult Update([FromBody] PostDTO postDTO)
         {
 
