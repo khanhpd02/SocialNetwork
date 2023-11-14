@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.DTO;
-using SocialNetwork.DTO.Cloudinary;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
 using Swashbuckle.AspNetCore.Annotations;
@@ -35,7 +34,7 @@ namespace SocialNetwork.Controller.User
 
         [HttpPost]
         [SwaggerOperation(Summary = "Create a Post")]
-        public IActionResult Create([FromBody] PostDTO postDTO)
+        public IActionResult Create([FromForm] PostDTO postDTO)
         {
 
             if (postDTO == null)
@@ -47,7 +46,7 @@ namespace SocialNetwork.Controller.User
         }
         [HttpPut]
         [SwaggerOperation(Summary = "Update a Post")]
-        public IActionResult Update([FromBody] PostDTO postDTO)
+        public IActionResult Update([FromForm] PostDTO postDTO)
         {
 
             if (postDTO == null)
@@ -56,26 +55,6 @@ namespace SocialNetwork.Controller.User
             }
             var createdPost = postService.Update(postDTO);
             return Ok(createdPost);
-        }
-        [HttpPost("upload")]
-        [SwaggerOperation(Summary = "Upload File to Cloudinary")]
-        public IActionResult UploadFileToCloudinary([FromForm] FileUploadDTO file)
-        {
-            if (file == null)
-            {
-                return BadRequest("Invalid file");
-            }
-
-            // Gọi hàm tải lên tệp lên Cloudinary
-            string cloudinaryUrl = postService.UploadFileToCloudinary(file);
-
-            if (cloudinaryUrl != null)
-            {
-                _generalService.CloudinaryUrl = cloudinaryUrl;
-                return Ok(new { CloudinaryUrl = cloudinaryUrl });
-            }
-
-            return BadRequest("Failed to upload file to Cloudinary");
         }
 
         [HttpDelete("{id}")]

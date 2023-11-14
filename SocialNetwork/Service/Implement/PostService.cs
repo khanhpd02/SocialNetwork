@@ -3,7 +3,6 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
-using SocialNetwork.DTO.Cloudinary;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Repository;
@@ -43,15 +42,15 @@ namespace SocialNetwork.Service.Implement
             this.commentRepository = commentRepository;
             _generalService = generalService;
         }
-        public string UploadFileToCloudinary(FileUploadDTO fileUploadDTO)
+        public string UploadFileToCloudinary(IFormFile fileUploadDTO)
         {
-            if (fileUploadDTO.File != null && fileUploadDTO.File.Length > 0)
+            if (fileUploadDTO != null && fileUploadDTO.Length > 0)
             {
-                if (Path.GetExtension(fileUploadDTO.File.FileName).Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+                if (Path.GetExtension(fileUploadDTO.FileName).Equals(".mp4", StringComparison.OrdinalIgnoreCase))
                 {
                     var uploadParamsVideo = new VideoUploadParams
                     {
-                        File = new FileDescription(fileUploadDTO.File.FileName, fileUploadDTO.File.OpenReadStream()),
+                        File = new FileDescription(fileUploadDTO.FileName, fileUploadDTO.OpenReadStream()),
                         Folder = "SocialNetwork/Video/",
                     };
 
@@ -65,14 +64,14 @@ namespace SocialNetwork.Service.Implement
                         return null;
                     }
                 }
-                if (Path.GetExtension(fileUploadDTO.File.FileName).Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(fileUploadDTO.File.FileName).Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(fileUploadDTO.File.FileName).Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(fileUploadDTO.File.FileName).Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                if (Path.GetExtension(fileUploadDTO.FileName).Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetExtension(fileUploadDTO.FileName).Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetExtension(fileUploadDTO.FileName).Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetExtension(fileUploadDTO.FileName).Equals(".gif", StringComparison.OrdinalIgnoreCase))
                 {
                     var uploadParams = new ImageUploadParams
                     {
-                        File = new FileDescription(fileUploadDTO.File.FileName, fileUploadDTO.File.OpenReadStream()),
+                        File = new FileDescription(fileUploadDTO.FileName, fileUploadDTO.OpenReadStream()),
                         Folder = "SocialNetwork/Image/",
                     };
 
@@ -93,7 +92,7 @@ namespace SocialNetwork.Service.Implement
         }
         public PostDTO Create(PostDTO dto)
         {
-            string cloudinaryUrl = _generalService.CloudinaryUrl;
+            string cloudinaryUrl = UploadFileToCloudinary(dto.File);
             Post post = mapper.Map<Post>(dto);
             post.UserId = _generalService.UserId;
             post.CreateBy = _generalService.UserId;
@@ -152,6 +151,8 @@ namespace SocialNetwork.Service.Implement
             {
                 throw new PostNotFoundException(dto.Id);
             }
+            string cloudinaryUrl = UploadFileToCloudinary(dto.File);
+
             Post post = mapper.Map<Post>(dto);
             post.UpdateBy = _generalService.UserId;
             post.UpdateDate = DateTime.Now;
@@ -159,7 +160,47 @@ namespace SocialNetwork.Service.Implement
             _context.SaveChanges();
             postRepository.Update(post);
             postRepository.Save();
-
+            if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
+            {
+                string fileExtension = Path.GetExtension(cloudinaryUrl);
+                if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                       fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                       fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                       fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                {
+                    var link = cloudinaryUrl;
+                    if (link != null)
+                    {
+                        Image image = new Image
+                        {
+                            PostId = post.Id,
+                            Link = link,
+                            CreateDate = DateTime.Now,
+                            CreateBy = _generalService.UserId,
+                            IsDeleted = false
+                        };
+                        imageRepository.Create(image);
+                        imageRepository.Save();
+                    }
+                }
+                if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+                {
+                    var link = cloudinaryUrl;
+                    if (link != null)
+                    {
+                        Video video = new Video
+                        {
+                            PostId = post.Id,
+                            Link = link,
+                            CreateDate = DateTime.Now,
+                            CreateBy = _generalService.UserId,
+                            IsDeleted = false
+                        };
+                        videoRepository.Create(video);
+                        videoRepository.Save();
+                    }
+                }
+            }
             return dto;
         }
         public PostDTO GetById(Guid id)

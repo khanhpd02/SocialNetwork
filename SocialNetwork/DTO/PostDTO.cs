@@ -8,6 +8,7 @@ public class PostDTO
     public string Content { get; set; }
 
     public Guid UserId { get; set; }
+    public IFormFile File { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

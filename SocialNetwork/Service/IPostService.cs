@@ -1,11 +1,10 @@
 ﻿using SocialNetwork.DTO;
-using SocialNetwork.DTO.Cloudinary;
 
 namespace SocialNetwork.Service
 {
     public interface IPostService
     {
-        string UploadFileToCloudinary(FileUploadDTO fileUploadDTO);
+        string UploadFileToCloudinary(IFormFile fileUploadDTO);
         PostDTO Create(PostDTO dto);
         PostDTO Update(PostDTO dto);
         PostDTO GetById(Guid id);
