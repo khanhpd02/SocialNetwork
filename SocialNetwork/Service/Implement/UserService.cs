@@ -283,27 +283,14 @@ public class UserService : IUserService
             var role = roleRepository.FindByCondition(u => u.Id == UserRole.RoleId).FirstOrDefault();
             roles.Add(role.RoleName.ToString());
         }
-        // Lấy UserId sau khi đã xác thực người dùng
-        Guid userId = GetUserId(loginModel.Email);
-        UserId = userId;
-        _generalService.UserId = userId;
-        _generalService.UserName = GetUserName(loginModel.Email);
+
         LoginDataResponse loginDataResponse = new LoginDataResponse { Id = user.Id.ToString(), Email = user.Email, JwtToken = _jwtUtils.GenerateJwtToken(user), Role = roles };
 
         LoginResponse loginResponse = new LoginResponse { Success = true, Code = 1, Data = loginDataResponse, Message = "Đăng nhập thành Công" };
 
         return loginResponse;
     }
-    public Guid GetUserId(string userMail)
-    {
-        Guid userId = userRepository.FindByCondition(x => x.Email == userMail).FirstOrDefault().Id;
-        return userId;
-    }
-    public string GetUserName(string userMail)
-    {
-        string userEmail = userRepository.FindByCondition(x => x.Email == userMail).FirstOrDefault().Email;
-        return userEmail;
-    }
+
     public bool VerifyPassword(string password, string hashedPassword)
     {
         return BCrypt.EnhancedVerify(password, hashedPassword, HashType.SHA256);
