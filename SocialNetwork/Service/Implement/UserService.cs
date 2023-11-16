@@ -175,8 +175,8 @@ public class UserService : IUserService
     }
     public async Task<bool> VerifyPin(VerifyPin VerifyPin)
     {
-        var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == false && x.Email == _generalService.Email).FirstOrDefault();
-        var user = userRepository.FindByCondition(x => x.Email == _generalService.Email).FirstOrDefault();
+        var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == false && x.Email == VerifyPin.Email).FirstOrDefault();
+        var user = userRepository.FindByCondition(x => x.Email == VerifyPin.Email).FirstOrDefault();
 
         if (pin != null)
         {
