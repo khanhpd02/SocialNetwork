@@ -110,11 +110,11 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IInforRepository, InforRepository>();
     services.AddScoped<IGroupChatRepository, GroupChatRepository>();
     services.AddScoped<IUserGroupChatRepository, UserGroupChatRepository>();
-    
+
 
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-    services.AddSingleton<IGeneralService, GeneralService>();
+    services.AddScoped<IGeneralService, GeneralService>();
 
     // Configure Cloudinary
     Account account = new Account(

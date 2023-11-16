@@ -1,6 +1,5 @@
 ﻿namespace SocialNetwork.Socket
 {
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.SignalR;
     using SocialNetwork.Middlewares;
@@ -56,11 +55,12 @@
         //}
         //#endregion
         private readonly IGeneralService _generalService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public ChatHub(IGeneralService generalService, IHttpContextAccessor httpContextAccessor)
+        private readonly IUserService _userService;
+
+        public ChatHub(IGeneralService generalService, IUserService userService)
         {
             _generalService = generalService;
-            _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
         }
         private static Dictionary<string, string> userConnections = new Dictionary<string, string>();
 
@@ -126,7 +126,7 @@
         }
         public async Task SendMessage(string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", _httpContextAccessor.HttpContext?.User.FindFirst("id")?.Value, message);
+            await Clients.All.SendAsync("ReceiveMessage", _userService.UserId.ToString(), message);
         }
 
         public string GetConnectionId() => Context.ConnectionId;

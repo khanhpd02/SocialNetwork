@@ -4,6 +4,7 @@ using AutoMapper;
 using BCrypt.Net;
 using firstapi.Service;
 using global::Service.Implement.ObjectMapping;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.DTO.Response;
@@ -31,6 +32,10 @@ public class UserService : IUserService
     private readonly IUserRoleRepository userRoleRepository;
     private readonly IPinCodeRepository pinCodeRepository;
     private IGeneralService _generalService;
+    private User _loggedInUser; // Add a field to store the logged-in user
+    public Guid UserId { get; set; }
+    public string UserEmail { get; set; }
+
     private readonly IMapper mapper = new MapperConfiguration(cfg =>
     {
         cfg.AddProfile(new MappingProfile());
@@ -41,7 +46,8 @@ public class UserService : IUserService
         IOptions<AppSettings> appSettings,
         IEmailService emailService,
         IUserRepository userRepository, IRoleRepository roleRepository,
-     IUserRoleRepository userRoleRepository, IPinCodeRepository pinCodeRepository, IGeneralService generalService)
+     IUserRoleRepository userRoleRepository, IPinCodeRepository pinCodeRepository, IGeneralService generalService,
+      IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
         _jwtUtils = jwtUtils;
@@ -52,6 +58,43 @@ public class UserService : IUserService
         this.userRoleRepository = userRoleRepository;
         this.pinCodeRepository = pinCodeRepository;
         _generalService = generalService;
+
+        _generalService.UserId = GetLoggedInUserId(httpContextAccessor.HttpContext);
+        _generalService.Email = GetLoggedInUserEmail(httpContextAccessor.HttpContext);
+
+
+    }
+    public Guid GetLoggedInUserId(HttpContext httpContext)
+    {
+        var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            var userId = _jwtUtils.ValidateJwtToken(token);
+
+            if (userId.HasValue)
+            {
+                return userId.Value;
+            }
+        }
+
+        return Guid.Empty; // No valid token or user not found
+    }
+    public string GetLoggedInUserEmail(HttpContext httpContext)
+    {
+        var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            var userEmail = _jwtUtils.ValidateJwtTokenEmail(token);
+
+            if (userEmail != null)
+            {
+                return userEmail;
+            }
+        }
+
+        return null; // No valid token or user not found
     }
 
     public AppResponse RegisterUser(RegisterModel dto)
@@ -242,6 +285,7 @@ public class UserService : IUserService
         }
         // Lấy UserId sau khi đã xác thực người dùng
         Guid userId = GetUserId(loginModel.Email);
+        UserId = userId;
         _generalService.UserId = userId;
         _generalService.UserName = GetUserName(loginModel.Email);
         LoginDataResponse loginDataResponse = new LoginDataResponse { Id = user.Id.ToString(), Email = user.Email, JwtToken = _jwtUtils.GenerateJwtToken(user), Role = roles };
