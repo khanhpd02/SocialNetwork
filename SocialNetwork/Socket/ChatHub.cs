@@ -56,12 +56,10 @@
         //}
         //#endregion
         private readonly IGeneralService _generalService;
-        private readonly IGeneralServiceFactory _generalServiceFactory;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public ChatHub(IGeneralService generalService, IGeneralServiceFactory generalServiceFactory, IHttpContextAccessor httpContextAccessor)
+        public ChatHub(IGeneralService generalService, IHttpContextAccessor httpContextAccessor)
         {
             _generalService = generalService;
-            _generalServiceFactory = generalServiceFactory;
             _httpContextAccessor = httpContextAccessor;
         }
         private static Dictionary<string, string> userConnections = new Dictionary<string, string>();
