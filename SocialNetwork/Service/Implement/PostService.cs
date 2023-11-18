@@ -14,33 +14,31 @@ namespace SocialNetwork.Service.Implement
     {
         private readonly Cloudinary _cloudinary;
         private SocialNetworkContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IPostRepository postRepository;
         private readonly IUserRepository userRepository;
         private readonly IImageRepository imageRepository;
         private readonly IVideoRepository videoRepository;
         private readonly ILikeRepository likeRepository;
         private readonly ICommentRepository commentRepository;
-        private IGeneralService _generalService;
+        private IUserService _userService;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile(new MappingProfile());
         }).CreateMapper();
 
         public PostService(IPostRepository postRepository, IUserRepository userRepository, IImageRepository imageRepository,
-            IHttpContextAccessor _httpContextAccessor, SocialNetworkContext _context, Cloudinary _cloudinary,
-            IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository, IGeneralService generalService)
+            SocialNetworkContext _context, Cloudinary _cloudinary,
+            IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository, IUserService userService)
         {
             this.postRepository = postRepository;
             this.userRepository = userRepository;
             this.imageRepository = imageRepository;
-            this._httpContextAccessor = _httpContextAccessor;
             this._context = _context;
             this._cloudinary = _cloudinary;
             this.videoRepository = videoRepository;
             this.likeRepository = likeRepository;
             this.commentRepository = commentRepository;
-            _generalService = generalService;
+            _userService = userService;
         }
         public string UploadFileToCloudinary(IFormFile fileUploadDTO)
         {
@@ -94,8 +92,8 @@ namespace SocialNetwork.Service.Implement
         {
             string cloudinaryUrl = UploadFileToCloudinary(dto.File);
             Post post = mapper.Map<Post>(dto);
-            post.UserId = _generalService.UserId;
-            post.CreateBy = _generalService.UserId;
+            post.UserId = _userService.UserId;
+            post.CreateBy = _userService.UserId;
             _context.Add(post);
             _context.SaveChanges();
             postRepository.Update(post);
@@ -117,7 +115,7 @@ namespace SocialNetwork.Service.Implement
                             PostId = post.Id,
                             Link = link,
                             CreateDate = DateTime.Now,
-                            CreateBy = _generalService.UserId,
+                            CreateBy = _userService.UserId,
                             IsDeleted = false
                         };
                         imageRepository.Create(image);
@@ -134,7 +132,7 @@ namespace SocialNetwork.Service.Implement
                             PostId = post.Id,
                             Link = link,
                             CreateDate = DateTime.Now,
-                            CreateBy = _generalService.UserId,
+                            CreateBy = _userService.UserId,
                             IsDeleted = false
                         };
                         videoRepository.Create(video);
@@ -154,7 +152,7 @@ namespace SocialNetwork.Service.Implement
             string cloudinaryUrl = UploadFileToCloudinary(dto.File);
 
             Post post = mapper.Map<Post>(dto);
-            post.UpdateBy = _generalService.UserId;
+            post.UpdateBy = _userService.UserId;
             post.UpdateDate = DateTime.Now;
             _context.Update(post);
             _context.SaveChanges();
@@ -176,7 +174,7 @@ namespace SocialNetwork.Service.Implement
                             PostId = post.Id,
                             Link = link,
                             CreateDate = DateTime.Now,
-                            CreateBy = _generalService.UserId,
+                            CreateBy = _userService.UserId,
                             IsDeleted = false
                         };
                         imageRepository.Create(image);
@@ -193,7 +191,7 @@ namespace SocialNetwork.Service.Implement
                             PostId = post.Id,
                             Link = link,
                             CreateDate = DateTime.Now,
-                            CreateBy = _generalService.UserId,
+                            CreateBy = _userService.UserId,
                             IsDeleted = false
                         };
                         videoRepository.Create(video);
@@ -225,6 +223,33 @@ namespace SocialNetwork.Service.Implement
             dto.CountComment = CountComment;
 
             return dto;
+        }
+        public List<PostDTO> GetPostByUserId(Guid id)
+        {
+            List<Post> entityList = postRepository.FindByCondition(x => x.UserId == id && x.IsDeleted == false).ToList() ?? throw new PostNotFoundException(id);
+
+            List<PostDTO> dtoList = new List<PostDTO>();
+            var CountLike = 0;
+            var CountComment = 0;
+
+            foreach (Post entity in entityList)
+            {
+                List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id).ToList();
+                List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id).ToList();
+                List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id).ToList();
+                List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == entity.Id).ToList();
+                CountLike = likes.Count();
+                CountComment = comments.Count();
+                PostDTO dto = mapper.Map<PostDTO>(entity);
+                dto.Images = images;
+                dto.Videos = videos;
+                dto.Likes = likes;
+                dto.Comments = comments;
+                dto.CountLike = CountLike;
+                dto.CountComment = CountComment;
+                dtoList.Add(dto);
+            }
+            return dtoList;
         }
         public void Delete(Guid id)
         {

@@ -62,6 +62,9 @@ public class UserService : IUserService
         _generalService.UserId = GetLoggedInUserId(httpContextAccessor.HttpContext);
         _generalService.Email = GetLoggedInUserEmail(httpContextAccessor.HttpContext);
 
+        UserId = GetLoggedInUserId(httpContextAccessor.HttpContext);
+        UserEmail = GetLoggedInUserEmail(httpContextAccessor.HttpContext);
+
 
     }
     public Guid GetLoggedInUserId(HttpContext httpContext)
@@ -131,6 +134,8 @@ public class UserService : IUserService
 
             try
             {
+                _generalService.Email = dto.Email;
+
                 SendPinEmail();
                 return new AppResponse { message = "Gửi mã pin thành công" };
             }

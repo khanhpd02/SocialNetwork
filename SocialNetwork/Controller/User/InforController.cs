@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.DTO;
-using SocialNetwork.DTO.Cloudinary;
-using SocialNetwork.DTO.Response;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
 using Swashbuckle.AspNetCore.Annotations;
@@ -42,6 +40,17 @@ namespace SocialNetwork.Controller.User
             var response = inforService.updateInfo(dto, userid);
 
             return Ok(response);
+        }
+        [HttpGet("user/{id}")]
+        [SwaggerOperation(Summary = "Get Infor By UserId")]
+        public IActionResult GetInforByUserId(Guid id)
+        {
+            var infor = inforService.GetInforByUserId(id);
+            if (infor == null)
+            {
+                return NotFound();
+            }
+            return Ok(infor);
         }
         /* [HttpPut("update")]
          [SwaggerOperation(Summary = "Update Comment")]

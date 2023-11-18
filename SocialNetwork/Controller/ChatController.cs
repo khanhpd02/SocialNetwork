@@ -11,12 +11,12 @@ namespace SocialNetwork.Controller
     {
         private readonly IHubContext<ChatHub> _hubContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private IGeneralService _generalService;
-        public ChatController(IHubContext<ChatHub> hubContext, IHttpContextAccessor httpContextAccessor, IGeneralService generalService)
+        private IUserService _userService;
+        public ChatController(IHubContext<ChatHub> hubContext, IHttpContextAccessor httpContextAccessor, IUserService userService)
         {
             _hubContext = hubContext;
             _httpContextAccessor = httpContextAccessor;
-            _generalService = generalService;
+            _userService = userService;
         }
         [HttpPost("GetConnectionId")]
         public IActionResult GetConnectionId()
@@ -38,7 +38,7 @@ namespace SocialNetwork.Controller
             if (ModelState.IsValid)
             {
                 var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", _generalService.Email, messageModel.Message);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", _userService.UserEmail, messageModel.Message);
                 return Ok();
             }
             return BadRequest("Invalid message model");
@@ -49,7 +49,7 @@ namespace SocialNetwork.Controller
             if (ModelState.IsValid)
             {
                 var connectionId = _httpContextAccessor.HttpContext.Connection.Id;
-                await _hubContext.Clients.Client(messageModelToUser.receiverConnectionId).SendAsync("ReceiveMessage", _generalService.Email, messageModelToUser.Message);
+                await _hubContext.Clients.Client(messageModelToUser.receiverConnectionId).SendAsync("ReceiveMessage", _userService.UserEmail, messageModelToUser.Message);
                 return Ok();
             }
             return BadRequest("Invalid message model");
@@ -85,7 +85,7 @@ namespace SocialNetwork.Controller
         {
             if (ModelState.IsValid)
             {
-                await _hubContext.Clients.Group(groupMessageModel.GroupName).SendAsync("ReceiveGroupMessage", _generalService.Email, groupMessageModel.Message);
+                await _hubContext.Clients.Group(groupMessageModel.GroupName).SendAsync("ReceiveGroupMessage", _userService.UserEmail, groupMessageModel.Message);
                 return Ok();
             }
             return BadRequest("Invalid group message model");

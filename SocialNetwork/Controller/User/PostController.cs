@@ -13,11 +13,9 @@ namespace SocialNetwork.Controller.User
     {
 
         private readonly IPostService postService;
-        private IGeneralService _generalService;
-        public PostController(IPostService postService, IGeneralService generalService)
+        public PostController(IPostService postService)
         {
             this.postService = postService;
-            _generalService = generalService;
         }
 
         [HttpGet("{id}")]
@@ -71,6 +69,17 @@ namespace SocialNetwork.Controller.User
         {
             var posts = postService.GetAll();
             return Ok(posts);
+        }
+        [HttpGet("user/{id}")]
+        [SwaggerOperation(Summary = "Get Post By UserId")]
+        public IActionResult GetPostByUserId(Guid id)
+        {
+            var post = postService.GetPostByUserId(id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            return Ok(post);
         }
     }
 }

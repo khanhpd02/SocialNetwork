@@ -1,17 +1,14 @@
 ﻿using AutoMapper;
-using CloudinaryDotNet.Actions;
 using CloudinaryDotNet;
-using Microsoft.AspNetCore.Http.HttpResults;
+using CloudinaryDotNet.Actions;
 using Microsoft.IdentityModel.Tokens;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
-using SocialNetwork.DTO.Cloudinary;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Repository;
 using System.Text.RegularExpressions;
-using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace SocialNetwork.Service.Implement
 {
@@ -19,20 +16,13 @@ namespace SocialNetwork.Service.Implement
     {
         //private readonly IInforService _inforService;
         private readonly IInforRepository _inforRepository;
+
         private SocialNetworkContext _context;
-        private readonly IImageRepository imageRepository;
         private readonly Cloudinary _cloudinary;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile(new MappingProfile());
         }).CreateMapper();
-
-        public InforService( IInforRepository inforRepository, SocialNetworkContext context)
-        {
-           
-            _inforRepository = inforRepository;
-            _context = context;
-        }
 
         public InforService(IInforRepository inforRepository, SocialNetworkContext context, Cloudinary cloudinary)
         {
@@ -40,16 +30,13 @@ namespace SocialNetwork.Service.Implement
             _context = context;
             _cloudinary = cloudinary;
         }
-
-        public InforService(IInforRepository inforRepository, SocialNetworkContext context, IImageRepository imageRepository, Cloudinary cloudinary)
+        public InforDTO GetInforByUserId(Guid id)
         {
-            _inforRepository = inforRepository;
-            _context = context;
-            this.imageRepository = imageRepository;
-            _cloudinary = cloudinary;
+            Infor entity = _inforRepository.FindByCondition(x => x.UserId == id && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(id);
+            InforDTO dto = mapper.Map<InforDTO>(entity);
+            return dto;
         }
-
-        public AppResponse createInfo(InforDTO inforDTO,Guid userId)
+        public AppResponse createInfo(InforDTO inforDTO, Guid userId)
         {
             if (inforDTO.FullName.IsNullOrEmpty())
             {
@@ -57,7 +44,7 @@ namespace SocialNetwork.Service.Implement
             }
             if (!inforDTO.PhoneNumber.IsNullOrEmpty())
             {
-                string sdt=inforDTO.PhoneNumber;
+                string sdt = inforDTO.PhoneNumber;
                 if (!IsPhoneNumber(sdt))
                 {
                     throw new BadRequestException("Số điện thoại không hợp lệ.");
@@ -91,15 +78,15 @@ namespace SocialNetwork.Service.Implement
                             info.Image = link;
                             _context.Add(info);
                             _context.SaveChanges();
-                            
+
 
                         }
                     }
-                    
-                }
-                return new AppResponse { message="Create Info Sucess!",success=true};
 
-                
+                }
+                return new AppResponse { message = "Create Info Sucess!", success = true };
+
+
             }
             else
             {
@@ -182,13 +169,13 @@ namespace SocialNetwork.Service.Implement
             Regex regex = new Regex(pattern);//true= số điện thoại hợp lệ
 
             return regex.IsMatch(input);
-  
+
         }
         public string UploadFileToCloudinary(IFormFile fileUploadDTO)
         {
             if (fileUploadDTO != null && fileUploadDTO.Length > 0)
             {
-               
+
                 if (Path.GetExtension(fileUploadDTO.FileName).Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
                     Path.GetExtension(fileUploadDTO.FileName).Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                     Path.GetExtension(fileUploadDTO.FileName).Equals(".png", StringComparison.OrdinalIgnoreCase) ||

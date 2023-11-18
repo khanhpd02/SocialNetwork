@@ -8,12 +8,10 @@
 
     public class ChatHub : Hub
     {
-        private readonly IGeneralService _generalService;
         private readonly IUserService _userService;
 
-        public ChatHub(IGeneralService generalService, IUserService userService)
+        public ChatHub(IUserService userService)
         {
-            _generalService = generalService;
             _userService = userService;
         }
         private static Dictionary<string, string> userConnections = new Dictionary<string, string>();
@@ -41,7 +39,7 @@
 
         public override Task OnConnectedAsync()
         {
-            var userId = _generalService.UserName;
+            var userId = _userService.UserEmail;
 
             if (!string.IsNullOrEmpty(userId))
             {
@@ -76,11 +74,11 @@
         public async Task SendGroupMessage(string groupName, string message)
         {
 
-            await Clients.Group(groupName).SendAsync("ReceiveGroupMessage", _generalService.UserName, message);
+            await Clients.Group(groupName).SendAsync("ReceiveGroupMessage", _userService.UserEmail, message);
         }
         public async Task SendMessage(string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", _generalService.Email, message);
+            await Clients.All.SendAsync("ReceiveMessage", _userService.UserEmail, message);
         }
 
         public string GetConnectionId() => Context.ConnectionId;

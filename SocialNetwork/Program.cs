@@ -115,6 +115,8 @@ builder.Services.AddSwaggerGen(option =>
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     services.AddScoped<IGeneralService, GeneralService>();
+    services.AddSingleton<IGeneralService, GeneralService>();
+
 
     // Configure Cloudinary
     Account account = new Account(
