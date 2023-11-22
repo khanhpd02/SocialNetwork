@@ -20,7 +20,13 @@ public partial class User : IEntity
 
     public bool IsDeleted { get; set; }
 
+    public string? UserName { get; set; }
+
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+    public virtual ICollection<Friend> FriendUserAcceptNavigations { get; set; } = new List<Friend>();
+
+    public virtual ICollection<Friend> FriendUserToNavigations { get; set; } = new List<Friend>();
 
     public virtual ICollection<Infor> Infors { get; set; } = new List<Infor>();
 

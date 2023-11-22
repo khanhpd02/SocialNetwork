@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace SocialNetwork.Entity;
 
@@ -13,6 +15,8 @@ public partial class SocialNetworkContext : DbContext
     {
     }
 
+    public virtual DbSet<Chat> Chats { get; set; }
+
     public virtual DbSet<Comment> Comments { get; set; }
 
     public virtual DbSet<Friend> Friends { get; set; }
@@ -26,6 +30,8 @@ public partial class SocialNetworkContext : DbContext
     public virtual DbSet<Infor> Infors { get; set; }
 
     public virtual DbSet<Like> Likes { get; set; }
+
+    public virtual DbSet<Notify> Notifies { get; set; }
 
     public virtual DbSet<PinCode> PinCodes { get; set; }
 
@@ -51,10 +57,18 @@ public partial class SocialNetworkContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=SocialNetwork;User Id=sa;Password=123456;Trusted_Connection=True;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=SocialNetwork;User Id=sa;Password=123456;Trusted_Connection=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Chat>(entity =>
+        {
+            entity.ToTable("Chat");
+
+            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+        });
+
         modelBuilder.Entity<Comment>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC078C460ADF");
@@ -84,6 +98,16 @@ public partial class SocialNetworkContext : DbContext
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
             entity.Property(e => e.Level).HasColumnName("level");
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.UserAcceptNavigation).WithMany(p => p.FriendUserAcceptNavigations)
+                .HasForeignKey(d => d.UserAccept)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Friends_User1");
+
+            entity.HasOne(d => d.UserToNavigation).WithMany(p => p.FriendUserToNavigations)
+                .HasForeignKey(d => d.UserTo)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Friends_User");
         });
 
         modelBuilder.Entity<Group>(entity =>
@@ -160,6 +184,15 @@ public partial class SocialNetworkContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Like_User");
+        });
+
+        modelBuilder.Entity<Notify>(entity =>
+        {
+            entity.ToTable("Notify");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdateDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<PinCode>(entity =>

@@ -1,14 +1,14 @@
 ﻿namespace SocialNetwork.Entity;
 
-public partial class Friend : IEntity
+public partial class Notify : IEntity
 {
     public Guid Id { get; set; }
 
     public Guid UserTo { get; set; }
 
-    public Guid UserAccept { get; set; }
+    public Guid? UserNotify { get; set; }
 
-    public int Level { get; set; }
+    public string Content { get; set; } = null!;
 
     public DateTime? CreateDate { get; set; }
 
@@ -19,8 +19,4 @@ public partial class Friend : IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
-
-    public virtual User UserAcceptNavigation { get; set; } = null!;
-
-    public virtual User UserToNavigation { get; set; } = null!;
 }

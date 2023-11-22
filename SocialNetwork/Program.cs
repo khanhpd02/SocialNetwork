@@ -10,7 +10,7 @@ using SocialNetwork.Repository;
 using SocialNetwork.Repository.Implement;
 using SocialNetwork.Service;
 using SocialNetwork.Service.Implement;
-using SocialNetwork.Socket;
+//using SocialNetwork.Socket;
 using System.Text;
 using System.Text.Json.Serialization;
 using WebApi.Helpers;
@@ -165,6 +165,6 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHub<ChatHub>("/chathub");
+    //endpoints.MapHub<ChatHub>("/chathub");
 });
 app.Run();

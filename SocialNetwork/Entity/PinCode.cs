@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.Entity;
 
 public partial class PinCode : IEntity
 {
@@ -22,4 +19,6 @@ public partial class PinCode : IEntity
     public DateTime? UpdateDate { get; set; }
 
     public Guid? UpdateBy { get; set; }
+
+    public string? Content { get; set; }
 }
