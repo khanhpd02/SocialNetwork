@@ -1,10 +1,12 @@
 ﻿using firstapi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.DTO.Auth;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Model.User;
 using SocialNetwork.Repository;
 using SocialNetwork.Service;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace SocialNetwork.Controller
 {
@@ -47,6 +49,20 @@ namespace SocialNetwork.Controller
 
 
         }
+        [AllowAnonymous]
+        [HttpPost("VerifyPinForgotPassword")]
+        public async Task<IActionResult> VerifyPinForgotPassword([FromBody] VerifyPin rsg)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid data");
+            }
+            // Gọi AuthService để xử lý việc đăng ký tài khoản
+            var response =  _userService.VerifyPinForgotPassword(rsg);
+            return Ok(response);
+
+
+        }
 
         [AllowAnonymous]
         [HttpPost("register")]
@@ -61,6 +77,22 @@ namespace SocialNetwork.Controller
 
 
             return Ok(isRegistered);
+
+
+        }
+        [AllowAnonymous]
+        [HttpPost("changePasswordForgotpassword")]
+        public IActionResult changePasswordForgotpassword(LoginModel dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid data");
+            }
+            // Gọi AuthService để xử lý việc đăng ký tài khoản
+            var response = _userService.ChangePasswordForgotPassword(dto);
+
+
+            return Ok(response);
 
 
         }
@@ -92,8 +124,9 @@ namespace SocialNetwork.Controller
         //    return Ok(new { accessToken = authResponse.Token?.AccessToken, user = authResponse.User });
         //}
         [AllowAnonymous]
-        [HttpPost("ReSendMail")]
-        public async Task<IActionResult> ReSendMail()
+        [SwaggerOperation(Summary = "Gửi mã pin để xác thực tài khoản khi đăng kí")]
+        [HttpPost("ReSendPin")]
+        public async Task<IActionResult> ReSendMail([FromBody] MailDTO mailDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -101,13 +134,33 @@ namespace SocialNetwork.Controller
             }
             else
             {
-                _userService.SendPinEmail();
+                String email = mailDTO.Email.ToString();
+                _userService.SendPinEmail(email,"VerifyPin");
                 return Ok("ReSendMail successful");
             }
             // Gọi AuthService để xử lý việc đăng ký tài khoản
 
 
         }
+        [AllowAnonymous]
+        [SwaggerOperation(Summary = "Gửi mã pin để lấy lại Mật khảu ")]
+        [HttpPost("sendPinforgotPassword")]
+        public async Task<IActionResult> SenPinForgotPassword([FromBody] MailDTO mailDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid data");
+            }
+            else
+            {   String email=mailDTO.Email.ToString();
+                _userService.SendPinForgotPassword(mailDTO);
+                return Ok("Send Pin ForgotPassword successful");
+            }
+            // Gọi AuthService để xử lý việc đăng ký tài khoản
+
+
+        }
+
 
     }
 }
