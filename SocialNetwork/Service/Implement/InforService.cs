@@ -62,6 +62,8 @@ namespace SocialNetwork.Service.Implement
                 info.CreateBy = userId;
                 //info.UpdateBy = userId;
                 info.IsDeleted = false;
+                _context.Add(info);
+                _context.SaveChanges();
 
                 //
                 if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
@@ -76,8 +78,9 @@ namespace SocialNetwork.Service.Implement
                         if (link != null)
                         {
                             info.Image = link;
-                            _context.Add(info);
-                            _context.SaveChanges();
+                            _inforRepository.Update(info);
+                            _inforRepository.Save();
+                            
 
 
                         }
