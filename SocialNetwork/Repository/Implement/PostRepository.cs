@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class PostRepository : RepositoryBase<Post>, IPostRepository
     {
-        public PostRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public PostRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

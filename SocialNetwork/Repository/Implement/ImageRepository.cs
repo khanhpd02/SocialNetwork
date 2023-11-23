@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class ImageRepository : RepositoryBase<Image>, IImageRepository
     {
-        public ImageRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public ImageRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

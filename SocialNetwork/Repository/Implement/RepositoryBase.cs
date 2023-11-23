@@ -9,11 +9,11 @@ namespace SocialNetwork.Repository.Implement
     {
 
         protected readonly SocialNetworkContext context;
-        private IGeneralService _generalService;
-        protected RepositoryBase(SocialNetworkContext context, IGeneralService generalService)
+        private IUserService _userService;
+        protected RepositoryBase(SocialNetworkContext context, IUserService userService)
         {
             this.context = context;
-            this._generalService = generalService;
+            this._userService = userService;
         }
 
         public List<T> FindAll(params Expression<Func<T, object>>[] includes)
@@ -66,9 +66,9 @@ namespace SocialNetwork.Repository.Implement
 
         public void Create(T entity)
         {
-            if (_generalService.UserId != null)
+            if (_userService.UserId != null)
             {
-                entity.CreateBy = _generalService.UserId;
+                entity.CreateBy = _userService.UserId;
 
             }
             else
@@ -81,9 +81,9 @@ namespace SocialNetwork.Repository.Implement
         }
         public void CreateIsTemp(T entity)
         {
-            if (_generalService.UserId != null)
+            if (_userService.UserId != null)
             {
-                entity.CreateBy = _generalService.UserId;
+                entity.CreateBy = _userService.UserId;
 
             }
             else
@@ -96,9 +96,9 @@ namespace SocialNetwork.Repository.Implement
         }
         public void Update(T entity)
         {
-            if (_generalService.UserId != null)
+            if (_userService.UserId != null)
             {
-                entity.UpdateBy = _generalService.UserId;
+                entity.UpdateBy = _userService.UserId;
 
             }
             else

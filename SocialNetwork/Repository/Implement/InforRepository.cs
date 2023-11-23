@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class InforRepository : RepositoryBase<Infor>, IInforRepository
     {
-        public InforRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public InforRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

@@ -8,7 +8,7 @@ namespace SocialNetwork.Repository
 
     public class ReportRepository : RepositoryBase<Report>, IReportRepository
     {
-        public ReportRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public ReportRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

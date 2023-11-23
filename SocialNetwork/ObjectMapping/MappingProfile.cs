@@ -36,6 +36,9 @@ namespace Service.Implement.ObjectMapping
             CreateMap<User, RegisterModel>();
             CreateMap<UserRole, UserRoleDTO>();
             CreateMap<Video, VideoDTO>();
+            CreateMap<Notify, NotifyDTO>();
+
+
 
             CreateMap<CommentDTO, Comment>();
             CreateMap<FriendDTO, Friend>();
@@ -54,6 +57,8 @@ namespace Service.Implement.ObjectMapping
             CreateMap<UserRoleDTO, UserRole>();
             CreateMap<VideoDTO, Video>();
             CreateMap<RegisterModel, User>();
+            CreateMap<NotifyDTO, Notify>();
+
 
 
         }

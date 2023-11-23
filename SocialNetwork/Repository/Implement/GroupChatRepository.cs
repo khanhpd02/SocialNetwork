@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class GroupChatRepository : RepositoryBase<GroupChat>, IGroupChatRepository
     {
-        public GroupChatRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public GroupChatRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

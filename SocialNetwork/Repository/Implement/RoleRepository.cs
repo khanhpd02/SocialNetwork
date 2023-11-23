@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class RoleRepository : RepositoryBase<Role>, IRoleRepository
     {
-        public RoleRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public RoleRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

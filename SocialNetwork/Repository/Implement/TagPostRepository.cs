@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class TagPostRepository : RepositoryBase<TagPost>, ITagPostRepository
     {
-        public TagPostRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public TagPostRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

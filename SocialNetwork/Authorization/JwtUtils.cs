@@ -2,7 +2,6 @@
 using Microsoft.IdentityModel.Tokens;
 using NanoidDotNet;
 using SocialNetwork.Entity;
-using SocialNetwork.Repository;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -22,18 +21,13 @@ public class JwtUtils : IJwtUtils
     private SocialNetworkContext _context;
 
     private readonly AppSettings _appSettings;
-    private readonly IRoleRepository roleRepository;
-    private readonly IUserRoleRepository userRoleRepository;
 
     public JwtUtils(
-        SocialNetworkContext context, IRoleRepository roleRepository,
-     IUserRoleRepository userRoleRepository,
+        SocialNetworkContext context,
         IOptions<AppSettings> appSettings)
     {
         _context = context;
         _appSettings = appSettings.Value;
-        this.roleRepository = roleRepository;
-        this.userRoleRepository = userRoleRepository;
     }
     //public string GenerateJwtToken(User user)
     //{
@@ -78,12 +72,12 @@ public class JwtUtils : IJwtUtils
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
 
-        List<UserRole> userRoles = userRoleRepository.FindByConditionWithTracking(u => u.UserId == user.Id);
+        List<UserRole> userRoles = _context.UserRoles.Where(u => u.UserId == user.Id).ToList();
         List<string> roles = new List<string>();
 
         foreach (var userRole in userRoles)
         {
-            var role = roleRepository.FindByCondition(u => u.Id == userRole.RoleId).FirstOrDefault();
+            var role = _context.Roles.Where(u => u.Id == userRole.RoleId).FirstOrDefault();
             roles.Add(role.RoleName.ToString());
         }
 

@@ -8,7 +8,7 @@ namespace SocialNetwork.Repository
 
     public class TagRepository : RepositoryBase<Tag>, ITagRepository
     {
-        public TagRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public TagRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

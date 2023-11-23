@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class LikeRepository : RepositoryBase<Like>, ILikeRepository
     {
-        public LikeRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public LikeRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

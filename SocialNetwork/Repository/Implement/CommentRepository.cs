@@ -5,7 +5,7 @@ namespace SocialNetwork.Repository.Implement
 {
     public class CommentRepository : RepositoryBase<Comment>, ICommentRepository
     {
-        public CommentRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public CommentRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

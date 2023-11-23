@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class GroupRepository : RepositoryBase<Group>, IGroupRepository
     {
-        public GroupRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public GroupRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

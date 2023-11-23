@@ -13,7 +13,6 @@ using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
-using SocialNetwork.Repository;
 using System.Text.RegularExpressions;
 using WebApi.Helpers;
 
@@ -27,12 +26,7 @@ public class UserService : IUserService
     private readonly AppSettings _appSettings;
     private IEmailService _emailService;
     private static string baseToken = "";
-    private readonly IUserRepository userRepository;
-    private readonly IInforRepository inforRepository;
-    private readonly IRoleRepository roleRepository;
-    private readonly IUserRoleRepository userRoleRepository;
-    private readonly IPinCodeRepository pinCodeRepository;
-    private IGeneralService _generalService;
+
     private User _loggedInUser; // Add a field to store the logged-in user
     public Guid UserId { get; set; }
     public string UserEmail { get; set; }
@@ -46,22 +40,14 @@ public class UserService : IUserService
         IJwtUtils jwtUtils,
         IOptions<AppSettings> appSettings,
         IEmailService emailService,
-        IUserRepository userRepository, IRoleRepository roleRepository,
-     IUserRoleRepository userRoleRepository, IPinCodeRepository pinCodeRepository, IGeneralService generalService,
+
       IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
         _jwtUtils = jwtUtils;
         _appSettings = appSettings.Value;
         _emailService = emailService;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.userRoleRepository = userRoleRepository;
-        this.pinCodeRepository = pinCodeRepository;
-        _generalService = generalService;
 
-        _generalService.UserId = GetLoggedInUserId(httpContextAccessor.HttpContext);
-        _generalService.Email = GetLoggedInUserEmail(httpContextAccessor.HttpContext);
 
         UserId = GetLoggedInUserId(httpContextAccessor.HttpContext);
         UserEmail = GetLoggedInUserEmail(httpContextAccessor.HttpContext);
@@ -112,7 +98,7 @@ public class UserService : IUserService
         //    throw new BadRequestException("Email is exist");
 
         //}
-        var emailUSER = userRepository.FindByCondition(x => x.Email == dto.Email).FirstOrDefault();
+        var emailUSER = _context.Users.Where(x => x.Email == dto.Email).FirstOrDefault();
 
         if (!IsValidEmail(dto.Email))
         {
@@ -130,14 +116,15 @@ public class UserService : IUserService
         else if (emailUSER != null && emailUSER.IsDeleted == true)
         {
             emailUSER.Password = HashPassword(dto.Password);
-            userRepository.Update(emailUSER);
-            userRepository.Save();
+            emailUSER.IsDeleted = false;
+            _context.Users.Add(emailUSER);
+            _context.SaveChanges();
 
             try
             {
-              ///  _generalService.Email = dto.Email;
+                ///  _generalService.Email = dto.Email;
 
-                SendPinEmail(dto.Email,"VerifyPin");
+                SendPinEmail(dto.Email, "VerifyPin");
                 return new AppResponse { message = "Gửi mã pin thành công" };
             }
             catch (Exception)
@@ -152,26 +139,31 @@ public class UserService : IUserService
             dto.Password = HashPassword(dto.Password);
 
             User entity = mapper.Map<User>(dto);
-            userRepository.CreateIsTemp(entity);
-            userRepository.Save();
+            entity.IsDeleted = true;
+            _context.Users.Add(entity);
+            _context.SaveChanges();
             dto.Password = "";
-            var users = userRepository.FindByCondition(u => u.Email == dto.Email).FirstOrDefault();
+            var users = _context.Users.Where(u => u.Email == dto.Email).FirstOrDefault();
+            users.CreateBy = users.Id;
+            _context.Users.Update(users);
+            _context.SaveChanges();
             string role = "User";
-            var roles = roleRepository.FindByCondition(r => r.RoleName == role).FirstOrDefault();
+            var roles = _context.Roles.Where(r => r.RoleName == role).FirstOrDefault();
             UserRole userRole = new UserRole
             {
                 UserId = users.Id,
-                RoleId = roles.Id
+                RoleId = roles.Id,
+                IsDeleted = false
             };
-            userRoleRepository.Create(userRole);
-            userRoleRepository.Save();
+            _context.UserRoles.Add(userRole);
+            _context.SaveChanges();
 
 
 
             try
             {
-               // _generalService.Email = dto.Email;
-                SendPinEmail(dto.Email,"VerifyPin");
+                // _generalService.Email = dto.Email;
+                SendPinEmail(dto.Email, "VerifyPin");
                 return new AppResponse { message = "Gửi mã pin thành công" };
             }
             catch (Exception)
@@ -191,7 +183,7 @@ public class UserService : IUserService
 
 
         // Loại bỏ các mã PIN cũ
-        var duplicatePinCode = _context.PinCodes.Where(u => u.Email == Email&&u.Content==content).ToList();
+        var duplicatePinCode = _context.PinCodes.Where(u => u.Email == Email && u.Content == content).ToList();
         foreach (var pincode in duplicatePinCode)
         {
             _context.PinCodes.Remove(pincode);
@@ -205,8 +197,8 @@ public class UserService : IUserService
             Pin = RandomPIN(),
             CreateDate = DateTime.Now,
             ExpiredTime = DateTime.Now.AddMinutes(3),
-            IsDeleted = false, 
-            Content=content
+            IsDeleted = false,
+            Content = content
         };
         _context.PinCodes.Add(pin1);
         _context.SaveChanges();
@@ -216,7 +208,7 @@ public class UserService : IUserService
         {
             Mailrequest mailrequest = new Mailrequest();
             mailrequest.ToEmail = pin1.Email;
-            mailrequest.Subject = "Mã Pin "+content;
+            mailrequest.Subject = "Mã Pin " + content;
             mailrequest.Body = _emailService.GetHtmlcontent("Mã pin của bạn là: " + pin1.Pin);
             _emailService.SendEmailAsync(mailrequest).Wait(); // Đợi cho đến khi gửi xong email
         }
@@ -227,8 +219,8 @@ public class UserService : IUserService
     }
     public async Task<bool> VerifyPin(VerifyPin VerifyPin)
     {
-        var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == false && x.Email == VerifyPin.Email && x.Content=="VerifyPin").FirstOrDefault();
-        var user = userRepository.FindByCondition(x => x.Email == VerifyPin.Email).FirstOrDefault();
+        var pin = _context.PinCodes.Where(x => x.IsDeleted == false && x.Email == VerifyPin.Email && x.Content == "VerifyPin").FirstOrDefault();
+        var user = _context.Users.Where(x => x.Email == VerifyPin.Email).FirstOrDefault();
 
         if (pin != null)
         {
@@ -236,19 +228,17 @@ public class UserService : IUserService
             {
                 user.IsDeleted = false;
                 pin.IsDeleted = true;
-                userRepository.Update(user);
-                pinCodeRepository.Update(pin);
-                userRepository.Save();
-                pinCodeRepository.Save();
+                _context.Users.Update(user);
+                _context.PinCodes.Update(pin);
+                _context.SaveChanges();
                 return true;
             }
             else
             {
-                userRepository.Delete(user);
-                userRepository.Update(user);
-                pinCodeRepository.Update(pin);
-                userRepository.Save();
-                pinCodeRepository.Save();
+                _context.Users.Remove(user);
+                _context.PinCodes.Update(pin);
+                _context.SaveChanges();
+
                 throw new BadRequestException("Mã pin sai hoặc hết hạn");
 
             }
@@ -285,11 +275,11 @@ public class UserService : IUserService
 
         }
         //lấy role
-        List<UserRole> userRole = userRoleRepository.FindByConditionWithTracking(u => u.UserId == user.Id);
+        List<UserRole> userRole = _context.UserRoles.Where(u => u.UserId == user.Id).ToList();
         List<string> roles = new List<string>();
         foreach (var UserRole in userRole)
         {
-            var role = roleRepository.FindByCondition(u => u.Id == UserRole.RoleId).FirstOrDefault();
+            var role = _context.Roles.Where(u => u.Id == UserRole.RoleId).FirstOrDefault();
             roles.Add(role.RoleName.ToString());
         }
 
@@ -330,12 +320,8 @@ public class UserService : IUserService
         {
             throw new BadRequestException("Email field cannot be empty");
         }
-        //if (_context.Users.Any(u => u.Email == dto.Email))
-        //{
-        //    throw new BadRequestException("Email is exist");
 
-        //}
-        var emailUSER = userRepository.FindByCondition(x => x.Email == mailDTO.Email).FirstOrDefault();
+        var emailUSER = _context.Users.Where(x => x.Email == mailDTO.Email).FirstOrDefault();
 
         if (!IsValidEmail(mailDTO.Email))
         {
@@ -344,41 +330,32 @@ public class UserService : IUserService
         if (emailUSER != null && emailUSER.IsDeleted == false)
         {
             SendPinEmail(mailDTO.Email, "ForgotPassword");
-            return new AppResponse { message = "Send Pin ForgotPassword successful", success=true};
+            return new AppResponse { message = "Send Pin ForgotPassword successful", success = true };
 
         }
-        else 
+        else
         {
             throw new BadRequestException("Email chưa được đăng kí");
 
         }
-        
 
-
-
-          
-        //return new AppResponse { message = "Gửi mã pin thất bại" };
-        // Gửi mã PIN
     }
 
     public AppResponse VerifyPinForgotPassword(VerifyPin VerifyPin)
     {
-        var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == false && x.Email == VerifyPin.Email && x.Content == "ForgotPassword").FirstOrDefault();
-        var user = userRepository.FindByCondition(x => x.Email == VerifyPin.Email).FirstOrDefault();
+        var pin = _context.PinCodes.Where(x => x.IsDeleted == false && x.Email == VerifyPin.Email && x.Content == "ForgotPassword").FirstOrDefault();
+        var user = _context.Users.Where(x => x.Email == VerifyPin.Email).FirstOrDefault();
 
         if (pin != null)
         {
             if (pin.Pin == VerifyPin.Pin && pin.ExpiredTime >= DateTime.Now)
             {
-                //user.IsDeleted = false;
                 pin.IsDeleted = true;
                 pin.UpdateDate = DateTime.Now;
                 pin.Content = "ForgotPasswordVerified";
-                //userRepository.Update(user);
-                pinCodeRepository.Update(pin);
-                //userRepository.Save();
-                pinCodeRepository.Save();
-                return new AppResponse { message="Xác thực thành công",success=true};
+                _context.PinCodes.Update(pin);
+                _context.SaveChanges();
+                return new AppResponse { message = "Xác thực thành công", success = true };
             }
             else
             {
@@ -394,27 +371,19 @@ public class UserService : IUserService
 
     public AppResponse ChangePasswordForgotPassword(LoginModel loginModel)
     {
-        var pin = pinCodeRepository.FindByCondition(x => x.IsDeleted == true && x.Email == loginModel.Email && x.Content == "ForgotPasswordVerified").FirstOrDefault();
-        var user = userRepository.FindByCondition(x => x.Email == loginModel.Email).FirstOrDefault();
+        var pin = _context.PinCodes.Where(x => x.IsDeleted == true && x.Email == loginModel.Email && x.Content == "ForgotPasswordVerified").FirstOrDefault();
+        var user = _context.Users.Where(x => x.Email == loginModel.Email).FirstOrDefault();
 
         if (pin != null)
         {
-            //DateTime dateupdate = pin.UpdateDate.Value.AddSeconds(30);
-            
-                user.Password = HashPassword(loginModel.Password);
-                //pin.IsDeleted = true;
-                pin.UpdateDate = DateTime.Now;
+            user.Password = HashPassword(loginModel.Password);
+            pin.UpdateDate = DateTime.Now;
             pin.Content = "ForgotPasswordChangedDone";
-                userRepository.Update(user);
-                pinCodeRepository.Update(pin);
-                userRepository.Save();
-                pinCodeRepository.Save();
-                return new AppResponse { message = "Đổi mật khẩu thành công", success = true };
-            
-            //
-               // throw new BadRequestException("Hết hạn đổi mật khẩu");
+            _context.Users.Update(user);
+            _context.PinCodes.Update(pin);
+            _context.SaveChanges();
+            return new AppResponse { message = "Đổi mật khẩu thành công", success = true };
 
-            
         }
         else
         {

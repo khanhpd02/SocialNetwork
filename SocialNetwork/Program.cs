@@ -1,5 +1,4 @@
 ﻿using CloudinaryDotNet;
-using firstapi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -8,8 +7,6 @@ using SocialNetwork.Mail;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Repository;
 using SocialNetwork.Repository.Implement;
-using SocialNetwork.Service;
-using SocialNetwork.Service.Implement;
 using SocialNetwork.Socket;
 //using SocialNetwork.Socket;
 using System.Text;
@@ -90,13 +87,21 @@ builder.Services.AddSwaggerGen(option =>
 
     // configure DI for application services
     services.AddScoped<IJwtUtils, JwtUtils>();
-    services.AddScoped<IUserService, UserService>();
-    services.AddScoped<IPostService, PostService>();
-    services.AddScoped<IEmailService, EmailService>();
-    services.AddScoped<ILikeService, LikeService>();
-    services.AddScoped<ICommentService, CommentService>();
-    services.AddScoped<IGeneralService, GeneralService>();
-    services.AddScoped<IInforService, InforService>();
+
+    var serviceTypes = AppDomain.CurrentDomain.GetAssemblies()
+    .SelectMany(s => s.GetTypes())
+    .Where(p => p.Namespace != null && p.Namespace.Contains("Service") && p.Name.EndsWith("Service") && p.GetInterfaces().Any())
+    .ToList();
+    foreach (var serviceType in serviceTypes)
+    {
+        services.AddScoped(serviceType.GetInterfaces().First(), serviceType);
+    }
+    //services.AddScoped<IUserService, UserService>();
+    //services.AddScoped<IPostService, PostService>();
+    //services.AddScoped<IEmailService, EmailService>();
+    //services.AddScoped<ILikeService, LikeService>();
+    //services.AddScoped<ICommentService, CommentService>();
+    //services.AddScoped<IInforService, InforService>();
 
 
     services.AddScoped<IUserRepository, UserRepository>();
@@ -111,12 +116,13 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IInforRepository, InforRepository>();
     services.AddScoped<IGroupChatRepository, GroupChatRepository>();
     services.AddScoped<IUserGroupChatRepository, UserGroupChatRepository>();
+    services.AddScoped<INotifyRepository, NotifyRepository>();
+    services.AddScoped<IMasterDataRepository, MasterDataRepository>();
+    services.AddScoped<IFriendRepository, FriendRepository>();
 
 
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-    services.AddScoped<IGeneralService, GeneralService>();
-    services.AddSingleton<IGeneralService, GeneralService>();
 
 
     // Configure Cloudinary

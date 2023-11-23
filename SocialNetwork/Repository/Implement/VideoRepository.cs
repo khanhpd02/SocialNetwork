@@ -8,7 +8,7 @@ namespace SocialNetwork.Repository
 
     public class VideoRepository : RepositoryBase<Video>, IVideoRepository
     {
-        public VideoRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public VideoRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

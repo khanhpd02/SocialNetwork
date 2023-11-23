@@ -20,6 +20,10 @@ namespace SocialNetwork.Service.Implement
         private readonly IVideoRepository videoRepository;
         private readonly ILikeRepository likeRepository;
         private readonly ICommentRepository commentRepository;
+        private readonly IFriendRepository friendRepository;
+        private readonly IMasterDataRepository masterDataRepository;
+        private readonly INotifyRepository notifyRepository;
+
         private IUserService _userService;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
@@ -28,7 +32,9 @@ namespace SocialNetwork.Service.Implement
 
         public PostService(IPostRepository postRepository, IUserRepository userRepository, IImageRepository imageRepository,
             SocialNetworkContext _context, Cloudinary _cloudinary,
-            IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository, IUserService userService)
+            IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository,
+            IUserService userService, IFriendRepository friendRepository,
+            IMasterDataRepository masterDataRepository, INotifyRepository notifyRepository)
         {
             this.postRepository = postRepository;
             this.userRepository = userRepository;
@@ -39,6 +45,9 @@ namespace SocialNetwork.Service.Implement
             this.likeRepository = likeRepository;
             this.commentRepository = commentRepository;
             _userService = userService;
+            this.friendRepository = friendRepository;
+            this.masterDataRepository = masterDataRepository;
+            this.notifyRepository = notifyRepository;
         }
         public string UploadFileToCloudinary(IFormFile fileUploadDTO)
         {
@@ -94,10 +103,7 @@ namespace SocialNetwork.Service.Implement
             string cloudinaryUrl = UploadFileToCloudinary(dto.File);
             Post post = mapper.Map<Post>(dto);
             post.UserId = _userService.UserId;
-            post.CreateBy = _userService.UserId;
-            _context.Add(post);
-            _context.SaveChanges();
-            postRepository.Update(post);
+            postRepository.Create(post);
             postRepository.Save();
 
             if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
@@ -140,6 +146,18 @@ namespace SocialNetwork.Service.Implement
                         videoRepository.Save();
                     }
                 }
+            }
+            var friendType = masterDataRepository.FindByCondition(x => x.Name == "Thân thiết").FirstOrDefault();
+            List<Friend> friends = friendRepository.FindByCondition(x => x.UserTo == _userService.UserId && x.Level == friendType.Id).ToList();
+            foreach (var item in friends)
+            {
+                Notify notify = new Notify();
+                notify.UserTo = _userService.UserId;
+                notify.UserNotify = item.UserAccept;
+                var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Đăng post").FirstOrDefault();
+                notify.NotifyType = notifyType.Id;
+                notifyRepository.Create(notify);
+                notifyRepository.Save();
             }
             return dto;
         }
@@ -152,12 +170,8 @@ namespace SocialNetwork.Service.Implement
             }
             string cloudinaryUrl = UploadFileToCloudinary(dto.File);
 
-            Post post = mapper.Map<Post>(dto);
-            post.UpdateBy = _userService.UserId;
-            post.UpdateDate = DateTime.Now;
-            _context.Update(post);
-            _context.SaveChanges();
-            postRepository.Update(post);
+            postcheck.Content = dto.Content;
+            postRepository.Update(postcheck);
             postRepository.Save();
             if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
             {
@@ -172,7 +186,7 @@ namespace SocialNetwork.Service.Implement
                     {
                         Image image = new Image
                         {
-                            PostId = post.Id,
+                            PostId = dto.Id,
                             LinkImage = link,
                             CreateDate = DateTime.Now,
                             CreateBy = _userService.UserId,
@@ -189,7 +203,7 @@ namespace SocialNetwork.Service.Implement
                     {
                         Video video = new Video
                         {
-                            PostId = post.Id,
+                            PostId = dto.Id,
                             Link = link,
                             CreateDate = DateTime.Now,
                             CreateBy = _userService.UserId,
@@ -200,6 +214,7 @@ namespace SocialNetwork.Service.Implement
                     }
                 }
             }
+
             return dto;
         }
         public PostDTO GetById(Guid id)

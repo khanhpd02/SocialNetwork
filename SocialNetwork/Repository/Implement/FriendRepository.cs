@@ -7,7 +7,7 @@ namespace SocialNetwork.Repository
 
     public class FriendRepository : RepositoryBase<Friend>, IFriendRepository
     {
-        public FriendRepository(SocialNetworkContext context, IGeneralService generalService) : base(context, generalService)
+        public FriendRepository(SocialNetworkContext context, IUserService userService) : base(context, userService)
         {
         }
     }

@@ -3,7 +3,7 @@ using SocialNetwork.Entity;
 
 namespace SocialNetwork.Repository
 {
-    public interface INotifyRepository : IRepositoryBase<Notify>
+    public interface ICommentRepository : IRepositoryBase<Comment>
     {
     }
 }
