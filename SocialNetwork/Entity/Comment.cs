@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace SocialNetwork.Entity;
 
-namespace SocialNetwork.Entity;
-
-public partial class Comment: IEntity
+public partial class Comment : IEntity
 {
     public Guid Id { get; set; }
 
-    public string? Content { get; set; }
+    public string Content { get; set; }
 
     public Guid? PostId { get; set; }
 
@@ -23,7 +20,7 @@ public partial class Comment: IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual Post? Post { get; set; }
+    public virtual Post Post { get; set; }
 
-    public virtual User? User { get; set; }
+    public virtual User User { get; set; }
 }

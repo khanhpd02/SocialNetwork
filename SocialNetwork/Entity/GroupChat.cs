@@ -4,7 +4,7 @@ public partial class GroupChat : IEntity
 {
     public Guid Id { get; set; }
 
-    public string? GroupName { get; set; }
+    public string GroupName { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

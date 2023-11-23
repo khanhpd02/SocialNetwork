@@ -1,10 +1,10 @@
 ﻿namespace SocialNetwork.Entity;
 
-public partial class TagPost : IEntity
+public partial class MasterDatum : IEntity
 {
-    public Guid TagId { get; set; }
+    public Guid Id { get; set; }
 
-    public Guid PostId { get; set; }
+    public string Name { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -15,10 +15,4 @@ public partial class TagPost : IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
-
-    public Guid Id { get; set; }
-
-    public virtual Post Post { get; set; }
-
-    public virtual Tag Tag { get; set; }
 }

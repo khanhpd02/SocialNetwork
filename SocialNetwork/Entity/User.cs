@@ -4,9 +4,9 @@ public partial class User : IEntity
 {
     public Guid Id { get; set; }
 
-    public string? Email { get; set; }
+    public string Email { get; set; }
 
-    public string? Password { get; set; }
+    public string Password { get; set; }
 
     public bool? Status { get; set; }
 
@@ -20,7 +20,7 @@ public partial class User : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public string? UserName { get; set; }
+    public string UserName { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

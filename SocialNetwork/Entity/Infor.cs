@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.Entity;
 
 public partial class Infor : IEntity
 {
@@ -9,17 +6,17 @@ public partial class Infor : IEntity
 
     public Guid? UserId { get; set; }
 
-    public string? FullName { get; set; }
+    public string FullName { get; set; }
 
-    public string? WorkPlace { get; set; }
+    public string WorkPlace { get; set; }
 
     public bool? Gender { get; set; }
 
-    public string? PhoneNumber { get; set; }
+    public string PhoneNumber { get; set; }
 
-    public string? Image { get; set; }
+    public string Image { get; set; }
 
-    public string? Address { get; set; }
+    public string Address { get; set; }
 
     public DateTime? DateOfBirth { get; set; }
 
@@ -33,5 +30,5 @@ public partial class Infor : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual User? User { get; set; }
+    public virtual User User { get; set; }
 }

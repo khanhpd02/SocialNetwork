@@ -4,9 +4,15 @@ public partial class Chat : IEntity
 {
     public Guid Id { get; set; }
 
-    public int? ConvertationId { get; set; }
+    public Guid? RoomId { get; set; }
 
-    public string? Context { get; set; }
+    public Guid? UserFromId { get; set; }
+
+    public Guid? UserToId { get; set; }
+
+    public Guid? ConvertationId { get; set; }
+
+    public string Context { get; set; }
 
     public bool IsSeen { get; set; }
 

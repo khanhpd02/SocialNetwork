@@ -18,5 +18,5 @@ public partial class Image : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual Post? Post { get; set; }
+    public virtual Post Post { get; set; }
 }

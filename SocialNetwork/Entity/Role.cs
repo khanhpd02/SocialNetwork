@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.Entity;
 
 public partial class Role : IEntity
 {
     public Guid Id { get; set; }
 
-    public string? RoleName { get; set; }
+    public string RoleName { get; set; }
 
-    public string? Description { get; set; }
+    public string Description { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

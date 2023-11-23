@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.Entity;
 
 public partial class Tag : IEntity
 {
     public Guid Id { get; set; }
 
-    public string? Content { get; set; }
+    public string Content { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

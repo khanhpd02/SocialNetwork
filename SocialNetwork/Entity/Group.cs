@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace SocialNetwork.Entity;
 
-namespace SocialNetwork.Entity;
-
-public partial class Group: IEntity
+public partial class Group : IEntity
 {
     public Guid Id { get; set; }
 
-    public string? GroupName { get; set; }
-
-    public Guid? UserId { get; set; }
+    public string GroupName { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -20,6 +15,4 @@ public partial class Group: IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
-
-    public virtual User? User { get; set; }
 }

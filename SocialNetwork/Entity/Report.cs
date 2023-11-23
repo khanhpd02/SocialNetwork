@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.Entity;
 
 public partial class Report : IEntity
 {
@@ -11,7 +8,7 @@ public partial class Report : IEntity
 
     public Guid? PostId { get; set; }
 
-    public string? Content { get; set; }
+    public string Content { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -23,7 +20,7 @@ public partial class Report : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual Post? Post { get; set; }
+    public virtual Post Post { get; set; }
 
-    public virtual User? User { get; set; }
+    public virtual User User { get; set; }
 }

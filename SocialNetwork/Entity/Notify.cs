@@ -8,7 +8,7 @@ public partial class Notify : IEntity
 
     public Guid? UserNotify { get; set; }
 
-    public string Content { get; set; } = null!;
+    public string Content { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
@@ -19,4 +19,6 @@ public partial class Notify : IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public Guid? NotifyType { get; set; }
 }

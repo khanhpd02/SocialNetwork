@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SocialNetwork.Entity;
+﻿namespace SocialNetwork.Entity;
 
 public partial class Like : IEntity
 {
@@ -21,7 +18,7 @@ public partial class Like : IEntity
 
     public bool IsDeleted { get; set; }
 
-    public virtual Post? Post { get; set; }
+    public virtual Post Post { get; set; }
 
-    public virtual User? User { get; set; }
+    public virtual User User { get; set; }
 }
