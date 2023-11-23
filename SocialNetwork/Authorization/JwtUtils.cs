@@ -35,10 +35,8 @@ public class JwtUtils : IJwtUtils
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
     }
-
     public string GenerateJwtToken(User user)
     {
-        // generate token that is valid for 15 minutes
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
 
@@ -51,14 +49,16 @@ public class JwtUtils : IJwtUtils
             roles.Add(role.RoleName.ToString());
         }
 
-        var roleClaims = roles.Select(role => new Claim("role", role)).ToList();
+        var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
 
-        // Thêm claim về email vào danh sách các claims
-        var emailClaim = new Claim("email", user.Email);
+        // Add claim for email
+        var emailClaim = new Claim(ClaimTypes.Email, user.Email);
+        var idClaim = new Claim(ClaimTypes.NameIdentifier, user.Id.ToString());
+
         var allClaims = new List<Claim>
     {
-        new Claim("id", user.Id.ToString()),
-        emailClaim
+        emailClaim,
+        idClaim
     }.Concat(roleClaims);
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -71,6 +71,42 @@ public class JwtUtils : IJwtUtils
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
+
+    //public string GenerateJwtToken(User user)
+    //{
+    //    // generate token that is valid for 15 minutes
+    //    var tokenHandler = new JwtSecurityTokenHandler();
+    //    var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+
+    //    List<UserRole> userRoles = userRoleRepository.FindByConditionWithTracking(u => u.UserId == user.Id);
+    //    List<string> roles = new List<string>();
+
+    //    foreach (var userRole in userRoles)
+    //    {
+    //        var role = roleRepository.FindByCondition(u => u.Id == userRole.RoleId).FirstOrDefault();
+    //        roles.Add(role.RoleName.ToString());
+    //    }
+
+    //    var roleClaims = roles.Select(role => new Claim("role", role)).ToList();
+
+    //    // Thêm claim về email vào danh sách các claims
+    //    var emailClaim = new Claim("email", user.Email);
+    //    var allClaims = new List<Claim>
+    //{
+    //    new Claim("id", user.Id.ToString()),
+    //    emailClaim
+    //}.Concat(roleClaims);
+
+    //    var tokenDescriptor = new SecurityTokenDescriptor
+    //    {
+    //        Subject = new ClaimsIdentity(allClaims),
+    //        Expires = DateTime.UtcNow.AddDays(3),
+    //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+    //    };
+
+    //    var token = tokenHandler.CreateToken(tokenDescriptor);
+    //    return tokenHandler.WriteToken(token);
+    //}
 
 
     public Guid? ValidateJwtToken(string token)
@@ -95,7 +131,7 @@ public class JwtUtils : IJwtUtils
             tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
 
             var jwtToken = (JwtSecurityToken)validatedToken;
-            var userId = Guid.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+            var userId = Guid.Parse(jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
             return userId;
         }
@@ -127,7 +163,7 @@ public class JwtUtils : IJwtUtils
             tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
 
             var jwtToken = (JwtSecurityToken)validatedToken;
-            var userEmailClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "email");
+            var userEmailClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email);
 
             if (userEmailClaim != null)
             {

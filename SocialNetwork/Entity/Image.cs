@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace SocialNetwork.Entity;
 
-namespace SocialNetwork.Entity;
-
-public partial class Image: IEntity
+public partial class Image : IEntity
 {
     public Guid Id { get; set; }
 
-    public string? Link { get; set; }
+    public string LinkImage { get; set; }
 
     public Guid? PostId { get; set; }
 

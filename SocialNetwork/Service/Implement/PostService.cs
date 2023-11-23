@@ -90,6 +90,7 @@ namespace SocialNetwork.Service.Implement
         }
         public PostDTO Create(PostDTO dto)
         {
+
             string cloudinaryUrl = UploadFileToCloudinary(dto.File);
             Post post = mapper.Map<Post>(dto);
             post.UserId = _userService.UserId;
@@ -113,7 +114,7 @@ namespace SocialNetwork.Service.Implement
                         Image image = new Image
                         {
                             PostId = post.Id,
-                            Link = link,
+                            LinkImage = link,
                             CreateDate = DateTime.Now,
                             CreateBy = _userService.UserId,
                             IsDeleted = false
@@ -172,7 +173,7 @@ namespace SocialNetwork.Service.Implement
                         Image image = new Image
                         {
                             PostId = post.Id,
-                            Link = link,
+                            LinkImage = link,
                             CreateDate = DateTime.Now,
                             CreateBy = _userService.UserId,
                             IsDeleted = false
