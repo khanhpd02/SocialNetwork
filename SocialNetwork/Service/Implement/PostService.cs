@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Server.IISIntegration;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
 using SocialNetwork.Entity;
@@ -287,9 +288,11 @@ namespace SocialNetwork.Service.Implement
             List<PostDTO> dtoList = new List<PostDTO>();
             var CountLike = 0;
             var CountComment = 0;
-
+            
             foreach (Post entity in entityList)
             {
+                var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false&&x.PostId==entity.Id).FirstOrDefault();
+           
                 List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id).ToList();
                 List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id).ToList();
                 List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id).ToList();
@@ -303,6 +306,16 @@ namespace SocialNetwork.Service.Implement
                 dto.Comments = comments;
                 dto.CountLike = CountLike;
                 dto.CountComment = CountComment;
+                if (like == null)
+                {
+                    dto.islike = false;
+                }
+                else
+                {
+                    dto.islike = true;
+                }
+                
+
                 dtoList.Add(dto);
             }
             return dtoList;

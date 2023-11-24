@@ -20,7 +20,7 @@ public class PostDTO
     public List<Comment> Comments { get; set; }
     public int CountLike { get; set; }
     public int CountComment { get; set; }
-
+    public bool islike { get; set; }
     public PostDTO()
     {
         Images = new List<Image>();
