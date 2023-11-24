@@ -29,7 +29,6 @@ namespace SocialNetwork.Controller.User
             }
             return Ok(post);
         }
-
         [HttpPost]
         [SwaggerOperation(Summary = "Create a Post")]
         public IActionResult Create([FromForm] PostDTO postDTO)
