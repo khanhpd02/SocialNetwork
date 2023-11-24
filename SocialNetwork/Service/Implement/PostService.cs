@@ -23,6 +23,7 @@ namespace SocialNetwork.Service.Implement
         private readonly IFriendRepository friendRepository;
         private readonly IMasterDataRepository masterDataRepository;
         private readonly INotifyRepository notifyRepository;
+        private readonly IInforRepository inforRepository;
 
         private IUserService _userService;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
@@ -34,7 +35,7 @@ namespace SocialNetwork.Service.Implement
             SocialNetworkContext _context, Cloudinary _cloudinary,
             IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository,
             IUserService userService, IFriendRepository friendRepository,
-            IMasterDataRepository masterDataRepository, INotifyRepository notifyRepository)
+            IMasterDataRepository masterDataRepository, INotifyRepository notifyRepository, IInforRepository inforRepository)
         {
             this.postRepository = postRepository;
             this.userRepository = userRepository;
@@ -48,6 +49,7 @@ namespace SocialNetwork.Service.Implement
             this.friendRepository = friendRepository;
             this.masterDataRepository = masterDataRepository;
             this.notifyRepository = notifyRepository;
+            this.inforRepository = inforRepository;
         }
         public string UploadFileToCloudinary(IFormFile fileUploadDTO)
         {
@@ -153,8 +155,11 @@ namespace SocialNetwork.Service.Implement
             {
                 Notify notify = new Notify();
                 notify.UserTo = _userService.UserId;
+                User user = userRepository.FindByCondition(x => x.Id == _userService.UserId).FirstOrDefault();
+                Infor infor = inforRepository.FindByCondition(x => x.UserId == user.Id).FirstOrDefault();
                 notify.UserNotify = item.UserAccept;
                 var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Đăng post").FirstOrDefault();
+                notify.Content = $"{infor.FullName} đã đăng bài post";
                 notify.NotifyType = notifyType.Id;
                 notifyRepository.Create(notify);
                 notifyRepository.Save();

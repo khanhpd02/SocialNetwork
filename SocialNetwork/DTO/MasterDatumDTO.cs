@@ -1,14 +1,10 @@
 ﻿namespace SocialNetwork.DTO;
 
-public class FriendDTO
+public class MasterDatumDTO
 {
-    public Guid? Id { get; set; }
+    public Guid Id { get; set; }
 
-    public Guid User1 { get; set; }
-
-    public Guid User2 { get; set; }
-
-    public Guid Level { get; set; }
+    public string Name { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

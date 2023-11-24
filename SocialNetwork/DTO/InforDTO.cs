@@ -20,6 +20,7 @@ public class InforDTO
     public string? Address { get; set; }
 
     public DateTime? DateOfBirth { get; set; }
+    public string LevelFriend { get; set; }
 
     //public DateTime? CreateDate { get; set; }
 
