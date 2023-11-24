@@ -230,7 +230,7 @@ namespace SocialNetwork.Service.Implement
 
             List<Image> images = imageRepository.FindByCondition(img => img.PostId == id).ToList();
             List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == id).ToList();
-            List<Like> likes = likeRepository.FindByCondition(img => img.PostId == id).ToList();
+            List<Like> likes = likeRepository.FindByCondition(img => img.PostId == id&& img.IsDeleted==false).ToList();
             List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == id).ToList();
             CountLike = likes.Count();
             CountComment = comments.Count();
