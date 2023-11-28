@@ -220,11 +220,11 @@ public class UserService : IUserService
     public async Task<bool> VerifyPin(VerifyPin VerifyPin)
     {
         var pin = _context.PinCodes.Where(x => x.IsDeleted == false && x.Email == VerifyPin.Email && x.Content == "VerifyPin").FirstOrDefault();
-        var user = _context.Users.Where(x => x.Email == VerifyPin.Email).FirstOrDefault();
+        var user = _context.Users.Where(x => x.Email == VerifyPin.Email && x.IsDeleted == true).FirstOrDefault();
 
         if (pin != null)
         {
-            if (pin.Pin == VerifyPin.Pin && pin.ExpiredTime >= DateTime.Now)
+            if (pin.Pin == VerifyPin.Pin && pin.ExpiredTime >= DateTime.Now && user != null)
             {
                 user.IsDeleted = false;
                 pin.IsDeleted = true;
@@ -233,11 +233,15 @@ public class UserService : IUserService
                 _context.SaveChanges();
                 return true;
             }
+            else if (user == null)
+            {
+                throw new BadRequestException("Tài khoản đã xác thực hoặc không tồn tại");
+            }
             else
             {
-                _context.Users.Remove(user);
-                _context.PinCodes.Update(pin);
-                _context.SaveChanges();
+                //_context.Users.Remove(user);
+                //_context.PinCodes.Update(pin);
+                //_context.SaveChanges();
 
                 throw new BadRequestException("Mã pin sai hoặc hết hạn");
 
