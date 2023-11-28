@@ -390,5 +390,6 @@ public class UserService : IUserService
             throw new BadRequestException("Change Password for Forgot Password Fail");
         }
     }
+
 }
 
