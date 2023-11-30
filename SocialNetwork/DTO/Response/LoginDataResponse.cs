@@ -7,5 +7,6 @@
         public List<string> Role { get; set; }
         //public string vendorId { get; set; }
         public string JwtToken { get; set; }
+        public bool HasInfor { get; set; }
     }
 }

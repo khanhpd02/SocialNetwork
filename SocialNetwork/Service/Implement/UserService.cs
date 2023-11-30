@@ -13,8 +13,11 @@ using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
+using SocialNetwork.Repository;
 using System.Text.RegularExpressions;
 using WebApi.Helpers;
+//
+
 
 
 
@@ -26,6 +29,7 @@ public class UserService : IUserService
     private readonly AppSettings _appSettings;
     private IEmailService _emailService;
     private static string baseToken = "";
+    
 
     private User _loggedInUser; // Add a field to store the logged-in user
     public Guid UserId { get; set; }
@@ -40,9 +44,10 @@ public class UserService : IUserService
         IJwtUtils jwtUtils,
         IOptions<AppSettings> appSettings,
         IEmailService emailService,
-
-      IHttpContextAccessor httpContextAccessor)
+        
+        IHttpContextAccessor httpContextAccessor)
     {
+       
         _context = context;
         _jwtUtils = jwtUtils;
         _appSettings = appSettings.Value;
@@ -286,11 +291,22 @@ public class UserService : IUserService
             var role = _context.Roles.Where(u => u.Id == UserRole.RoleId).FirstOrDefault();
             roles.Add(role.RoleName.ToString());
         }
+        // check infor
+
+        var checkInfo= _context.Infors.Where(u=>u.UserId==user.Id && u.IsDeleted==false).FirstOrDefault();
 
         LoginDataResponse loginDataResponse = new LoginDataResponse { Id = user.Id.ToString(), Email = user.Email, JwtToken = _jwtUtils.GenerateJwtToken(user), Role = roles };
 
         LoginResponse loginResponse = new LoginResponse { Success = true, Code = 1, Data = loginDataResponse, Message = "Đăng nhập thành Công" };
-
+        if (checkInfo == null)
+        {
+            loginDataResponse.HasInfor= false;
+        }
+        else
+        {
+            loginDataResponse.HasInfor = true;
+        }
+        
         return loginResponse;
     }
 
