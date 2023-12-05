@@ -16,9 +16,11 @@ namespace SocialNetwork.Service.Implement
     {
         //private readonly IInforService _inforService;
         private readonly IInforRepository _inforRepository;
-
+        private readonly IFriendRepository _friendRepository;
+        private readonly IMasterDataRepository _masterDataRepository;
         private SocialNetworkContext _context;
         private readonly Cloudinary _cloudinary;
+        private IUserService _userService;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile(new MappingProfile());
@@ -30,10 +32,56 @@ namespace SocialNetwork.Service.Implement
             _context = context;
             _cloudinary = cloudinary;
         }
+
+        public InforService(IInforRepository inforRepository, IFriendRepository friendRepository, IMasterDataRepository masterDataRepository, SocialNetworkContext context, Cloudinary cloudinary)
+        {
+            _inforRepository = inforRepository;
+            _friendRepository = friendRepository;
+            _masterDataRepository = masterDataRepository;
+            _context = context;
+            _cloudinary = cloudinary;
+        }
+
+        public InforService(IInforRepository inforRepository, IFriendRepository friendRepository, IMasterDataRepository masterDataRepository, SocialNetworkContext context, Cloudinary cloudinary, IUserService userService)
+        {
+            _inforRepository = inforRepository;
+            _friendRepository = friendRepository;
+            _masterDataRepository = masterDataRepository;
+            _context = context;
+            _cloudinary = cloudinary;
+            _userService = userService;
+        }
+
         public InforDTO GetInforByUserId(Guid id)
         {
             Infor entity = _inforRepository.FindByCondition(x => x.UserId == id && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(id);
             InforDTO dto = mapper.Map<InforDTO>(entity);
+            var checkFriend = _friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == id) || (x.UserAccept == _userService.UserId && x.UserTo == id)).FirstOrDefault();
+            if (checkFriend == null)
+            {
+                dto.StatusFriend = "Thêm bạn bè";
+            }
+            else if (checkFriend.IsDeleted == true && checkFriend.UserTo == _userService.UserId)
+            {
+                dto.StatusFriend = "Hủy lời mời";
+            }
+            else if (checkFriend.IsDeleted == true && checkFriend.UserAccept == _userService.UserId)
+            {
+                dto.StatusFriend = "Phản Hồi";
+            }
+            else if (checkFriend.IsDeleted == false)
+            {
+                var check= _masterDataRepository.FindByCondition(x =>x.Id==checkFriend.Level).FirstOrDefault();
+                if(check != null)
+                {
+                    dto.StatusFriend = check.Name;
+                }
+                else 
+                {
+                    dto.StatusFriend = "Lỗi";
+                }
+            }
+            
             return dto;
         }
         public AppResponse createInfo(InforDTO inforDTO, Guid userId)

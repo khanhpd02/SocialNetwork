@@ -19,6 +19,8 @@ public class InforDTO
 
     public string? Address { get; set; }
 
+    public string? StatusFriend { get; set; }
+
     public DateTime? DateOfBirth { get; set; }
     public string LevelFriend { get; set; }
 
