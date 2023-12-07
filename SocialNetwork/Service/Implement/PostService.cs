@@ -5,6 +5,7 @@ using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
+using SocialNetwork.Helpers;
 using SocialNetwork.Repository;
 using Video = SocialNetwork.Entity.Video;
 
@@ -292,29 +293,37 @@ namespace SocialNetwork.Service.Implement
             List<PostDTO> dtoList = new List<PostDTO>();
             var CountLike = 0;
             var CountComment = 0;
+            List<Post> postsToRemove = new List<Post>();
             foreach (Post post in entityList)
             {
                 int has = 0;
+                if (post.UserId == _userService.UserId && post.IsDeleted == false)
+                {
+                    continue;
+                }
                 if (idOfFriends.Count != 0)
                 {
                     foreach (Guid idfriend in idOfFriends)
                     {
-                        if ((idfriend == post.UserId || post.LevelView == 1) && post.IsDeleted == false)
+                        if ((idfriend == post.UserId || post.LevelView == (int)(EnumLevelView.publicview)) && post.IsDeleted == false)
                         {
                             has = 1; break;
                         }
                     }
                     if (has == 0)
                     {
-                        entityList.Remove(post);
+                        postsToRemove.Add(post);
                     }
                 }
                 else if (post.LevelView == 2)
-                { entityList.Remove(post); }
+                { postsToRemove.Add(post); }
 
             }
 
-
+            foreach (var postToRemove in postsToRemove)
+            {
+                entityList.Remove(postToRemove);
+            }
             foreach (Post entity in entityList)
             {
 
