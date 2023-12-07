@@ -51,7 +51,12 @@ namespace SocialNetwork.Service.Implement
             _cloudinary = cloudinary;
             _userService = userService;
         }
-
+        public InforDTO GetMyInfor()
+        {
+            Infor entity = _inforRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(_userService.UserId);
+            InforDTO dto = mapper.Map<InforDTO>(entity);
+            return dto;
+        }
         public InforDTO GetInforByUserId(Guid id)
         {
             Infor entity = _inforRepository.FindByCondition(x => x.UserId == id && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(id);
@@ -71,12 +76,12 @@ namespace SocialNetwork.Service.Implement
             }
             else if (checkFriend.IsDeleted == false)
             {
-                var check= _masterDataRepository.FindByCondition(x =>x.Id==checkFriend.Level).FirstOrDefault();
-                if(check != null)
+                var check = _masterDataRepository.FindByCondition(x => x.Id == checkFriend.Level).FirstOrDefault();
+                if (check != null)
                 {
                     dto.StatusFriend = check.Name;
                 }
-                else 
+                else
                 {
                     dto.StatusFriend = "Lỗi";
                 }
@@ -85,7 +90,7 @@ namespace SocialNetwork.Service.Implement
             {
                 dto.StatusFriend = "My Infor";
             }
-            
+
             return dto;
         }
         public AppResponse createInfo(InforDTO inforDTO, Guid userId)
@@ -132,7 +137,7 @@ namespace SocialNetwork.Service.Implement
                             info.Image = link;
                             _inforRepository.Update(info);
                             _inforRepository.Save();
-                            
+
 
 
                         }

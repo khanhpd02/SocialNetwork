@@ -52,6 +52,17 @@ namespace SocialNetwork.Controller.User
             }
             return Ok(infor);
         }
+        [HttpGet("myinfor")]
+        [SwaggerOperation(Summary = "Get My Infor")]
+        public IActionResult GetMyInfor()
+        {
+            var infor = inforService.GetMyInfor();
+            if (infor == null)
+            {
+                return NotFound();
+            }
+            return Ok(infor);
+        }
         /* [HttpPut("update")]
          [SwaggerOperation(Summary = "Update Comment")]
          public IActionResult Update([FromBody] CommentDTO dto)
