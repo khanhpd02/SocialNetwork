@@ -39,7 +39,7 @@ namespace SocialNetwork.Service.Implement
         }
         public AppResponse SendToFriend(Guid userIdReceive)
         {
-            var checkFriend=friendRepository.FindByCondition(x=>(x.UserTo==_userService.UserId&&x.UserAccept==userIdReceive)||((x.UserTo == userIdReceive && x.UserAccept == _userService.UserId))).FirstOrDefault();
+            var checkFriend=friendRepository.FindByCondition(x=>(x.UserTo==_userService.UserId&&x.UserAccept==userIdReceive)||(x.UserTo == userIdReceive && x.UserAccept == _userService.UserId)).FirstOrDefault();
             var checkUser= userRepository.FindByCondition(x=>x.Id==userIdReceive && x.IsDeleted==false).FirstOrDefault();
             if (checkUser == null)
             {

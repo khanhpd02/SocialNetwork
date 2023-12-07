@@ -21,6 +21,7 @@ public class PostDTO
     public int CountLike { get; set; }
     public int CountComment { get; set; }
     public bool islike { get; set; }
+    public int  LevelView { get; set; }
     public PostDTO()
     {
         Images = new List<Image>();

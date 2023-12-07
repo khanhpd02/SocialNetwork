@@ -17,6 +17,7 @@ public partial class Post : IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
+    public int LevelView { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

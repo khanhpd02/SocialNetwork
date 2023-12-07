@@ -81,6 +81,10 @@ namespace SocialNetwork.Service.Implement
                     dto.StatusFriend = "Lỗi";
                 }
             }
+            if (id == _userService.UserId)
+            {
+                dto.StatusFriend = "My Infor";
+            }
             
             return dto;
         }
