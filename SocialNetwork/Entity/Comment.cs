@@ -20,6 +20,12 @@ public partial class Comment : IEntity
 
     public bool IsDeleted { get; set; }
 
+    public Guid? ParentId { get; set; }
+
+    public virtual ICollection<Comment> InverseParent { get; set; } = new List<Comment>();
+
+    public virtual Comment Parent { get; set; }
+
     public virtual Post Post { get; set; }
 
     public virtual User User { get; set; }
