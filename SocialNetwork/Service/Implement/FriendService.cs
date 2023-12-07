@@ -39,8 +39,8 @@ namespace SocialNetwork.Service.Implement
         }
         public AppResponse SendToFriend(Guid userIdReceive)
         {
-            var checkFriend=friendRepository.FindByCondition(x=>(x.UserTo==_userService.UserId&&x.UserAccept==userIdReceive)||(x.UserTo == userIdReceive && x.UserAccept == _userService.UserId)).FirstOrDefault();
-            var checkUser= userRepository.FindByCondition(x=>x.Id==userIdReceive && x.IsDeleted==false).FirstOrDefault();
+            var checkFriend = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == userIdReceive) || ((x.UserTo == userIdReceive && x.UserAccept == _userService.UserId))).FirstOrDefault();
+            var checkUser = userRepository.FindByCondition(x => x.Id == userIdReceive && x.IsDeleted == false).FirstOrDefault();
             if (checkUser == null)
             {
                 throw new BadRequestException("UserId không tồn tại");
@@ -77,40 +77,44 @@ namespace SocialNetwork.Service.Implement
                 return new AppResponse { message = "Gửi lời mời kết bạn thành công", success = true };
             }
 
-           
+
         }
         public AppResponse AcceptFriend(Guid userIdSender)
         {
             var LevelFriend = masterDataRepository.FindByCondition(x => x.Name == "Bạn thường").FirstOrDefault();
-            var userSender= userRepository.FindByCondition(x=>x.Id==userIdSender && x.IsDeleted==false).FirstOrDefault();
-            var friends = friendRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserAccept == _userService.UserId && x.IsDeleted==true).FirstOrDefault();
+            var userSender = userRepository.FindByCondition(x => x.Id == userIdSender && x.IsDeleted == false).FirstOrDefault();
+            var friends = friendRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserAccept == _userService.UserId && x.IsDeleted == true).FirstOrDefault();
             var myInfor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
             if (userIdSender == null)
             {
                 throw new BadRequestException("UserId không tồn tại");
             }
-            else if (friends == null) {
+            else if (friends == null)
+            {
                 throw new BadRequestException("Không có lời mời kết bạn từ userID hoặc đã kết bạn");
-            } else {
+            }
+            else
+            {
                 friends.Level = LevelFriend.Id;
                 friends.IsDeleted = false;
                 friendRepository.Update(friends);
                 friendRepository.Save();
                 var notifyType = masterDataRepository.FindByCondition(x => x.Name == "AcceptFriend").FirstOrDefault();
-                Notify notify = new Notify { 
-                    UserTo=_userService.UserId,
-                    UserNotify=userIdSender,
-                    Content= $" đã chấp nhận lời mời kết bạn",
-                    NotifyType=notifyType.Id,
-                    CreateDate= DateTime.Now,
-                    CreateBy=_userService.UserId
+                Notify notify = new Notify
+                {
+                    UserTo = _userService.UserId,
+                    UserNotify = userIdSender,
+                    Content = $" đã chấp nhận lời mời kết bạn",
+                    NotifyType = notifyType.Id,
+                    CreateDate = DateTime.Now,
+                    CreateBy = _userService.UserId
                 };
                 notifyRepository.Create(notify);
                 notifyRepository.Save();
                 return new AppResponse { message = "Accept Friend Success", success = true };
             }
-            
-           
+
+
         }
         public List<InforDTO> GetAllFriends()
         {
@@ -178,9 +182,9 @@ namespace SocialNetwork.Service.Implement
 
         public List<InforDTO> GetAllFriendsRequests()
         {
-            
-            List<Guid> idOfFriend=friendRepository.FindByCondition(x=>x.UserAccept == _userService.UserId && x.IsDeleted==true)
-                .Select(x=>x.UserTo)
+
+            List<Guid> idOfFriend = friendRepository.FindByCondition(x => x.UserAccept == _userService.UserId && x.IsDeleted == true)
+                .Select(x => x.UserTo)
                 .ToList();
             List<Infor> infors = new List<Infor>();
 
@@ -202,10 +206,10 @@ namespace SocialNetwork.Service.Implement
 
             foreach (var infor in infors)
             {
-                
+
 
                 InforDTO inforDTO = mapper.Map<InforDTO>(infor);
-                
+
                 inforDTOs.Add(inforDTO);
             }
 
@@ -216,7 +220,7 @@ namespace SocialNetwork.Service.Implement
 
         public AppResponse UnFriend(Guid userId)
         {
-            var checkFriend = friendRepository.FindByCondition(x => ((x.UserTo == _userService.UserId && x.UserAccept == userId) || (x.UserTo == userId && x.UserAccept == _userService.UserId)) && x.IsDeleted==false ).FirstOrDefault();
+            var checkFriend = friendRepository.FindByCondition(x => ((x.UserTo == _userService.UserId && x.UserAccept == userId) || (x.UserTo == userId && x.UserAccept == _userService.UserId)) && x.IsDeleted == false).FirstOrDefault();
             //var LevelFriend = masterDataRepository.FindByCondition(x => x.Name == "Bạn thường").FirstOrDefault();
             var checkUserId = userRepository.FindByCondition(x => x.Id == userId && x.IsDeleted == false).FirstOrDefault();
             //var friends = friendRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserAccept == _userService.UserId && x.IsDeleted == false).FirstOrDefault();
@@ -233,8 +237,8 @@ namespace SocialNetwork.Service.Implement
             {
                 friendRepository.Delete(checkFriend);
                 friendRepository.Save();
-                
-       
+
+
                 return new AppResponse { message = "UnFriend Success", success = true };
             }
         }
@@ -257,7 +261,7 @@ namespace SocialNetwork.Service.Implement
             {
                 friendRepository.Delete(friends);
                 friendRepository.Save();
-                
+
                 return new AppResponse { message = "Accept Friend Success", success = true };
             }
         }

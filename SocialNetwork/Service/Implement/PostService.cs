@@ -5,7 +5,6 @@ using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
-using SocialNetwork.Helpers;
 using SocialNetwork.Repository;
 using Video = SocialNetwork.Entity.Video;
 
@@ -293,7 +292,7 @@ namespace SocialNetwork.Service.Implement
             List<PostDTO> dtoList = new List<PostDTO>();
             var CountLike = 0;
             var CountComment = 0;
-            foreach (Post post in entityList) 
+            foreach (Post post in entityList)
             {
                 int has = 0;
                 if (idOfFriends.Count != 0)
@@ -302,7 +301,7 @@ namespace SocialNetwork.Service.Implement
                     {
                         if ((idfriend == post.UserId || post.LevelView == 1) && post.IsDeleted == false)
                         {
-                            has = 1;break;
+                            has = 1; break;
                         }
                     }
                     if (has == 0)
@@ -310,46 +309,44 @@ namespace SocialNetwork.Service.Implement
                         entityList.Remove(post);
                     }
                 }
-                else if(post.LevelView == 2) 
+                else if (post.LevelView == 2)
                 { entityList.Remove(post); }
-                
+
             }
 
 
             foreach (Post entity in entityList)
             {
-                
-                
-                    var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == entity.Id).FirstOrDefault();
-
-                    List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
-                    List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
-                    List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
-                    List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
-                    CountLike = likes.Count();
-                    CountComment = comments.Count();
-                    PostDTO dto = mapper.Map<PostDTO>(entity);
-                    dto.Images = images;
-                    dto.Videos = videos;
-                    dto.Likes = likes;
-                    dto.Comments = comments;
-                    dto.CountLike = CountLike;
-                    dto.CountComment = CountComment;
-                    //dto.LevelView=entity.LevelView; 
-                    if (like == null)
-                    {
-                        dto.islike = false;
-                    }
-                    else
-                    {
-                        dto.islike = true;
-                    }
 
 
-                    dtoList.Add(dto);
-                
-                
+                var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == entity.Id).FirstOrDefault();
+
+                List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
+                List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
+                List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
+                List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
+                CountLike = likes.Count();
+                CountComment = comments.Count();
+                PostDTO dto = mapper.Map<PostDTO>(entity);
+                dto.Images = images;
+                dto.Videos = videos;
+                dto.Likes = likes;
+                dto.Comments = comments;
+                dto.CountLike = CountLike;
+                dto.CountComment = CountComment;
+                //dto.LevelView=entity.LevelView; 
+                if (like == null)
+                {
+                    dto.islike = false;
+                }
+                else
+                {
+                    dto.islike = true;
+                }
+
+                dtoList.Add(dto);
             }
+
             return dtoList;
         }
         private void DeletePostAndRelationShip(Guid id)

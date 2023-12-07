@@ -173,5 +173,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
     endpoints.MapHub<ChatHub>("/chathub");
+    endpoints.MapHub<CommentHub>("/commentHub");
+    endpoints.MapHub<VideoHub>("/videoHub");
 });
 app.Run();

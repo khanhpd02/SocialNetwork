@@ -58,7 +58,7 @@ namespace SocialNetwork.Controller
                 return BadRequest("Invalid data");
             }
             // Gọi AuthService để xử lý việc đăng ký tài khoản
-            var response =  _userService.VerifyPinForgotPassword(rsg);
+            var response = _userService.VerifyPinForgotPassword(rsg);
             return Ok(response);
 
 
@@ -135,7 +135,7 @@ namespace SocialNetwork.Controller
             else
             {
                 String email = mailDTO.Email.ToString();
-                _userService.SendPinEmail(email,"VerifyPin");
+                _userService.SendPinEmail(email, "VerifyPin");
                 return Ok("ReSendMail successful");
             }
             // Gọi AuthService để xử lý việc đăng ký tài khoản
@@ -152,7 +152,8 @@ namespace SocialNetwork.Controller
                 return BadRequest("Invalid data");
             }
             else
-            {   String email=mailDTO.Email.ToString();
+            {
+                String email = mailDTO.Email.ToString();
                 _userService.SendPinForgotPassword(mailDTO);
                 return Ok("Send Pin ForgotPassword successful");
             }
