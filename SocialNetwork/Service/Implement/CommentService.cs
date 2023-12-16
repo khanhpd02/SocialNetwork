@@ -6,6 +6,7 @@ using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Repository;
+using Comment = SocialNetwork.Entity.Comment;
 
 namespace SocialNetwork.Service.Implement
 {
@@ -54,13 +55,18 @@ namespace SocialNetwork.Service.Implement
         }
         public List<CommentDTO> getAllOnPost(Guid postId)
         {
-            List<Comment> entityList = _commentRepository.FindByCondition(l => l.PostId == postId && l.IsDeleted == false);
+            var rootComments = _commentRepository
+               .FindByCondition(l => l.PostId == postId && l.IsDeleted == false && l.ParentId == null)
+               .ToList();
             List<CommentDTO> dtoList = new List<CommentDTO>();
-            foreach (Comment entity in entityList)
+            foreach (var rootComment in rootComments)
             {
-                CommentDTO dto = mapper.Map<CommentDTO>(entity);
-                dtoList.Add(dto);
+                var comments = GetAllCommentsRecursive(rootComment.Id);
+                var mappedRootComment = mapper.Map<CommentDTO>(rootComment);
+                mappedRootComment.ChildrenComment = comments;
+                dtoList.Add(mappedRootComment);
             }
+
             return dtoList;
         }
         public AppResponse deleteOfUndo(Guid commentId, Guid userId)
@@ -95,15 +101,37 @@ namespace SocialNetwork.Service.Implement
 
         }
 
+        public List<CommentDTO> GetAllCommentsRecursive(Guid? parentId)
+        {
+            List<CommentDTO> result = new List<CommentDTO>();
+            var childComments = _commentRepository
+                .FindByCondition(l => l.ParentId == parentId && l.IsDeleted == false)
+                .ToList();
+            foreach (var childComment in childComments)
+            {
+                var comments = GetAllCommentsRecursive(childComment.Id);
+                var mappedChildComment = mapper.Map<CommentDTO>(childComment);
+                mappedChildComment.ChildrenComment = comments;
+                result.Add(mappedChildComment);
+            }
+
+            return result;
+        }
+
         public List<CommentDTO> getallofUser(Guid userId)
         {
-            List<Comment> entityList = _commentRepository.FindByCondition(l => l.UserId == userId && l.IsDeleted == false);
+            var rootComments = _commentRepository
+                .FindByCondition(l => l.UserId == userId && l.IsDeleted == false && l.ParentId == null)
+                .ToList();
             List<CommentDTO> dtoList = new List<CommentDTO>();
-            foreach (Comment entity in entityList)
+            foreach (var rootComment in rootComments)
             {
-                CommentDTO dto = mapper.Map<CommentDTO>(entity);
-                dtoList.Add(dto);
+                var comments = GetAllCommentsRecursive(rootComment.Id);
+                var mappedRootComment = mapper.Map<CommentDTO>(rootComment);
+                mappedRootComment.ChildrenComment = comments;
+                dtoList.Add(mappedRootComment);
             }
+
             return dtoList;
         }
 

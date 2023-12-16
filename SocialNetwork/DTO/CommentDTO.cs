@@ -19,6 +19,8 @@ public class CommentDTO
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
+    public Guid? ParentId { get; set; }
 
+    public List<CommentDTO> ChildrenComment { get; set; }
 
 }

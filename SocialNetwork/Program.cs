@@ -14,7 +14,6 @@ using System.Text.Json.Serialization;
 using WebApi.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSignalR();
 builder.Services.AddControllers(config =>
 {
     config.Filters.Add(new ResponseFilter());
@@ -67,14 +66,23 @@ builder.Services.AddSwaggerGen(option =>
     //services.AddDbContext<DataContext>();
     services.AddDbContext<SocialNetworkContext>();
     //services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
-    services.AddCors(options => options.AddDefaultPolicy(policy =>
+    services.AddCors(options =>
     {
-        policy
-            .WithOrigins("http://localhost:3000") // Thay thế bằng tên miền của ứng dụng React của bạn
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    }));
+        options.AddPolicy("CorsPolicy",
+            builder => builder
+                .WithOrigins("http://localhost:3000") // Add your frontend origin(s) here
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
+    });
+    services.AddSignalR();
+
+
+    services.AddSignalR().AddHubOptions<VideoHub>(options =>
+    {
+        options.EnableDetailedErrors = true;
+    });
+
     services.AddControllers()
         .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
@@ -162,13 +170,16 @@ if (true)//app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("CorsPolicy");
+
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseForbiddenResponse();
 app.UseUnauthorizedResponse();
 app.UseRouting();
-app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseWebSockets();
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
