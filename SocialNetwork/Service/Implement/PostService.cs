@@ -288,7 +288,6 @@ namespace SocialNetwork.Service.Implement
             List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
                 .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
                 .ToList();
-
             List<Post> entityList = postRepository.FindAll();
             List<PostDTO> dtoList = new List<PostDTO>();
             var CountLike = 0;
@@ -317,7 +316,6 @@ namespace SocialNetwork.Service.Implement
                 }
                 else if (post.LevelView == 2)
                 { postsToRemove.Add(post); }
-
             }
 
             foreach (var postToRemove in postsToRemove)
@@ -326,10 +324,7 @@ namespace SocialNetwork.Service.Implement
             }
             foreach (Post entity in entityList)
             {
-
-
                 var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == entity.Id).FirstOrDefault();
-
                 List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
                 List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
                 List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
@@ -343,7 +338,6 @@ namespace SocialNetwork.Service.Implement
                 dto.Comments = comments;
                 dto.CountLike = CountLike;
                 dto.CountComment = CountComment;
-                //dto.LevelView=entity.LevelView; 
                 if (like == null)
                 {
                     dto.islike = false;
