@@ -52,6 +52,17 @@ namespace SocialNetwork.Controller.User
             }
             return Ok(infor);
         }
+        [HttpGet("searchuser")]
+        [SwaggerOperation(Summary = "Get Infor By Full Name")]
+        public IActionResult GetInforByFullName(string fullname)
+        {
+            var infor = inforService.GetInforByFullName(fullname);
+            if (infor == null)
+            {
+                return NotFound();
+            }
+            return Ok(infor);
+        }
         [HttpGet("myinfor")]
         [SwaggerOperation(Summary = "Get My Infor")]
         public IActionResult GetMyInfor()

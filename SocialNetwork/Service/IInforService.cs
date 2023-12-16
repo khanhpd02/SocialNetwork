@@ -10,6 +10,7 @@ namespace SocialNetwork.Service
         AppResponse createInfo(InforDTO inforDTO, Guid userId);
         AppResponse updateInfo(InforDTO inforDTO, Guid userId);
         AppResponse deleteInfo(Guid id, Guid userId);
+        List<InforDTO> GetInforByFullName(string fullname);
 
     }
 }

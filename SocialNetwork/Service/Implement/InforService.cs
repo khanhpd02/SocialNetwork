@@ -14,7 +14,6 @@ namespace SocialNetwork.Service.Implement
 {
     public class InforService : IInforService
     {
-        //private readonly IInforService _inforService;
         private readonly IInforRepository _inforRepository;
         private readonly IFriendRepository _friendRepository;
         private readonly IMasterDataRepository _masterDataRepository;
@@ -93,6 +92,57 @@ namespace SocialNetwork.Service.Implement
 
             return dto;
         }
+        public List<InforDTO> GetInforByFullName(string fullname)
+        {
+            List<Infor> entities = _inforRepository.FindByCondition(x => x.FullName.Contains(fullname) && x.IsDeleted == false).ToList();
+
+            List<InforDTO> dtos = new List<InforDTO>();
+
+            foreach (var entity in entities)
+            {
+                InforDTO dto = mapper.Map<InforDTO>(entity);
+
+                var checkFriend = _friendRepository.FindByCondition(x =>
+                    (x.UserTo == _userService.UserId && x.UserAccept == entity.Id) ||
+                    (x.UserAccept == _userService.UserId && x.UserTo == entity.Id)
+                ).FirstOrDefault();
+
+                if (checkFriend == null)
+                {
+                    dto.StatusFriend = "Thêm bạn bè";
+                }
+                else if (checkFriend.IsDeleted == true && checkFriend.UserTo == _userService.UserId)
+                {
+                    dto.StatusFriend = "Hủy lời mời";
+                }
+                else if (checkFriend.IsDeleted == true && checkFriend.UserAccept == _userService.UserId)
+                {
+                    dto.StatusFriend = "Phản Hồi";
+                }
+                else if (checkFriend.IsDeleted == false)
+                {
+                    var check = _masterDataRepository.FindByCondition(x => x.Id == checkFriend.Level).FirstOrDefault();
+                    if (check != null)
+                    {
+                        dto.StatusFriend = check.Name;
+                    }
+                    else
+                    {
+                        dto.StatusFriend = "Lỗi";
+                    }
+                }
+
+                if (entity.Id == _userService.UserId)
+                {
+                    dto.StatusFriend = "My Infor";
+                }
+
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+
         public AppResponse createInfo(InforDTO inforDTO, Guid userId)
         {
             if (inforDTO.FullName.IsNullOrEmpty())
