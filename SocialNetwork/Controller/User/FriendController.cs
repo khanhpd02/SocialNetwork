@@ -49,10 +49,18 @@ namespace SocialNetwork.Controller.User
         }
 
         [HttpGet("getAll")]
-        [SwaggerOperation(Summary = "Get All Friends")]
+        [SwaggerOperation(Summary = "Get All NFriends")]
         public IActionResult GetAllFriends()
         {
             var friends = _friendService.GetAllFriends();
+            return Ok(friends);
+        }
+
+        [HttpGet("getAllNotFriend")]
+        [SwaggerOperation(Summary = "Get All Not Friends RanDom")]
+        public IActionResult GetAllNoFriends()
+        {
+            var friends = _friendService.GetAllNotFriends();
             return Ok(friends);
         }
         [HttpGet("getAllLevels")]

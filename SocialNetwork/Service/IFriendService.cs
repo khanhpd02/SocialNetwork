@@ -10,6 +10,7 @@ namespace SocialNetwork.Service
         AppResponse UnFriend(Guid userId);
         AppResponse RefuseFriend(Guid userIdSender);
         List<InforDTO> GetAllFriends();
+        List<InforDTO> GetAllNotFriends();
         List<InforDTO> GetAllFriendsRequests();
         List<MasterDatumDTO> GetAllLevel();
         FriendDTO UpdateLevelFriend(FriendDTO dto);

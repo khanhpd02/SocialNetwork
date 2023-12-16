@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
 using SocialNetwork.DTO.Response;
@@ -264,6 +265,34 @@ namespace SocialNetwork.Service.Implement
 
                 return new AppResponse { message = "Accept Friend Success", success = true };
             }
+        }
+
+        public List<InforDTO> GetAllNotFriends()
+        {
+            var entity = inforRepository.FindByCondition(x => x.IsDeleted == false && x.UserId!=_userService.UserId).ToList();
+            //InforDTO dto = mapper.Map<InforDTO>(entity);
+            Random random = new Random();
+
+            // Sắp xếp danh sách ngẫu nhiên
+            entity = entity.OrderBy(x => random.Next()).ToList();
+            var entityRemove = new List<Infor>();
+            foreach ( var entitys in entity)
+            {
+                 var checkFriend = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == entitys.UserId) || (x.UserAccept == _userService.UserId && x.UserTo == entitys.UserId)).FirstOrDefault();
+                if(checkFriend != null)
+                {
+                    entityRemove.Add(entitys);
+                    //entity.Remove(entitys);
+                }
+                    
+            }
+            foreach (var test in entityRemove) { 
+            
+                entity.Remove(test);
+            }
+            
+            List<InforDTO> dto = mapper.Map<List<InforDTO>>(entity);
+            return dto;
         }
     }
 }
