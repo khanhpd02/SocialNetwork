@@ -20,6 +20,8 @@ public class CommentDTO
 
     public bool IsDeleted { get; set; }
     public Guid? ParentId { get; set; }
+    public string? Image { get; set; }
+    public string? FullName { get; set; }
 
     public List<CommentDTO> ChildrenComment { get; set; }
 

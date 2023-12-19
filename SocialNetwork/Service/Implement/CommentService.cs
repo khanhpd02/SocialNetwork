@@ -13,6 +13,7 @@ namespace SocialNetwork.Service.Implement
     public class CommentService : ICommentService
     {
         private readonly ICommentRepository _commentRepository;
+        private readonly IInforRepository inforRepository;
         private readonly IPostRepository postRepository;
         private SocialNetworkContext _context;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
@@ -20,11 +21,12 @@ namespace SocialNetwork.Service.Implement
             cfg.AddProfile(new MappingProfile());
         }).CreateMapper();
 
-        public CommentService(ICommentRepository commentRepository, IPostRepository postRepository, SocialNetworkContext context)
+        public CommentService(ICommentRepository commentRepository, IPostRepository postRepository, SocialNetworkContext context, IInforRepository inforRepository)
         {
             _commentRepository = commentRepository;
             this.postRepository = postRepository;
             _context = context;
+            this.inforRepository = inforRepository;
         }
 
         public AppResponse create(CommentDTO commentDTO, Guid userId)
@@ -109,9 +111,12 @@ namespace SocialNetwork.Service.Implement
                 .ToList();
             foreach (var childComment in childComments)
             {
+                var infor = inforRepository.FindByCondition(x => x.UserId == childComment.UserId).FirstOrDefault();
                 var comments = GetAllCommentsRecursive(childComment.Id);
                 var mappedChildComment = mapper.Map<CommentDTO>(childComment);
                 mappedChildComment.ChildrenComment = comments;
+                mappedChildComment.FullName = infor.FullName;
+                mappedChildComment.Image = infor.Image;
                 result.Add(mappedChildComment);
             }
 
@@ -126,12 +131,14 @@ namespace SocialNetwork.Service.Implement
             List<CommentDTO> dtoList = new List<CommentDTO>();
             foreach (var rootComment in rootComments)
             {
+                var infor = inforRepository.FindByCondition(x => x.UserId == rootComment.UserId).FirstOrDefault();
                 var comments = GetAllCommentsRecursive(rootComment.Id);
                 var mappedRootComment = mapper.Map<CommentDTO>(rootComment);
                 mappedRootComment.ChildrenComment = comments;
+                mappedRootComment.FullName = infor.FullName;
+                mappedRootComment.Image = infor.Image;
                 dtoList.Add(mappedRootComment);
             }
-
             return dtoList;
         }
 
