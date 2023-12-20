@@ -63,9 +63,12 @@ namespace SocialNetwork.Service.Implement
             List<CommentDTO> dtoList = new List<CommentDTO>();
             foreach (var rootComment in rootComments)
             {
+                var infor = inforRepository.FindByCondition(x => x.UserId == rootComment.UserId).FirstOrDefault();
                 var comments = GetAllCommentsRecursive(rootComment.Id);
                 var mappedRootComment = mapper.Map<CommentDTO>(rootComment);
                 mappedRootComment.ChildrenComment = comments;
+                mappedRootComment.FullName = infor.FullName;
+                mappedRootComment.Image = infor.Image;
                 dtoList.Add(mappedRootComment);
             }
 
