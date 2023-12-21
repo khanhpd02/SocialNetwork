@@ -58,20 +58,59 @@ namespace SocialNetwork.Service.Implement
         public List<CommentDTO> getAllOnPost(Guid postId)
         {
             var rootComments = _commentRepository
-               .FindByCondition(l => l.PostId == postId && l.IsDeleted == false && l.ParentId == null)
-               .ToList();
+                .FindByCondition(l => l.PostId == postId && l.IsDeleted == false && l.ParentId == null)
+                .ToList();
             List<CommentDTO> dtoList = new List<CommentDTO>();
             foreach (var rootComment in rootComments)
             {
-                var infor = inforRepository.FindByCondition(x => x.UserId == rootComment.UserId).FirstOrDefault();
                 var comments = GetAllCommentsRecursive(rootComment.Id);
-                var mappedRootComment = mapper.Map<CommentDTO>(rootComment);
+                var mappedRootComment = MapCommentDTO(rootComment);
                 mappedRootComment.ChildrenComment = comments;
-                mappedRootComment.FullName = infor.FullName;
-                mappedRootComment.Image = infor.Image;
                 dtoList.Add(mappedRootComment);
             }
+            return dtoList;
+        }
 
+        public List<CommentDTO> GetAllCommentsRecursive(Guid? parentId)
+        {
+            List<CommentDTO> result = new List<CommentDTO>();
+            var childComments = _commentRepository
+                .FindByCondition(l => l.ParentId == parentId && l.IsDeleted == false)
+                .ToList();
+            foreach (var childComment in childComments)
+            {
+                var comments = GetAllCommentsRecursive(childComment.Id);
+                var mappedChildComment = MapCommentDTO(childComment);
+                mappedChildComment.ChildrenComment = comments;
+                result.Add(mappedChildComment);
+            }
+            return result;
+        }
+
+        private CommentDTO MapCommentDTO(Comment comment)
+        {
+            var infor = inforRepository.FindByCondition(x => x.UserId == comment.UserId).FirstOrDefault();
+            var mappedComment = mapper.Map<CommentDTO>(comment);
+            if (infor != null)
+            {
+                mappedComment.FullName = infor.FullName;
+                mappedComment.Image = infor.Image;
+            }
+            return mappedComment;
+        }
+        public List<CommentDTO> getallofUser(Guid userId)
+        {
+            var rootComments = _commentRepository
+                .FindByCondition(l => l.UserId == userId && l.IsDeleted == false && l.ParentId == null)
+                .ToList();
+            List<CommentDTO> dtoList = new List<CommentDTO>();
+            foreach (var rootComment in rootComments)
+            {
+                var comments = GetAllCommentsRecursive(rootComment.Id);
+                var mappedRootComment = MapCommentDTO(rootComment);
+                mappedRootComment.ChildrenComment = comments;
+                dtoList.Add(mappedRootComment);
+            }
             return dtoList;
         }
         public AppResponse deleteOfUndo(Guid commentId, Guid userId)
@@ -104,45 +143,6 @@ namespace SocialNetwork.Service.Implement
                 throw new BadRequestException("Không thể xóa cmt của người khác");
             }
 
-        }
-
-        public List<CommentDTO> GetAllCommentsRecursive(Guid? parentId)
-        {
-            List<CommentDTO> result = new List<CommentDTO>();
-            var childComments = _commentRepository
-                .FindByCondition(l => l.ParentId == parentId && l.IsDeleted == false)
-                .ToList();
-            foreach (var childComment in childComments)
-            {
-                var infor = inforRepository.FindByCondition(x => x.UserId == childComment.UserId).FirstOrDefault();
-                var comments = GetAllCommentsRecursive(childComment.Id);
-                var mappedChildComment = mapper.Map<CommentDTO>(childComment);
-                mappedChildComment.ChildrenComment = comments;
-                mappedChildComment.FullName = infor.FullName;
-                mappedChildComment.Image = infor.Image;
-                result.Add(mappedChildComment);
-            }
-
-            return result;
-        }
-
-        public List<CommentDTO> getallofUser(Guid userId)
-        {
-            var rootComments = _commentRepository
-                .FindByCondition(l => l.UserId == userId && l.IsDeleted == false && l.ParentId == null)
-                .ToList();
-            List<CommentDTO> dtoList = new List<CommentDTO>();
-            foreach (var rootComment in rootComments)
-            {
-                var infor = inforRepository.FindByCondition(x => x.UserId == rootComment.UserId).FirstOrDefault();
-                var comments = GetAllCommentsRecursive(rootComment.Id);
-                var mappedRootComment = mapper.Map<CommentDTO>(rootComment);
-                mappedRootComment.ChildrenComment = comments;
-                mappedRootComment.FullName = infor.FullName;
-                mappedRootComment.Image = infor.Image;
-                dtoList.Add(mappedRootComment);
-            }
-            return dtoList;
         }
 
         public List<CommentDTO> getallofUseronPost(Guid postId, Guid userId)
