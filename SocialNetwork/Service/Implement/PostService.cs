@@ -175,7 +175,16 @@ namespace SocialNetwork.Service.Implement
                 throw new PostNotFoundException(dto.Id);
             }
             string cloudinaryUrl = UploadFileToCloudinary(dto.File);
-
+                var imageLast = imageRepository.FindByCondition(x => x.PostId == dto.Id).FirstOrDefault();
+            if (dto.Images!=null)
+            {
+                if (imageLast!=null)
+                {
+                    imageLast.IsDeleted = true;
+                }
+            }
+            imageRepository.Update(imageLast);
+            imageRepository.Save();
             postcheck.Content = dto.Content;
             postRepository.Update(postcheck);
             postRepository.Save();
