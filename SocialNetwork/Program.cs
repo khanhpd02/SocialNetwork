@@ -70,7 +70,7 @@ builder.Services.AddSwaggerGen(option =>
     {
         options.AddPolicy("CorsPolicy",
             builder => builder
-                .WithOrigins("https://font-socialk-network.vercel.app") // Add your frontend origin(s) here
+                .WithOrigins("https://font-socialk-network.vercel.app", "https://front-tlcn.vercel.app", "http://localhost:3000") // Add your frontend origin(s) here
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials());

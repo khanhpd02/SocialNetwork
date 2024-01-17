@@ -6,7 +6,8 @@ public class PostDTO
 {
     public Guid? Id { get; set; }
     public string? Content { get; set; }
-
+    public string? FullName { get; set; }
+    public string? AvatarUrl { get; set; }
     public Guid UserId { get; set; }
     public IFormFile? File { get; set; }
 

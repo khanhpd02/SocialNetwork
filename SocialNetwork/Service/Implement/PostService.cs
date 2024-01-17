@@ -237,6 +237,7 @@ namespace SocialNetwork.Service.Implement
             var CountLike = 0;
             var CountComment = 0;
             Post entity = postRepository.FindById(id) ?? throw new PostNotFoundException(id);
+            var infor = inforRepository.FindByCondition(x => x.UserId == entity.UserId && x.IsDeleted == false).FirstOrDefault();
 
             List<Image> images = imageRepository.FindByCondition(img => img.PostId == id && img.IsDeleted == false).ToList();
             List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == id && vid.IsDeleted == false).ToList();
@@ -245,7 +246,8 @@ namespace SocialNetwork.Service.Implement
             CountLike = likes.Count();
             CountComment = comments.Count();
             PostDTO dto = mapper.Map<PostDTO>(entity);
-
+            dto.FullName=infor.FullName;
+            dto.AvatarUrl = infor.Image;
             dto.Images = images;
             dto.Videos = videos;
             dto.Likes = likes;
@@ -265,6 +267,7 @@ namespace SocialNetwork.Service.Implement
 
             foreach (Post entity in entityList)
             {
+                var infor= inforRepository.FindByCondition(x=>x.UserId==entity.UserId && x.IsDeleted == false).FirstOrDefault();
                 List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
                 List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
                 List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
@@ -272,6 +275,8 @@ namespace SocialNetwork.Service.Implement
                 CountLike = likes.Count();
                 CountComment = comments.Count();
                 PostDTO dto = mapper.Map<PostDTO>(entity);
+                dto.AvatarUrl = infor.Image;
+                dto.FullName= infor.FullName;
                 dto.Images = images;
                 dto.Videos = videos;
                 dto.Likes = likes;
@@ -333,6 +338,7 @@ namespace SocialNetwork.Service.Implement
             }
             foreach (Post entity in entityList)
             {
+                var infor =inforRepository.FindByCondition(x=>x.UserId== entity.UserId && x.IsDeleted == false).FirstOrDefault();
                 var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == entity.Id).FirstOrDefault();
                 List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
                 List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
@@ -341,6 +347,8 @@ namespace SocialNetwork.Service.Implement
                 CountLike = likes.Count();
                 CountComment = comments.Count();
                 PostDTO dto = mapper.Map<PostDTO>(entity);
+                dto.FullName=infor.FullName;
+                dto.AvatarUrl = infor.Image;
                 dto.Images = images;
                 dto.Videos = videos;
                 dto.Likes = likes;
