@@ -52,78 +52,82 @@ namespace SocialNetwork.Service.Implement
             this.notifyRepository = notifyRepository;
             this.inforRepository = inforRepository;
         }
-        public string UploadFileToCloudinary(IFormFile fileUploadDTO)
+        public List<string> UploadFilesToCloudinary(List<IFormFile> files)
         {
-            if (fileUploadDTO != null && fileUploadDTO.Length > 0)
+            List<string> uploadedUrls = new List<string>();
+
+            foreach (var file in files)
             {
-                if (Path.GetExtension(fileUploadDTO.FileName).Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+                if (file != null && file.Length > 0)
                 {
-                    var uploadParamsVideo = new VideoUploadParams
+                    if (Path.GetExtension(file.FileName).Equals(".mp4", StringComparison.OrdinalIgnoreCase))
                     {
-                        File = new FileDescription(fileUploadDTO.FileName, fileUploadDTO.OpenReadStream()),
-                        Folder = "SocialNetwork/Video/",
-                    };
+                        var uploadParamsVideo = new VideoUploadParams
+                        {
+                            File = new FileDescription(file.FileName, file.OpenReadStream()),
+                            Folder = "SocialNetwork/Video/",
+                        };
 
-                    try
-                    {
-                        var uploadResult = _cloudinary.Upload(uploadParamsVideo);
-                        return uploadResult.SecureUrl.AbsoluteUri;
+                        try
+                        {
+                            var uploadResult = _cloudinary.Upload(uploadParamsVideo);
+                            uploadedUrls.Add(uploadResult.SecureUrl.AbsoluteUri);
+                        }
+                        catch (Exception)
+                        {
+                            // Handle error
+                        }
                     }
-                    catch (Exception)
+                    else if (Path.GetExtension(file.FileName).Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                             Path.GetExtension(file.FileName).Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                             Path.GetExtension(file.FileName).Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                             Path.GetExtension(file.FileName).Equals(".gif", StringComparison.OrdinalIgnoreCase))
                     {
-                        return null;
+                        var uploadParams = new ImageUploadParams
+                        {
+                            File = new FileDescription(file.FileName, file.OpenReadStream()),
+                            Folder = "SocialNetwork/Image/",
+                        };
+
+                        try
+                        {
+                            var uploadResult = _cloudinary.Upload(uploadParams);
+                            uploadedUrls.Add(uploadResult.SecureUrl.AbsoluteUri);
+                        }
+                        catch (Exception)
+                        {
+                            // Handle error
+                        }
                     }
                 }
-                if (Path.GetExtension(fileUploadDTO.FileName).Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(fileUploadDTO.FileName).Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(fileUploadDTO.FileName).Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(fileUploadDTO.FileName).Equals(".gif", StringComparison.OrdinalIgnoreCase))
-                {
-                    var uploadParams = new ImageUploadParams
-                    {
-                        File = new FileDescription(fileUploadDTO.FileName, fileUploadDTO.OpenReadStream()),
-                        Folder = "SocialNetwork/Image/",
-                    };
-
-                    try
-                    {
-                        var uploadResult = _cloudinary.Upload(uploadParams);
-                        return uploadResult.SecureUrl.AbsoluteUri;
-                    }
-                    catch (Exception)
-                    {
-                        return null;
-                    }
-                }
-
             }
 
-            return null;
+            return uploadedUrls;
         }
+
         public PostDTO Create(PostDTO dto)
         {
+            List<string> cloudinaryUrls = UploadFilesToCloudinary(dto.File);
 
-            string cloudinaryUrl = UploadFileToCloudinary(dto.File);
             Post post = mapper.Map<Post>(dto);
             post.UserId = _userService.UserId;
             postRepository.Create(post);
             postRepository.Save();
 
-            if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
+            foreach (var cloudinaryUrl in cloudinaryUrls)
             {
-                string fileExtension = Path.GetExtension(cloudinaryUrl);
-                if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                       fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                       fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-                       fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(cloudinaryUrl))
                 {
-                    var link = cloudinaryUrl;
-                    if (link != null)
+                    string fileExtension = Path.GetExtension(cloudinaryUrl);
+                    if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                        fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                        fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                        fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
                     {
-                        Image image = new Image
+                        var image = new Image
                         {
                             PostId = post.Id,
-                            LinkImage = link,
+                            LinkImage = cloudinaryUrl,
                             CreateDate = DateTime.Now,
                             CreateBy = _userService.UserId,
                             IsDeleted = false
@@ -131,16 +135,12 @@ namespace SocialNetwork.Service.Implement
                         imageRepository.Create(image);
                         imageRepository.Save();
                     }
-                }
-                if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
-                {
-                    var link = cloudinaryUrl;
-                    if (link != null)
+                    else if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
                     {
-                        Video video = new Video
+                        var video = new Video
                         {
                             PostId = post.Id,
-                            Link = link,
+                            Link = cloudinaryUrl,
                             CreateDate = DateTime.Now,
                             CreateBy = _userService.UserId,
                             IsDeleted = false
@@ -174,64 +174,69 @@ namespace SocialNetwork.Service.Implement
             {
                 throw new PostNotFoundException(dto.Id);
             }
-            string cloudinaryUrl = UploadFileToCloudinary(dto.File);
-                var imageLast = imageRepository.FindByCondition(x => x.PostId == dto.Id).FirstOrDefault();
-            if (dto.Images!=null)
+
+            // Xác định ảnh cuối cùng liên kết với bài đăng và đánh dấu nó là đã xóa
+            var imageLast = imageRepository.FindByCondition(x => x.PostId == dto.Id).FirstOrDefault();
+            if (dto.Images != null && imageLast != null)
             {
-                if (imageLast!=null)
-                {
-                    imageLast.IsDeleted = true;
-                }
+                imageLast.IsDeleted = true;
+                imageRepository.Update(imageLast);
+                imageRepository.Save();
             }
-            imageRepository.Update(imageLast);
-            imageRepository.Save();
+
+            // Cập nhật nội dung bài đăng
             postcheck.Content = dto.Content;
             postRepository.Update(postcheck);
             postRepository.Save();
-            if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
+
+            // Tải lên và liên kết các ảnh/video mới (nếu có)
+            if (dto.File != null && dto.File.Any())
             {
-                string fileExtension = Path.GetExtension(cloudinaryUrl);
-                if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                       fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                       fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-                       fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                List<string> cloudinaryUrls = UploadFilesToCloudinary(dto.File);
+
+                foreach (var cloudinaryUrl in cloudinaryUrls)
                 {
-                    var link = cloudinaryUrl;
-                    if (link != null)
+                    if (!string.IsNullOrEmpty(cloudinaryUrl))
                     {
-                        Image image = new Image
+                        string fileExtension = Path.GetExtension(cloudinaryUrl);
+                        if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
                         {
-                            PostId = dto.Id,
-                            LinkImage = link,
-                            CreateDate = DateTime.Now,
-                            CreateBy = _userService.UserId,
-                            IsDeleted = false
-                        };
-                        imageRepository.Create(image);
-                        imageRepository.Save();
-                    }
-                }
-                if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
-                {
-                    var link = cloudinaryUrl;
-                    if (link != null)
-                    {
-                        Video video = new Video
+                            var link = cloudinaryUrl;
+                            Image image = new Image
+                            {
+                                PostId = dto.Id,
+                                LinkImage = link,
+                                CreateDate = DateTime.Now,
+                                CreateBy = _userService.UserId,
+                                IsDeleted = false
+                            };
+                            imageRepository.Create(image);
+                            imageRepository.Save();
+                        }
+                        else if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
                         {
-                            PostId = dto.Id,
-                            Link = link,
-                            CreateDate = DateTime.Now,
-                            CreateBy = _userService.UserId,
-                            IsDeleted = false
-                        };
-                        videoRepository.Create(video);
-                        videoRepository.Save();
+                            var link = cloudinaryUrl;
+                            Video video = new Video
+                            {
+                                PostId = dto.Id,
+                                Link = link,
+                                CreateDate = DateTime.Now,
+                                CreateBy = _userService.UserId,
+                                IsDeleted = false
+                            };
+                            videoRepository.Create(video);
+                            videoRepository.Save();
+                        }
                     }
                 }
             }
 
             return dto;
         }
+
         public PostDTO GetById(Guid id)
         {
             var CountLike = 0;

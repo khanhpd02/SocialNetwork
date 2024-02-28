@@ -9,7 +9,7 @@ public class PostDTO
     public string? FullName { get; set; }
     public string? AvatarUrl { get; set; }
     public Guid UserId { get; set; }
-    public IFormFile? File { get; set; }
+    public List<IFormFile?> File { get; set; }
 
     public DateTime? CreateDate { get; set; }
 

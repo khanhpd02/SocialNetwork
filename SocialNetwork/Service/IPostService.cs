@@ -5,7 +5,7 @@ namespace SocialNetwork.Service
     public interface IPostService
     {
         List<PostDTO> GetPostByUserId(Guid id);
-        string UploadFileToCloudinary(IFormFile fileUploadDTO);
+        List<string> UploadFilesToCloudinary(List<IFormFile> files);
         PostDTO Create(PostDTO dto);
         PostDTO Update(PostDTO dto);
         PostDTO GetById(Guid id);
