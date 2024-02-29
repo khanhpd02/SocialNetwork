@@ -236,21 +236,25 @@ namespace SocialNetwork.Service.Implement
 
             return dto;
         }
-        //public PostDTO SharePost(Guid id) { 
-        //var postOrigin= postRepository.FindById(id);
-        //    if (postOrigin != null)
-        //    {
-        //        throw new Exception("Id of Post is eror");
-        //    }
-        //    else
-        //    {
-        //        if (postOrigin.LevelView == (int)(EnumLevelView.publicview))
-        //        {
+        public PostDTO SharePost(Guid id)
+        {
+            var postOrigin = postRepository.FindById(id);
+            if (postOrigin == null)
+            {
+                throw new Exception("Id of Post is invalid");
+            }
+            else
+            {
+                    Post postNew = new Post();
+                    mapper.Map(postOrigin, postNew);
+                    postRepository.Create(postNew);
+                    postRepository.Save();
+                    PostDTO postDTO = new PostDTO();
+                    postDTO=mapper.Map<PostDTO>(postNew);
+                    return postDTO;
+            }
+        }
 
-        //        }
-        //    }
-        //    return postOrigin;
-        //}
         public PostDTO GetById(Guid id)
         {
             var CountLike = 0;

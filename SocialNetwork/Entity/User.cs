@@ -1,4 +1,7 @@
-﻿namespace SocialNetwork.Entity;
+﻿using System;
+using System.Collections.Generic;
+
+namespace SocialNetwork.Entity;
 
 public partial class User : IEntity
 {
@@ -32,7 +35,11 @@ public partial class User : IEntity
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
+    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
+
+    public virtual ICollection<Share> Shares { get; set; } = new List<Share>();
 
     public virtual ICollection<UserGroupChat> UserGroupChats { get; set; } = new List<UserGroupChat>();
 

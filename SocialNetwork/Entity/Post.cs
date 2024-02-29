@@ -23,8 +23,6 @@ public partial class Post : IEntity
 
     public int LevelView { get; set; }
 
-    public Guid? PostOriginId { get; set; }
-
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();
@@ -33,7 +31,11 @@ public partial class Post : IEntity
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
+    public virtual ICollection<Share> Shares { get; set; } = new List<Share>();
+
     public virtual ICollection<TagPost> TagPosts { get; set; } = new List<TagPost>();
+
+    public virtual User User { get; set; }
 
     public virtual ICollection<Video> Videos { get; set; } = new List<Video>();
 }

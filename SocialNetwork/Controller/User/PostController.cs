@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.DTO;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
@@ -44,6 +45,18 @@ namespace SocialNetwork.Controller.User
             }
             var createdPost = postService.Create(postDTO);
             return Ok(createdPost);
+        }
+        [HttpPost("{id}")]
+        [SwaggerOperation(Summary = "Shared a Post")]
+        public IActionResult Share( Guid id)
+        {
+
+            if (id.ToString().IsNullOrEmpty())
+            {
+                return BadRequest("Invalid data");
+            }
+            var sharedPost = postService.SharePost(id);
+            return Ok(sharedPost);
         }
         [HttpPut]
         [SwaggerOperation(Summary = "Update a Post")]

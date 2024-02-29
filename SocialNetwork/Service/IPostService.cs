@@ -8,6 +8,7 @@ namespace SocialNetwork.Service
         List<string> UploadFilesToCloudinary(List<IFormFile> files);
         PostDTO Create(PostDTO dto);
         PostDTO Update(PostDTO dto);
+        PostDTO SharePost(Guid id);
         PostDTO GetById(Guid id);
         void Delete(Guid id);
         List<PostDTO> GetAll();
