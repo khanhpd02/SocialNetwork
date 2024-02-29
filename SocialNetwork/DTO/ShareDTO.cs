@@ -21,5 +21,7 @@ namespace SocialNetwork.DTO
         public Guid? UpdateBy { get; set; }
 
         public bool IsDeleted { get; set; }
+        public string Link { get; set; }
+
     }
 }

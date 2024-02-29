@@ -23,6 +23,10 @@ public partial class Share : IEntity
 
     public bool IsDeleted { get; set; }
 
+    public string Link { get; set; }
+
+    public int? Level { get; set; }
+
     public virtual Post Post { get; set; }
 
     public virtual User User { get; set; }

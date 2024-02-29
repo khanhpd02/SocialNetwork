@@ -25,7 +25,8 @@ namespace SocialNetwork.Service.Implement
         private readonly IMasterDataRepository masterDataRepository;
         private readonly INotifyRepository notifyRepository;
         private readonly IInforRepository inforRepository;
-
+        private readonly IShareRepository shareRepository;
+        private readonly IHttpContextAccessor httpContextAccessor;
         private IUserService _userService;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
@@ -36,7 +37,8 @@ namespace SocialNetwork.Service.Implement
             SocialNetworkContext _context, Cloudinary _cloudinary,
             IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository,
             IUserService userService, IFriendRepository friendRepository,
-            IMasterDataRepository masterDataRepository, INotifyRepository notifyRepository, IInforRepository inforRepository)
+            IMasterDataRepository masterDataRepository, INotifyRepository notifyRepository, IInforRepository inforRepository,
+            IShareRepository shareRepository, IHttpContextAccessor httpContextAccessor)
         {
             this.postRepository = postRepository;
             this.userRepository = userRepository;
@@ -51,6 +53,8 @@ namespace SocialNetwork.Service.Implement
             this.masterDataRepository = masterDataRepository;
             this.notifyRepository = notifyRepository;
             this.inforRepository = inforRepository;
+            this.shareRepository = shareRepository;
+            this.httpContextAccessor = httpContextAccessor;
         }
         public List<string> UploadFilesToCloudinary(List<IFormFile> files)
         {
@@ -236,22 +240,26 @@ namespace SocialNetwork.Service.Implement
 
             return dto;
         }
-        public PostDTO SharePost(Guid id)
+        public ShareDTO SharePost(Guid id,String content)
         {
             var postOrigin = postRepository.FindById(id);
+            var currentDomain = httpContextAccessor.HttpContext.Request.Host.Value;
             if (postOrigin == null)
             {
                 throw new Exception("Id of Post is invalid");
             }
             else
             {
-                    Post postNew = new Post();
-                    mapper.Map(postOrigin, postNew);
-                    postRepository.Create(postNew);
-                    postRepository.Save();
-                    PostDTO postDTO = new PostDTO();
-                    postDTO=mapper.Map<PostDTO>(postNew);
-                    return postDTO;
+                   Share share=new Share { 
+                       Content = content,
+                       PostId=id,
+                       UserId=_userService.UserId,
+                       Link= $"https://{currentDomain}/api/post/{id}"
+            };
+                shareRepository.Create(share);
+                shareRepository.Save();
+                ShareDTO shareDTO = mapper.Map<ShareDTO>(share);
+                return shareDTO;
             }
         }
 

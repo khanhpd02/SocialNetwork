@@ -48,14 +48,14 @@ namespace SocialNetwork.Controller.User
         }
         [HttpPost("{id}")]
         [SwaggerOperation(Summary = "Shared a Post")]
-        public IActionResult Share( Guid id)
+        public IActionResult Share( Guid id,String content)
         {
 
             if (id.ToString().IsNullOrEmpty())
             {
                 return BadRequest("Invalid data");
             }
-            var sharedPost = postService.SharePost(id);
+            var sharedPost = postService.SharePost(id, content);
             return Ok(sharedPost);
         }
         [HttpPut]

@@ -117,6 +117,7 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<INotifyRepository, NotifyRepository>();
     services.AddScoped<IMasterDataRepository, MasterDataRepository>();
     services.AddScoped<IFriendRepository, FriendRepository>();
+    services.AddScoped<IShareRepository, ShareRepository>();
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
