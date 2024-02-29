@@ -1,4 +1,7 @@
-﻿namespace SocialNetwork.Entity;
+﻿using System;
+using System.Collections.Generic;
+
+namespace SocialNetwork.Entity;
 
 public partial class Post : IEntity
 {
@@ -17,7 +20,10 @@ public partial class Post : IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
+
     public int LevelView { get; set; }
+
+    public Guid? PostOriginId { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

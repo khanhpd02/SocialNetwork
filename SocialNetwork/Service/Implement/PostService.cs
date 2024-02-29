@@ -236,7 +236,21 @@ namespace SocialNetwork.Service.Implement
 
             return dto;
         }
+        //public PostDTO SharePost(Guid id) { 
+        //var postOrigin= postRepository.FindById(id);
+        //    if (postOrigin != null)
+        //    {
+        //        throw new Exception("Id of Post is eror");
+        //    }
+        //    else
+        //    {
+        //        if (postOrigin.LevelView == (int)(EnumLevelView.publicview))
+        //        {
 
+        //        }
+        //    }
+        //    return postOrigin;
+        //}
         public PostDTO GetById(Guid id)
         {
             var CountLike = 0;
@@ -333,7 +347,7 @@ namespace SocialNetwork.Service.Implement
                         postsToRemove.Add(post);
                     }
                 }
-                else if (post.LevelView == 2)
+                else if (post.LevelView == (int)(EnumLevelView.friendview))
                 { postsToRemove.Add(post); }
             }
 

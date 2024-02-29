@@ -63,9 +63,7 @@ builder.Services.AddSwaggerGen(option =>
 
     services.AddHttpContextAccessor();
 
-    //services.AddDbContext<DataContext>();
     services.AddDbContext<SocialNetworkContext>();
-    //services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
     services.AddCors(options =>
     {
         options.AddPolicy("CorsPolicy",
@@ -104,14 +102,6 @@ builder.Services.AddSwaggerGen(option =>
     {
         services.AddScoped(serviceType.GetInterfaces().First(), serviceType);
     }
-    //services.AddScoped<IUserService, UserService>();
-    //services.AddScoped<IPostService, PostService>();
-    //services.AddScoped<IEmailService, EmailService>();
-    //services.AddScoped<ILikeService, LikeService>();
-    //services.AddScoped<ICommentService, CommentService>();
-    //services.AddScoped<IInforService, InforService>();
-
-
     services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<IRoleRepository, RoleRepository>();
     services.AddScoped<IUserRoleRepository, UserRoleRepository>();
@@ -127,8 +117,6 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<INotifyRepository, NotifyRepository>();
     services.AddScoped<IMasterDataRepository, MasterDataRepository>();
     services.AddScoped<IFriendRepository, FriendRepository>();
-
-
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -183,8 +171,5 @@ app.UseWebSockets();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHub<ChatHub>("/chathub");
-    endpoints.MapHub<CommentHub>("/commentHub");
-    endpoints.MapHub<VideoHub>("/videoHub");
 });
 app.Run();
