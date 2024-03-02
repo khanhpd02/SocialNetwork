@@ -83,7 +83,7 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "Get All Posts")]
         public IActionResult GetAll()
         {
-            var posts = postService.GetAll();
+            var posts = postService.GetAllPostsAndShare();
             foreach (var post in posts)
             {
                 _commentHub.Clients.Group(post.Id.ToString()).SendAsync("JoinPostGroup", post.Id);
@@ -95,7 +95,7 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "Get Post By UserId")]
         public IActionResult GetPostByUserId(Guid id)
         {
-            var post = postService.GetAllPostsAndShareByUserId(id);
+            var post = postService.GetPostsAndShareByUserId(id);
             if (post == null)
             {
                 return NotFound();

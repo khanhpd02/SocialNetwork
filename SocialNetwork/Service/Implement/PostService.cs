@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Helpers;
 using SocialNetwork.Repository;
+using Comment = SocialNetwork.Entity.Comment;
 using Video = SocialNetwork.Entity.Video;
 
 namespace SocialNetwork.Service.Implement
@@ -294,7 +296,81 @@ namespace SocialNetwork.Service.Implement
 
             return dto;
         }
-        public List<PostDTO> GetAllPostShare(Guid userId)
+        public List<PostDTO> GetAllPostShare()
+        {
+            List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
+                .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
+                .ToList();
+            List<PostDTO> postsToRemove = new List<PostDTO>();
+            var shares = shareRepository.FindByCondition(x => x.IsDeleted == false).ToList();
+            var listPostShareDTO = new List<PostDTO>();
+            var CountLike = 0;
+            var CountComment = 0;
+            foreach (var share in shares)
+            {
+                var infor = inforRepository.FindByCondition(x => x.UserId == share.UserId).FirstOrDefault();
+
+                var postShare = postRepository.FindByCondition(x => x.Id == share.PostId && x.IsDeleted == false).FirstOrDefault();
+
+                if (postShare != null)
+                {
+                    var userShare = userRepository.FindByCondition(x => x.Id == postShare.UserId).FirstOrDefault();
+                    var inforUserPost = inforRepository.FindByCondition(x => x.UserId == userShare.Id).FirstOrDefault();
+                    List<Image> images = imageRepository.FindByCondition(img => img.PostId == postShare.Id && img.IsDeleted == false).ToList();
+                    List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == postShare.Id && vid.IsDeleted == false).ToList();
+                    List<Like> likes = likeRepository.FindByCondition(img => img.PostId == postShare.Id && img.IsDeleted == false).ToList();
+                    List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == postShare.Id && vid.IsDeleted == false).ToList();
+                    CountLike = likes.Count();
+                    CountComment = comments.Count();
+                    var postShareDTO = mapper.Map<PostDTO>(postShare);
+                    postShareDTO.FullName = inforUserPost.FullName;
+                    postShareDTO.AvatarUrl = inforUserPost.Image;
+                    postShareDTO.FullNameShare = infor.FullName;
+                    postShareDTO.AvatarUrlShare = infor.Image;
+                    postShareDTO.Images = images;
+                    postShareDTO.Videos = videos;
+                    postShareDTO.Likes = likes;
+                    postShareDTO.Comments = comments;
+                    postShareDTO.CountLike = CountLike;
+                    postShareDTO.CountComment = CountComment;
+                    postShareDTO.LevelViewShare = share.LevelView;
+                    postShareDTO.UserIdSharePost = infor.UserId;
+                    postShareDTO.CreateDateShare = share.CreateDate;
+                    listPostShareDTO.Add(postShareDTO);
+                }
+            }
+            foreach (PostDTO post in listPostShareDTO)
+            {
+                int has = 0;
+                if (post.UserIdSharePost == _userService.UserId && post.IsDeleted == false)
+                {
+                    continue;
+                }
+                if (idOfFriends.Count != 0)
+                {
+                    foreach (Guid idfriend in idOfFriends)
+                    {
+                        if ((idfriend == post.UserIdSharePost || post.LevelViewShare == (int)(EnumLevelView.publicview)) && post.IsDeleted == false)
+                        {
+                            has = 1; break;
+                        }
+                    }
+                    if (has == 0)
+                    {
+                        postsToRemove.Add(post);
+                    }
+                }
+                else if (post.LevelViewShare == (int)(EnumLevelView.friendview))
+                { postsToRemove.Add(post); }
+            }
+
+            foreach (var postToRemove in postsToRemove)
+            {
+                listPostShareDTO.Remove(postToRemove);
+            }
+            return listPostShareDTO;
+        }
+        public List<PostDTO> GetPostShareByUserId(Guid userId)
         {
             List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
                 .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
@@ -332,6 +408,7 @@ namespace SocialNetwork.Service.Implement
                     postShareDTO.CountLike = CountLike;
                     postShareDTO.CountComment = CountComment;
                     postShareDTO.LevelViewShare = share.LevelView;
+                    postShareDTO.CreateDateShare = share.CreateDate;
                     listPostShareDTO.Add(postShareDTO);
                 }
             }
@@ -426,6 +503,7 @@ namespace SocialNetwork.Service.Implement
                 dto.Comments = comments;
                 dto.CountLike = CountLike;
                 dto.CountComment = CountComment;
+                dto.CreateDateShare = dto.CreateDate;
                 if (like == null)
                 {
                     dto.islike = false;
@@ -438,12 +516,25 @@ namespace SocialNetwork.Service.Implement
             }
             return dtoList;
         }
-        public List<PostDTO> GetAllPostsAndShareByUserId(Guid userId)
+        public List<PostDTO> GetPostsAndShareByUserId(Guid userId)
         {
-            var sharedPosts = GetAllPostShare(userId);
+            var sharedPosts = GetPostShareByUserId(userId);
             var userPosts = GetPostByUserId(userId);
+
             var allPosts = sharedPosts.Concat(userPosts).ToList();
-            allPosts = allPosts.OrderByDescending(post => post.CreateDate).ToList();
+
+            allPosts = allPosts.OrderByDescending(post => post.CreateDateShare).ToList();
+
+
+            return allPosts;
+        }
+
+        public List<PostDTO> GetAllPostsAndShare()
+        {
+            var sharedPosts = GetAllPostShare();
+            var userPosts = GetAllPost();
+            var allPosts = sharedPosts.Concat(userPosts).ToList();
+            allPosts = allPosts.OrderByDescending(post => post.CreateDateShare).ToList();
             return allPosts;
         }
         public void Delete(Guid id)
@@ -456,7 +547,7 @@ namespace SocialNetwork.Service.Implement
             postRepository.Save();
         }
 
-        public List<PostDTO> GetAll()
+        public List<PostDTO> GetAllPost()
         {
             List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
                 .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
@@ -514,6 +605,7 @@ namespace SocialNetwork.Service.Implement
                 dto.Comments = comments;
                 dto.CountLike = CountLike;
                 dto.CountComment = CountComment;
+                dto.CreateDateShare = dto.CreateDate;
                 if (like == null)
                 {
                     dto.islike = false;

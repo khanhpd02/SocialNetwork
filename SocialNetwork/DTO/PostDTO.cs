@@ -12,6 +12,7 @@ public class PostDTO
     public List<IFormFile?> File { get; set; }
 
     public DateTime? CreateDate { get; set; }
+    public DateTime? CreateDateShare { get; set; }
 
     public Guid? CreateBy { get; set; }
 
@@ -34,5 +35,6 @@ public class PostDTO
         Comments = new List<Comment>();
     }
     public bool IsDeleted { get; set; }
+    public Guid? UserIdSharePost { get; set; }
 
 }
