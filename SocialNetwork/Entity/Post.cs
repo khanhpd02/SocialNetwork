@@ -31,8 +31,6 @@ public partial class Post : IEntity
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
-    public virtual ICollection<Share> Shares { get; set; } = new List<Share>();
-
     public virtual ICollection<TagPost> TagPosts { get; set; } = new List<TagPost>();
 
     public virtual User User { get; set; }

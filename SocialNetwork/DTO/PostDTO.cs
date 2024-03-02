@@ -23,6 +23,9 @@ public class PostDTO
     public int CountComment { get; set; }
     public bool islike { get; set; }
     public int LevelView { get; set; }
+    public int? LevelViewShare { get; set; }
+    public string? FullNameShare { get; set; }
+    public string? AvatarUrlShare { get; set; }
     public PostDTO()
     {
         Images = new List<Image>();
@@ -30,4 +33,6 @@ public class PostDTO
         Likes = new List<Like>();
         Comments = new List<Comment>();
     }
+    public bool IsDeleted { get; set; }
+
 }

@@ -22,6 +22,7 @@ namespace SocialNetwork.DTO
 
         public bool IsDeleted { get; set; }
         public string Link { get; set; }
+        public int LevelView { get; set; }
 
     }
 }

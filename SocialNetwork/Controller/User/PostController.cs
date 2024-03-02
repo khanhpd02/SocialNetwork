@@ -48,14 +48,14 @@ namespace SocialNetwork.Controller.User
         }
         [HttpPost("{id}")]
         [SwaggerOperation(Summary = "Shared a Post")]
-        public IActionResult Share( Guid id,String content)
+        public IActionResult Share(ShareDTO sharePostDTO)
         {
 
-            if (id.ToString().IsNullOrEmpty())
+            if (sharePostDTO.PostId.ToString().IsNullOrEmpty())
             {
                 return BadRequest("Invalid data");
             }
-            var sharedPost = postService.SharePost(id, content);
+            var sharedPost = postService.SharePost(sharePostDTO);
             return Ok(sharedPost);
         }
         [HttpPut]
@@ -95,7 +95,7 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "Get Post By UserId")]
         public IActionResult GetPostByUserId(Guid id)
         {
-            var post = postService.GetPostByUserId(id);
+            var post = postService.GetAllPostsAndShareByUserId(id);
             if (post == null)
             {
                 return NotFound();
