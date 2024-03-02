@@ -1,4 +1,7 @@
-﻿namespace SocialNetwork.Entity;
+﻿using System;
+using System.Collections.Generic;
+
+namespace SocialNetwork.Entity;
 
 public partial class TagPost : IEntity
 {

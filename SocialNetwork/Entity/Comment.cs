@@ -1,4 +1,7 @@
-﻿namespace SocialNetwork.Entity;
+﻿using System;
+using System.Collections.Generic;
+
+namespace SocialNetwork.Entity;
 
 public partial class Comment : IEntity
 {
@@ -27,6 +30,8 @@ public partial class Comment : IEntity
     public virtual Comment Parent { get; set; }
 
     public virtual Post Post { get; set; }
+
+    public virtual Share PostNavigation { get; set; }
 
     public virtual User User { get; set; }
 }
