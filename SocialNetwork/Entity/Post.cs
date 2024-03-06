@@ -27,8 +27,6 @@ public partial class Post : IEntity
 
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 
-    public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
-
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
     public virtual ICollection<TagPost> TagPosts { get; set; } = new List<TagPost>();
