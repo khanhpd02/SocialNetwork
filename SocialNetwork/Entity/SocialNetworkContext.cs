@@ -196,11 +196,6 @@ public partial class SocialNetworkContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Like_Post");
 
-            entity.HasOne(d => d.PostNavigation).WithMany(p => p.Likes)
-                .HasForeignKey(d => d.PostId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Like_Share");
-
             entity.HasOne(d => d.User).WithMany(p => p.Likes)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade)

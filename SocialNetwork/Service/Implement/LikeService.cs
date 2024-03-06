@@ -30,25 +30,6 @@ namespace SocialNetwork.Service.Implement
             this.shareRepository = shareRepository;
             _context = context;
         }
-        public AppResponse Like(Guid postId, Guid userId)
-        {
-            var checklike = likeRepository.FindByCondition(x => x.UserId == userId && x.PostId == postId).FirstOrDefault();
-            if (checklike == null)
-            {
-                Like like = new Like();
-                like.UserId = userId;
-                like.PostId = postId; 
-                likeRepository.Create(like);
-                likeRepository.Save();
-                return new AppResponse { message = "Like Success!", success = true };
-            }
-            else
-            {
-                checklike.IsDeleted = !checklike.IsDeleted;
-                likeRepository.Update(checklike);
-                return new AppResponse { message = checklike.IsDeleted ? "Unlike Success!" : "Like Success!", success = true };
-            }
-        }
 
         public AppResponse LikeAndUnlike(Guid postId, Guid userId)
         {
@@ -57,11 +38,41 @@ namespace SocialNetwork.Service.Implement
 
             if (post == null && share != null)
             {
-                Like(share.Id, userId); 
+                var checklike = likeRepository.FindByCondition(x => x.UserId == userId && x.PostId == postId).FirstOrDefault();
+                if (checklike == null)
+                {
+                    Like like = new Like();
+                    like.UserId = userId;
+                    like.PostId = share.Id;
+                    likeRepository.Create(like);
+                    likeRepository.Save();
+                    return new AppResponse { message = "Like Success!", success = true };
+                }
+                else
+                {
+                    checklike.IsDeleted = !checklike.IsDeleted;
+                    likeRepository.Update(checklike);
+                    return new AppResponse { message = checklike.IsDeleted ? "Unlike Success!" : "Like Success!", success = true };
+                }
             }
             else if (post != null && share == null)
             {
-                Like(post.Id, userId); 
+                var checklike = likeRepository.FindByCondition(x => x.UserId == userId && x.PostId == postId).FirstOrDefault();
+                if (checklike == null)
+                {
+                    Like like = new Like();
+                    like.UserId = userId;
+                    like.PostId = post.Id;
+                    likeRepository.Create(like);
+                    likeRepository.Save();
+                    return new AppResponse { message = "Like Success!", success = true };
+                }
+                else
+                {
+                    checklike.IsDeleted = !checklike.IsDeleted;
+                    likeRepository.Update(checklike);
+                    return new AppResponse { message = checklike.IsDeleted ? "Unlike Success!" : "Like Success!", success = true };
+                }
             }
             else
             {

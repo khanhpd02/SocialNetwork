@@ -23,7 +23,5 @@ public partial class Like : IEntity
 
     public virtual Post Post { get; set; }
 
-    public virtual Share PostNavigation { get; set; }
-
     public virtual User User { get; set; }
 }

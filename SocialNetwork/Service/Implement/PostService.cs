@@ -245,7 +245,7 @@ namespace SocialNetwork.Service.Implement
         }
         public ShareDTO SharePost(ShareDTO sharePostDTO)
         {
-            var postOrigin = postRepository.FindById(sharePostDTO.PostId);
+            var postOrigin = postRepository.FindByCondition(x=>x.Id==sharePostDTO.PostId).FirstOrDefault();
             var currentDomain = httpContextAccessor.HttpContext.Request.Host.Value;
             if (postOrigin == null)
             {

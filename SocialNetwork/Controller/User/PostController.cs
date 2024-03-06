@@ -46,9 +46,9 @@ namespace SocialNetwork.Controller.User
             var createdPost = postService.Create(postDTO);
             return Ok(createdPost);
         }
-        [HttpPost("{id}")]
+        [HttpPost("share")]
         [SwaggerOperation(Summary = "Shared a Post")]
-        public IActionResult Share(ShareDTO sharePostDTO)
+        public IActionResult Share([FromForm] ShareDTO sharePostDTO)
         {
 
             if (sharePostDTO.PostId.ToString().IsNullOrEmpty())
