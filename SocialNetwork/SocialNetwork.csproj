@@ -31,11 +31,9 @@
 		<PackageReference Include="MailKit" Version="4.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.13" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="7.0.13" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="7.0.13" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
 		<PackageReference Include="Microsoft.Build.Framework" Version="17.7.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.11" />

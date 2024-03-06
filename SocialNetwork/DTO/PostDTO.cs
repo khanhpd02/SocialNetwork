@@ -20,9 +20,14 @@ public class PostDTO
     public List<Video> Videos { get; set; }
     public List<Like> Likes { get; set; }
     public List<Comment> Comments { get; set; }
+    public List<Like> LikesShare { get; set; }
+    public List<Comment> CommentsShare { get; set; }
     public int CountLike { get; set; }
     public int CountComment { get; set; }
     public bool islike { get; set; }
+    public int CountLikeShare { get; set; }
+    public int CountCommentShare { get; set; }
+    public bool islikeShare { get; set; }
     public int LevelView { get; set; }
     public int? LevelViewShare { get; set; }
     public string? FullNameShare { get; set; }

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AngleSharp.Dom;
+using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -306,6 +307,8 @@ namespace SocialNetwork.Service.Implement
             var listPostShareDTO = new List<PostDTO>();
             var CountLike = 0;
             var CountComment = 0;
+            var CountLikeShare = 0;
+            var CountCommentShare = 0;
             foreach (var share in shares)
             {
                 var infor = inforRepository.FindByCondition(x => x.UserId == share.UserId).FirstOrDefault();
@@ -314,6 +317,8 @@ namespace SocialNetwork.Service.Implement
 
                 if (postShare != null)
                 {
+                    var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == share.Id).FirstOrDefault();
+
                     var userShare = userRepository.FindByCondition(x => x.Id == postShare.UserId).FirstOrDefault();
                     var inforUserPost = inforRepository.FindByCondition(x => x.UserId == userShare.Id).FirstOrDefault();
                     List<Image> images = imageRepository.FindByCondition(img => img.PostId == postShare.Id && img.IsDeleted == false).ToList();
@@ -321,7 +326,13 @@ namespace SocialNetwork.Service.Implement
                     List<Like> likes = likeRepository.FindByCondition(img => img.PostId == postShare.Id && img.IsDeleted == false).ToList();
                     List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == postShare.Id && vid.IsDeleted == false).ToList();
                     CountLike = likes.Count();
-                    CountComment = comments.Count();
+                    CountComment = comments.Count(); 
+
+                    List<Like> likesShare = likeRepository.FindByCondition(img => img.PostId == share.Id && img.IsDeleted == false).ToList();
+                    List<Comment> commentsShare = commentRepository.FindByCondition(vid => vid.PostId == share.Id && vid.IsDeleted == false).ToList();
+                    CountLikeShare = likes.Count();
+                    CountCommentShare = comments.Count();
+
                     var postShareDTO = mapper.Map<PostDTO>(postShare);
                     postShareDTO.FullName = inforUserPost.FullName;
                     postShareDTO.AvatarUrl = inforUserPost.Image;
@@ -332,10 +343,22 @@ namespace SocialNetwork.Service.Implement
                     postShareDTO.Likes = likes;
                     postShareDTO.Comments = comments;
                     postShareDTO.CountLike = CountLike;
-                    postShareDTO.CountComment = CountComment;
+                    postShareDTO.CountComment = CountComment; 
+                    postShareDTO.LikesShare = likesShare;
+                    postShareDTO.CommentsShare = commentsShare;
+                    postShareDTO.CountLikeShare = CountLikeShare;
+                    postShareDTO.CountCommentShare = CountCommentShare;
                     postShareDTO.LevelViewShare = share.LevelView;
                     postShareDTO.UserIdSharePost = infor.UserId;
                     postShareDTO.CreateDateShare = share.CreateDate;
+                    if (like == null)
+                    {
+                        postShareDTO.islikeShare = false;
+                    }
+                    else
+                    {
+                        postShareDTO.islikeShare = true;
+                    }
                     listPostShareDTO.Add(postShareDTO);
                 }
             }
@@ -382,8 +405,12 @@ namespace SocialNetwork.Service.Implement
             var listPostShareDTO = new List<PostDTO>();
             var CountLike = 0;
             var CountComment = 0;
+            var CountLikeShare = 0;
+            var CountCommentShare = 0;
             foreach (var share in shares)
             {
+                var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == share.Id).FirstOrDefault();
+
                 var postShare = postRepository.FindByCondition(x => x.Id == share.PostId && x.IsDeleted == false).FirstOrDefault();
 
                 if (postShare != null)
@@ -396,6 +423,12 @@ namespace SocialNetwork.Service.Implement
                     List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == postShare.Id && vid.IsDeleted == false).ToList();
                     CountLike = likes.Count();
                     CountComment = comments.Count();
+
+                    List<Like> likesShare = likeRepository.FindByCondition(img => img.PostId == share.Id && img.IsDeleted == false).ToList();
+                    List<Comment> commentsShare = commentRepository.FindByCondition(vid => vid.PostId == share.Id && vid.IsDeleted == false).ToList();
+                    CountLikeShare = likes.Count();
+                    CountCommentShare = comments.Count();
+
                     var postShareDTO = mapper.Map<PostDTO>(postShare);
                     postShareDTO.FullName = inforUserPost.FullName;
                     postShareDTO.AvatarUrl = inforUserPost.Image;
@@ -407,8 +440,20 @@ namespace SocialNetwork.Service.Implement
                     postShareDTO.Comments = comments;
                     postShareDTO.CountLike = CountLike;
                     postShareDTO.CountComment = CountComment;
+                    postShareDTO.LikesShare = likesShare;
+                    postShareDTO.CommentsShare = commentsShare;
+                    postShareDTO.CountLikeShare = CountLikeShare;
+                    postShareDTO.CountCommentShare = CountCommentShare;
                     postShareDTO.LevelViewShare = share.LevelView;
                     postShareDTO.CreateDateShare = share.CreateDate;
+                    if (like == null)
+                    {
+                        postShareDTO.islikeShare = false;
+                    }
+                    else
+                    {
+                        postShareDTO.islikeShare = true;
+                    }
                     listPostShareDTO.Add(postShareDTO);
                 }
             }

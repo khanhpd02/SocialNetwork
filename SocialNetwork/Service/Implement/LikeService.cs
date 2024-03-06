@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Extensions.Hosting;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
 using SocialNetwork.DTO.Response;
@@ -13,65 +15,60 @@ namespace SocialNetwork.Service.Implement
     {
         private readonly ILikeRepository likeRepository;
         private readonly IPostRepository postRepository;
+        private readonly IShareRepository shareRepository;
         private SocialNetworkContext _context;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile(new MappingProfile());
         }).CreateMapper();
 
-        public LikeService(ILikeRepository likeRepository, IPostRepository postRepository, SocialNetworkContext context)
+        public LikeService(ILikeRepository likeRepository, IPostRepository postRepository, 
+            SocialNetworkContext context, IShareRepository shareRepository)
         {
             this.likeRepository = likeRepository;
             this.postRepository = postRepository;
+            this.shareRepository = shareRepository;
             _context = context;
+        }
+        public AppResponse Like(Guid postId, Guid userId)
+        {
+            var checklike = likeRepository.FindByCondition(x => x.UserId == userId && x.PostId == postId).FirstOrDefault();
+            if (checklike == null)
+            {
+                Like like = new Like();
+                like.UserId = userId;
+                like.PostId = postId; 
+                likeRepository.Create(like);
+                likeRepository.Save();
+                return new AppResponse { message = "Like Success!", success = true };
+            }
+            else
+            {
+                checklike.IsDeleted = !checklike.IsDeleted;
+                likeRepository.Update(checklike);
+                return new AppResponse { message = checklike.IsDeleted ? "Unlike Success!" : "Like Success!", success = true };
+            }
         }
 
         public AppResponse LikeAndUnlike(Guid postId, Guid userId)
         {
-            
             var post = postRepository.FindByCondition(x => x.Id == postId).FirstOrDefault();
-            if (post == null)
+            var share = shareRepository.FindByCondition(x => x.Id == postId).FirstOrDefault();
+
+            if (post == null && share != null)
             {
-                return new AppResponse { message="PostId Not Valid",success=false};
+                Like(share.Id, userId); 
+            }
+            else if (post != null && share == null)
+            {
+                Like(post.Id, userId); 
             }
             else
             {
-                var checklike = likeRepository.FindByCondition(x => x.UserId == userId && x.PostId==postId).FirstOrDefault();
-                if (checklike == null)
-                {
-                    //Guid id = user.Id;
-                    Like like = new Like();
-                    // Post post = mapper.Map<Post>(dto);
-                    like.UserId = userId;
-                    like.PostId = post.Id;
-                    like.CreateBy = userId;
-                    like.CreateDate = DateTime.Now;
-                    //like.Status = true;
-                    like.IsDeleted = false;
-                    _context.Add(like);
-                    _context.SaveChanges();
-                    likeRepository.Update(like);
-                    likeRepository.Save();
-                    return new AppResponse { message = "Like Sucess!", success = true };
-                }
-                else
-                {
-                    checklike.IsDeleted = !checklike.IsDeleted;
-                    checklike.UpdateDate = DateTime.Now;
-                    checklike.UpdateBy = userId;
-                    likeRepository.Update(checklike);
-                    likeRepository.Save();
-                    if(checklike.IsDeleted)
-                    {
-                        return new AppResponse { message = "UnLike Sucess!", success = true };
-                    }
-                    else
-                    {
-                        return new AppResponse { message = "Like Sucess!", success = true };
-                    }
-                    
-                }
+                return new AppResponse { message = "PostId Not Valid", success = false };
             }
+
+            return new AppResponse { message = "Action Success!", success = true };
         }
 
         public AppResponse deleteLike(Guid idLike)
@@ -95,7 +92,6 @@ namespace SocialNetwork.Service.Implement
                 dtoList.Add(dto);
             }
             return dtoList;
-           // throw new NotImplementedException();
         }
 
         public List<LikeDTO> getallByUserID(Guid userId)
