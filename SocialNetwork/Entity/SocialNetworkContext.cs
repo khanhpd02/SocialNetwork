@@ -90,16 +90,6 @@ public partial class SocialNetworkContext : DbContext
                 .HasForeignKey(d => d.ParentId)
                 .HasConstraintName("FK_Comment_Comment");
 
-            entity.HasOne(d => d.Post).WithMany(p => p.Comments)
-                .HasForeignKey(d => d.PostId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Comment_Post");
-
-            entity.HasOne(d => d.PostNavigation).WithMany(p => p.Comments)
-                .HasForeignKey(d => d.PostId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Comment_Share");
-
             entity.HasOne(d => d.User).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade)

@@ -27,7 +27,5 @@ public partial class Share : IEntity
 
     public int? LevelView { get; set; }
 
-    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
-
     public virtual User User { get; set; }
 }
