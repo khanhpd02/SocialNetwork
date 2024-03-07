@@ -22,6 +22,7 @@ public class CommentDTO
     public Guid? ParentId { get; set; }
     public string? Image { get; set; }
     public string? FullName { get; set; }
+    public List<IFormFile?> File { get; set; }
 
     public List<CommentDTO> ChildrenComment { get; set; }
 

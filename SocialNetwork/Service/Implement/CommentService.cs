@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
 using Microsoft.IdentityModel.Tokens;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
@@ -7,16 +9,22 @@ using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Repository;
 using Comment = SocialNetwork.Entity.Comment;
+using Video = SocialNetwork.Entity.Video;
 
 namespace SocialNetwork.Service.Implement
 {
     public class CommentService : ICommentService
     {
+        private readonly IImageRepository imageRepository;
+        private readonly IVideoRepository videoRepository;
         private readonly ICommentRepository _commentRepository;
         private readonly IInforRepository inforRepository;
         private readonly IPostRepository postRepository;
         private readonly IShareRepository shareRepository;
         private SocialNetworkContext _context;
+        private readonly Cloudinary _cloudinary;
+        private IUserService _userService;
+
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile(new MappingProfile());
@@ -24,17 +32,69 @@ namespace SocialNetwork.Service.Implement
 
         public CommentService(ICommentRepository commentRepository, IPostRepository postRepository, 
             SocialNetworkContext context, IInforRepository inforRepository,
-            IShareRepository shareRepository)
+            IShareRepository shareRepository, Cloudinary cloudinary, IUserService userService,
+            IImageRepository imageRepository, IVideoRepository videoRepository)
         {
             _commentRepository = commentRepository;
             this.postRepository = postRepository;
             _context = context;
             this.inforRepository = inforRepository;
             this.shareRepository = shareRepository;
+            _cloudinary = cloudinary;
+            _userService = userService;
+            this.imageRepository = imageRepository;
+            this.videoRepository = videoRepository;
         }
+        public List<string> UploadFilesToCloudinary(List<IFormFile> files)
+        {
+            List<string> uploadedUrls = new List<string>();
 
+            foreach (var file in files)
+            {
+                if (file != null && file.Length > 0)
+                {
+                    if (Path.GetExtension(file.FileName).Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var uploadParamsVideo = new VideoUploadParams
+                        {
+                            File = new FileDescription(file.FileName, file.OpenReadStream()),
+                            Folder = "SocialNetwork/Video/",
+                        };
+
+                        try
+                        {
+                            var uploadResult = _cloudinary.Upload(uploadParamsVideo);
+                            uploadedUrls.Add(uploadResult.SecureUrl.AbsoluteUri);
+                        }
+                        catch (Exception)
+                        {
+                            // Handle error
+                        }
+                    }
+                    else if (Path.GetExtension(file.FileName).Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                             Path.GetExtension(file.FileName).Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                             Path.GetExtension(file.FileName).Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                             Path.GetExtension(file.FileName).Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var uploadParams = new ImageUploadParams
+                        {
+                            File = new FileDescription(file.FileName, file.OpenReadStream()),
+                            Folder = "SocialNetwork/Image/",
+                        };
+
+                        var uploadResult = _cloudinary.Upload(uploadParams);
+                        uploadedUrls.Add(uploadResult.SecureUrl.AbsoluteUri);
+
+                    }
+                }
+            }
+
+            return uploadedUrls;
+        }
         public AppResponse create(CommentDTO commentDTO, Guid userId)
         {
+            List<string> cloudinaryUrls = UploadFilesToCloudinary(commentDTO.File);
+
             if (commentDTO.Content.IsNullOrEmpty())
             {
                 throw new BadRequestException("Content Không được để trống");
@@ -48,6 +108,42 @@ namespace SocialNetwork.Service.Implement
                 cmt.UserId = userId;
                 _commentRepository.Create(cmt);
                 _commentRepository.Save();
+                foreach (var cloudinaryUrl in cloudinaryUrls)
+                {
+                    if (!string.IsNullOrEmpty(cloudinaryUrl))
+                    {
+                        string fileExtension = Path.GetExtension(cloudinaryUrl);
+                        if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var image = new Image
+                            {
+                                PostId = share.Id,
+                                LinkImage = cloudinaryUrl,
+                                CreateDate = DateTime.Now,
+                                CreateBy = _userService.UserId,
+                                IsDeleted = false
+                            };
+                            imageRepository.Create(image);
+                            imageRepository.Save();
+                        }
+                        else if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var video = new Video
+                            {
+                                PostId = share.Id,
+                                Link = cloudinaryUrl,
+                                CreateDate = DateTime.Now,
+                                CreateBy = _userService.UserId,
+                                IsDeleted = false
+                            };
+                            videoRepository.Create(video);
+                            videoRepository.Save();
+                        }
+                    }
+                }
                 return new AppResponse { message = "Comment Success", success = true };
             }
             if (post != null && share == null)
@@ -57,6 +153,42 @@ namespace SocialNetwork.Service.Implement
                 cmt.UserId = userId;
                 _commentRepository.Create(cmt);
                 _commentRepository.Save();
+                foreach (var cloudinaryUrl in cloudinaryUrls)
+                {
+                    if (!string.IsNullOrEmpty(cloudinaryUrl))
+                    {
+                        string fileExtension = Path.GetExtension(cloudinaryUrl);
+                        if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                            fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var image = new Image
+                            {
+                                PostId = post.Id,
+                                LinkImage = cloudinaryUrl,
+                                CreateDate = DateTime.Now,
+                                CreateBy = _userService.UserId,
+                                IsDeleted = false
+                            };
+                            imageRepository.Create(image);
+                            imageRepository.Save();
+                        }
+                        else if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var video = new Video
+                            {
+                                PostId = post.Id,
+                                Link = cloudinaryUrl,
+                                CreateDate = DateTime.Now,
+                                CreateBy = _userService.UserId,
+                                IsDeleted = false
+                            };
+                            videoRepository.Create(video);
+                            videoRepository.Save();
+                        }
+                    }
+                }
                 return new AppResponse { message = "Comment Success", success = true };
             }
             else

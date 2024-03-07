@@ -27,7 +27,7 @@ namespace SocialNetwork.Controller.User
 
         [HttpPost("create")]
         [SwaggerOperation(Summary = "Create Comment")]
-        public async Task<IActionResult> Create([FromBody] CommentDTO dto)
+        public async Task<IActionResult> Create([FromForm] CommentDTO dto)
         {
             Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
             var response = commentService.create(dto, userid);

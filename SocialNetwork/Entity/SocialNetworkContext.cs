@@ -147,11 +147,6 @@ public partial class SocialNetworkContext : DbContext
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
-
-            entity.HasOne(d => d.Post).WithMany(p => p.Images)
-                .HasForeignKey(d => d.PostId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Image_Post");
         });
 
         modelBuilder.Entity<Infor>(entity =>

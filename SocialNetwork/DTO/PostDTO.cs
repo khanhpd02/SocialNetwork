@@ -21,6 +21,8 @@ public class PostDTO
     public List<Video> Videos { get; set; }
     public List<Like> Likes { get; set; }
     public List<Comment> Comments { get; set; }
+    public List<Image> ImagesShare { get; set; }
+    public List<Video> VideosShare { get; set; }
     public List<Like> LikesShare { get; set; }
     public List<Comment> CommentsShare { get; set; }
     public int CountLike { get; set; }

@@ -23,8 +23,6 @@ public partial class Post : IEntity
 
     public int LevelView { get; set; }
 
-    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
-
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
     public virtual ICollection<TagPost> TagPosts { get; set; } = new List<TagPost>();

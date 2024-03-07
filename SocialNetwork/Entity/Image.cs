@@ -20,6 +20,4 @@ public partial class Image : IEntity
     public Guid? UpdateBy { get; set; }
 
     public bool IsDeleted { get; set; }
-
-    public virtual Post Post { get; set; }
 }
