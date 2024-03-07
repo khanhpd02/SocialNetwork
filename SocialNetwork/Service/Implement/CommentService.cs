@@ -15,18 +15,22 @@ namespace SocialNetwork.Service.Implement
         private readonly ICommentRepository _commentRepository;
         private readonly IInforRepository inforRepository;
         private readonly IPostRepository postRepository;
+        private readonly IShareRepository shareRepository;
         private SocialNetworkContext _context;
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile(new MappingProfile());
         }).CreateMapper();
 
-        public CommentService(ICommentRepository commentRepository, IPostRepository postRepository, SocialNetworkContext context, IInforRepository inforRepository)
+        public CommentService(ICommentRepository commentRepository, IPostRepository postRepository, 
+            SocialNetworkContext context, IInforRepository inforRepository,
+            IShareRepository shareRepository)
         {
             _commentRepository = commentRepository;
             this.postRepository = postRepository;
             _context = context;
             this.inforRepository = inforRepository;
+            this.shareRepository = shareRepository;
         }
 
         public AppResponse create(CommentDTO commentDTO, Guid userId)
@@ -36,22 +40,28 @@ namespace SocialNetwork.Service.Implement
                 throw new BadRequestException("Content Không được để trống");
             }
             var post = postRepository.FindById(commentDTO.PostId);
-            if (post == null)
+            var share = shareRepository.FindById(commentDTO.PostId);
+            if (post == null && share != null)
             {
-                return new AppResponse { message = "ID Post sai hoặc không tồn tại" };
+                Comment cmt = mapper.Map<Comment>(commentDTO);
+                cmt.PostId = share.Id;
+                cmt.UserId = userId;
+                _commentRepository.Create(cmt);
+                _commentRepository.Save();
+                return new AppResponse { message = "Comment Success", success = true };
+            }
+            if (post != null && share == null)
+            {
+                Comment cmt = mapper.Map<Comment>(commentDTO);
+                cmt.PostId = post.Id;
+                cmt.UserId = userId;
+                _commentRepository.Create(cmt);
+                _commentRepository.Save();
+                return new AppResponse { message = "Comment Success", success = true };
             }
             else
             {
-                Comment cmt = mapper.Map<Comment>(commentDTO);
-                cmt.UserId = userId;
-                cmt.CreateBy = userId;
-                cmt.CreateDate = DateTime.Now;
-                cmt.IsDeleted = false;
-                _context.Add(cmt);
-                _context.SaveChanges();
-                _commentRepository.Update(cmt);
-                _commentRepository.Save();
-                return new AppResponse { message = "Comment Success", success = true };
+                return new AppResponse { message = "ID Post sai hoặc không tồn tại" };
 
             }
         }

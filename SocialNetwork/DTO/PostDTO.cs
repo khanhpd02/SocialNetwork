@@ -5,6 +5,7 @@ namespace SocialNetwork.DTO;
 public class PostDTO
 {
     public Guid? Id { get; set; }
+    public Guid? IdShare { get; set; }
     public string? Content { get; set; }
     public string? FullName { get; set; }
     public string? AvatarUrl { get; set; }

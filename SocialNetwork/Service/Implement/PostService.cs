@@ -351,6 +351,7 @@ namespace SocialNetwork.Service.Implement
                     postShareDTO.LevelViewShare = share.LevelView;
                     postShareDTO.UserIdSharePost = infor.UserId;
                     postShareDTO.CreateDateShare = share.CreateDate;
+                    postShareDTO.IdShare = share.Id;
                     if (like == null)
                     {
                         postShareDTO.islikeShare = false;
@@ -446,6 +447,8 @@ namespace SocialNetwork.Service.Implement
                     postShareDTO.CountCommentShare = CountCommentShare;
                     postShareDTO.LevelViewShare = share.LevelView;
                     postShareDTO.CreateDateShare = share.CreateDate;
+                    postShareDTO.IdShare = share.Id;
+
                     if (like == null)
                     {
                         postShareDTO.islikeShare = false;
@@ -667,7 +670,7 @@ namespace SocialNetwork.Service.Implement
         }
         private void DeletePostAndRelationShip(Guid id)
         {
-            Post post = postRepository.FindByConditionWithTracking(x => x.Id == id, x => x.Comments, x => x.Images, x => x.Reports, x => x.TagPosts, x => x.Videos).FirstOrDefault()!;
+            Post post = postRepository.FindByConditionWithTracking(x => x.Id == id,  x => x.Images, x => x.Reports, x => x.TagPosts, x => x.Videos).FirstOrDefault()!;
             post.IsDeleted = true;
 
         }
