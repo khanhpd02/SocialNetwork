@@ -33,5 +33,13 @@ public partial class Infor : IEntity
 
     public bool IsDeleted { get; set; }
 
+    public string Provinces { get; set; }
+
+    public string Districts { get; set; }
+
+    public string Wards { get; set; }
+
+    public string Direction { get; set; }
+
     public virtual User User { get; set; }
 }
