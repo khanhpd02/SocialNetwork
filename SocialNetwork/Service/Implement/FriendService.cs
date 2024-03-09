@@ -6,6 +6,7 @@ using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Repository;
+using System.Linq;
 
 namespace SocialNetwork.Service.Implement
 {
@@ -269,30 +270,68 @@ namespace SocialNetwork.Service.Implement
 
         public List<InforDTO> GetAllNotFriends()
         {
-            var entity = inforRepository.FindByCondition(x => x.IsDeleted == false && x.UserId!=_userService.UserId).ToList();
-            //InforDTO dto = mapper.Map<InforDTO>(entity);
-            Random random = new Random();
-
-            // Sắp xếp danh sách ngẫu nhiên
-            entity = entity.OrderBy(x => random.Next()).ToList();
-            var entityRemove = new List<Infor>();
-            foreach ( var entitys in entity)
+            List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
+                .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
+                .ToList();
+            var userSuggest = userRepository
+                .FindByCondition(x => x.IsDeleted == false && !idOfFriends.Contains(x.Id) && x. Id!= _userService.UserId)
+                .ToList();
+            List<User> listUserSuggest = new List<User>();
+            foreach (var item in userSuggest)
             {
-                 var checkFriend = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == entitys.UserId) || (x.UserAccept == _userService.UserId && x.UserTo == entitys.UserId)).FirstOrDefault();
-                if(checkFriend != null)
+                List<Guid> idOfFriendsSuggest = friendRepository.FindByCondition(x => (x.UserTo == item.Id || x.UserAccept == item.Id) && x.IsDeleted == false)
+                .Select(x => x.UserTo == item.Id ? x.UserAccept : x.UserTo)
+                .ToList();
+                if (idOfFriends.Intersect(idOfFriendsSuggest).Any())
                 {
-                    entityRemove.Add(entitys);
-                    //entity.Remove(entitys);
+                    listUserSuggest.Add(item);
                 }
-                    
             }
-            foreach (var test in entityRemove) { 
-            
-                entity.Remove(test);
+            var userSuggestIds = userSuggest.Select(u => u.Id).ToList();
+            var inforSuggest = inforRepository
+                .FindByCondition(x => !x.IsDeleted && userSuggestIds.Contains(x.UserId.Value))
+                .ToList();
+            var myInfor = inforRepository.FindByCondition(x => !x.IsDeleted && x.UserId == _userService.UserId).FirstOrDefault();
+            foreach (var item in inforSuggest)
+            {
+                if (item.Wards == myInfor.Wards)
+                {
+                    var userItem = userRepository.FindByCondition(x => x.Id == item.UserId).FirstOrDefault();
+                    listUserSuggest.Add(userItem);
+                }
             }
-            
-            List<InforDTO> dto = mapper.Map<List<InforDTO>>(entity);
-            return dto;
+            foreach (var item in inforSuggest)
+            {
+                if (item.Districts == myInfor.Districts)
+                {
+                    var userItem = userRepository.FindByCondition(x => x.Id == item.UserId).FirstOrDefault();
+                    listUserSuggest.Add(userItem);
+                }
+            }
+            foreach (var item in inforSuggest)
+            {
+                if (item.Provinces == myInfor.Provinces)
+                {
+                    var userItem = userRepository.FindByCondition(x => x.Id == item.UserId).FirstOrDefault();
+                    listUserSuggest.Add(userItem);
+                }
+            }
+            List<Infor> listInforSuggest=new List<Infor>();
+            foreach (var item in listUserSuggest)
+            {
+                var iteminfor=inforRepository.FindByCondition(x=>x.UserId==item.Id).FirstOrDefault();
+                if (iteminfor!=null)
+                {
+                    listInforSuggest.Add(iteminfor);
+                }
+            }
+            List<InforDTO> listInforDTO = new List<InforDTO>();
+            foreach (var item in listInforSuggest)
+            {
+                InforDTO inforDTO = mapper.Map<InforDTO>(item);
+                listInforDTO.Add(inforDTO);
+            }
+            return listInforDTO;
         }
     }
 }
