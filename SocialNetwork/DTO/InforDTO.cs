@@ -24,13 +24,12 @@ public class InforDTO
     public DateTime? DateOfBirth { get; set; }
     public string LevelFriend { get; set; }
 
-    //public DateTime? CreateDate { get; set; }
+    public string Provinces { get; set; }
 
-    //public Guid? CreateBy { get; set; }
+    public string Districts { get; set; }
 
-    //public DateTime? UpdateDate { get; set; }
+    public string Wards { get; set; }
 
-    //public Guid? UpdateBy { get; set; }
+    public string Direction { get; set; }
 
-    //public bool IsDeleted { get; set; }
 }

@@ -164,15 +164,10 @@ namespace SocialNetwork.Service.Implement
                 String cloudinaryUrl = UploadFileToCloudinary(inforDTO.File);
                 Infor info = mapper.Map<Infor>(inforDTO);
                 info.UserId = userId;
-                //info.UpdateDate = DateTime.Now;
-                info.CreateDate = DateTime.Now;
-                info.CreateBy = userId;
-                //info.UpdateBy = userId;
-                info.IsDeleted = false;
-                _context.Add(info);
-                _context.SaveChanges();
+                info.Address = inforDTO.Direction + ", " + inforDTO.Wards + ", " + inforDTO.Districts + ", " + inforDTO.Provinces;
+                _inforRepository.Create(info);
+                _inforRepository.Save();
 
-                //
                 if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
                 {
                     string fileExtension = Path.GetExtension(cloudinaryUrl);
