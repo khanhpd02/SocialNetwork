@@ -277,6 +277,7 @@ namespace SocialNetwork.Service.Implement
                 .FindByCondition(x => x.IsDeleted == false && !idOfFriends.Contains(x.Id) && x. Id!= _userService.UserId)
                 .ToList();
             List<User> listUserSuggest = new List<User>();
+            var itemsToRemove = new List<User>();
             foreach (var item in userSuggest)
             {
                 List<Guid> idOfFriendsSuggest = friendRepository.FindByCondition(x => (x.UserTo == item.Id || x.UserAccept == item.Id) && x.IsDeleted == false)
@@ -285,36 +286,59 @@ namespace SocialNetwork.Service.Implement
                 if (idOfFriends.Intersect(idOfFriendsSuggest).Any())
                 {
                     listUserSuggest.Add(item);
+                    itemsToRemove.Add(item);
                 }
+            }
+            foreach (var item in itemsToRemove)
+            {
+                userSuggest.Remove(item);
             }
             var userSuggestIds = userSuggest.Select(u => u.Id).ToList();
             var inforSuggest = inforRepository
                 .FindByCondition(x => !x.IsDeleted && userSuggestIds.Contains(x.UserId.Value))
                 .ToList();
             var myInfor = inforRepository.FindByCondition(x => !x.IsDeleted && x.UserId == _userService.UserId).FirstOrDefault();
+            var itemsToRemoveWards = new List<Infor>();
             foreach (var item in inforSuggest)
             {
                 if (item.Wards == myInfor.Wards)
                 {
                     var userItem = userRepository.FindByCondition(x => x.Id == item.UserId).FirstOrDefault();
                     listUserSuggest.Add(userItem);
+                    itemsToRemoveWards.Add(item);
                 }
             }
+            foreach (var item in itemsToRemoveWards)
+            {
+                inforSuggest.Remove(item);
+            }
+            var itemsToRemoveDistricts = new List<Infor>();
             foreach (var item in inforSuggest)
             {
                 if (item.Districts == myInfor.Districts)
                 {
                     var userItem = userRepository.FindByCondition(x => x.Id == item.UserId).FirstOrDefault();
                     listUserSuggest.Add(userItem);
+                    itemsToRemoveDistricts.Add(item);
                 }
             }
+            foreach (var item in itemsToRemoveDistricts)
+            {
+                inforSuggest.Remove(item);
+            }
+            var itemsToRemoveProvinces = new List<Infor>();
             foreach (var item in inforSuggest)
             {
                 if (item.Provinces == myInfor.Provinces)
                 {
                     var userItem = userRepository.FindByCondition(x => x.Id == item.UserId).FirstOrDefault();
                     listUserSuggest.Add(userItem);
+                    itemsToRemoveProvinces.Add(item);
                 }
+            }
+            foreach (var item in itemsToRemoveProvinces)
+            {
+                inforSuggest.Remove(item);
             }
             List<Infor> listInforSuggest=new List<Infor>();
             foreach (var item in listUserSuggest)
