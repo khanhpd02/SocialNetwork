@@ -16,6 +16,7 @@ namespace SocialNetwork.Service.Implement
     {
         private readonly IInforRepository _inforRepository;
         private readonly IFriendRepository _friendRepository;
+        private readonly IUserRepository userRepository;
         private readonly IMasterDataRepository _masterDataRepository;
         private SocialNetworkContext _context;
         private readonly Cloudinary _cloudinary;
@@ -41,7 +42,8 @@ namespace SocialNetwork.Service.Implement
             _cloudinary = cloudinary;
         }
 
-        public InforService(IInforRepository inforRepository, IFriendRepository friendRepository, IMasterDataRepository masterDataRepository, SocialNetworkContext context, Cloudinary cloudinary, IUserService userService)
+        public InforService(IInforRepository inforRepository, IFriendRepository friendRepository, IMasterDataRepository masterDataRepository, SocialNetworkContext context, Cloudinary cloudinary, IUserService userService,
+            IUserRepository userRepository)
         {
             _inforRepository = inforRepository;
             _friendRepository = friendRepository;
@@ -49,6 +51,7 @@ namespace SocialNetwork.Service.Implement
             _context = context;
             _cloudinary = cloudinary;
             _userService = userService;
+            this.userRepository = userRepository;
         }
         public InforDTO GetMyInfor()
         {
@@ -94,7 +97,7 @@ namespace SocialNetwork.Service.Implement
         }
         public List<InforDTO> GetInforByFullName(string fullname)
         {
-            List<Infor> entities = _inforRepository.FindByCondition(x => x.FullName.Contains(fullname) && x.IsDeleted == false).ToList();
+            List<Infor> entities = _inforRepository.FindByCondition(x => x.FullName.Contains(fullname) && x.IsDeleted == false && x.UserId != _userService.UserId).ToList();
 
             List<InforDTO> dtos = new List<InforDTO>();
 
@@ -139,8 +142,74 @@ namespace SocialNetwork.Service.Implement
 
                 dtos.Add(dto);
             }
-
-            return dtos;
+            List<Guid> idOfFriends = _friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
+                .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
+                .ToList();
+            var userSuggest = userRepository
+                .FindByCondition(x => x.IsDeleted == false && !idOfFriends.Contains(x.Id) && x.Id != _userService.UserId)
+                .ToList();
+            List<InforDTO> listDTOReturn = new List<InforDTO>();
+            var itemsToRemove = new List<InforDTO>();
+            foreach (var item in dtos)
+            {
+                List<Guid> idOfFriendsSuggest = _friendRepository.FindByCondition(x => (x.UserTo == item.UserId || x.UserAccept == item.UserId) && x.IsDeleted == false)
+               .Select(x => x.UserTo == item.UserId ? x.UserAccept : x.UserTo)
+               .ToList();
+                if (idOfFriends.Intersect(idOfFriendsSuggest).Any())
+                {
+                    listDTOReturn.Add(item);
+                    itemsToRemove.Add(item);
+                }
+            }
+            foreach (var item in itemsToRemove)
+            {
+                dtos.Remove(item);
+            }
+            var myInfor = _inforRepository.FindByCondition(x => !x.IsDeleted && x.UserId == _userService.UserId).FirstOrDefault();
+            var itemsToRemoveWards = new List<InforDTO>();
+            foreach (var item in dtos)
+            {
+                if (item.Wards == myInfor.Wards)
+                {
+                    listDTOReturn.Add(item);
+                    itemsToRemoveWards.Add(item);
+                }
+            }
+            foreach (var item in itemsToRemoveWards)
+            {
+                dtos.Remove(item);
+            }
+            var itemsToRemoveDistricts = new List<InforDTO>();
+            foreach (var item in dtos)
+            {
+                if (item.Districts == myInfor.Districts)
+                {
+                    listDTOReturn.Add(item);
+                    itemsToRemoveDistricts.Add(item);
+                }
+            }
+            foreach (var item in itemsToRemoveDistricts)
+            {
+                dtos.Remove(item);
+            }
+            var itemsToRemoveProvinces = new List<InforDTO>();
+            foreach (var item in dtos)
+            {
+                if (item.Provinces == myInfor.Provinces)
+                {
+                    listDTOReturn.Add(item);
+                    itemsToRemoveProvinces.Add(item);
+                }
+            }
+            foreach (var item in itemsToRemoveProvinces)
+            {
+                dtos.Remove(item);
+            }
+            foreach (var item in dtos)
+            {
+                listDTOReturn.Add(item);
+            }
+            return listDTOReturn;
         }
 
         public AppResponse createInfo(InforDTO inforDTO, Guid userId)
@@ -190,8 +259,6 @@ namespace SocialNetwork.Service.Implement
 
                 }
                 return new AppResponse { message = "Create Info Sucess!", success = true };
-
-
             }
             else
             {

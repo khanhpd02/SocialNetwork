@@ -15,11 +15,6 @@ using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
 using System.Text.RegularExpressions;
 using WebApi.Helpers;
-//
-
-
-
-
 
 public class UserService : IUserService
 {
@@ -243,10 +238,6 @@ public class UserService : IUserService
             }
             else
             {
-                //_context.Users.Remove(user);
-                //_context.PinCodes.Update(pin);
-                //_context.SaveChanges();
-
                 throw new BadRequestException("Mã pin sai hoặc hết hạn");
 
             }

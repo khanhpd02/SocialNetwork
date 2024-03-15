@@ -247,10 +247,8 @@ namespace SocialNetwork.Service.Implement
 
         public AppResponse RefuseFriend(Guid userIdSender)
         {
-            //var LevelFriend = masterDataRepository.FindByCondition(x => x.Name == "Bạn thường").FirstOrDefault();
             var userSender = userRepository.FindByCondition(x => x.Id == userIdSender && x.IsDeleted == false).FirstOrDefault();
             var friends = friendRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserAccept == _userService.UserId && x.IsDeleted == true).FirstOrDefault();
-            //var myInfor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
             if (userIdSender == null)
             {
                 throw new BadRequestException("UserId không tồn tại");
@@ -339,6 +337,11 @@ namespace SocialNetwork.Service.Implement
             foreach (var item in itemsToRemoveProvinces)
             {
                 inforSuggest.Remove(item);
+            }
+            foreach (var item in inforSuggest)
+            {
+                var userItem = userRepository.FindByCondition(x => x.Id == item.UserId).FirstOrDefault();
+                listUserSuggest.Add(userItem);
             }
             List<Infor> listInforSuggest=new List<Infor>();
             foreach (var item in listUserSuggest)
