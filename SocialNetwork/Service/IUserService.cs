@@ -14,7 +14,7 @@ namespace SocialNetwork.Service
         AppResponse ChangePasswordForgotPassword(LoginModel loginModel);
         AppResponse RegisterUser(RegisterModel rsg);
         AppResponse SendPinForgotPassword(MailDTO mailDTO);
-        LoginResponse Authenticate(LoginModel loginModel);
+        Task<LoginResponse> Authenticate(LoginModel loginModel);
         void SendPinEmail(String Email, String content);
     }
 }

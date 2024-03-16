@@ -105,7 +105,7 @@ namespace SocialNetwork.Controller
                 return BadRequest("Invalid data");
             }
 
-            LoginResponse loginResponse = _userService.Authenticate(loginModel);
+            LoginResponse loginResponse = await _userService.Authenticate(loginModel);
 
             if (loginResponse == null)
             {

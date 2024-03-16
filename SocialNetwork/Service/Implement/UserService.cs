@@ -11,6 +11,7 @@ using SocialNetwork.DTO.Auth;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
+using SocialNetwork.Firebase;
 using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
 using System.Text.RegularExpressions;
@@ -230,6 +231,22 @@ public class UserService : IUserService
                 _context.Users.Update(user);
                 _context.PinCodes.Update(pin);
                 _context.SaveChanges();
+                //Tạo account firebase
+                try
+                {
+                    FirebaseInitializer.InitializeFirebaseApp();
+                    var firebaseAuthManager = new FirebaseAuthManager();
+                    var uid = firebaseAuthManager.CreateFirebaseUserAsync(user.Email, user.Password);
+                    Console.WriteLine($"User created with UID: {uid}");
+                }
+                catch (Exception)
+                {
+                    throw new BadRequestException("Kiểm tra lại tk firebase");
+                }
+
+                //
+
+
                 return true;
             }
             else if (user == null)
@@ -251,7 +268,8 @@ public class UserService : IUserService
     {
         return BCrypt.EnhancedHashPassword(password, HashType.SHA256);
     }
-    public LoginResponse Authenticate(LoginModel loginModel)
+     async Task<LoginResponse> IUserService.Authenticate(LoginModel loginModel)
+
     {
         if (loginModel.Email.IsNullOrEmpty())
         {
@@ -295,6 +313,21 @@ public class UserService : IUserService
         else
         {
             loginDataResponse.HasInfor = true;
+        }
+        //firebase tokeen
+        FirebaseInitializer.InitializeFirebaseApp();
+        var firebaseAuthManager = new FirebaseAuthManager();
+
+        try
+        {
+            var tokenfirebase = await firebaseAuthManager.GetFirebaseTokenByEmailAsync(loginModel.Email);
+            //Console.WriteLine($"User created with UID: {uid}");
+            loginDataResponse.FirebaseToken = tokenfirebase;
+           
+        }
+        catch (BadRequestException ex)
+        {
+            throw new BadRequestException("Lỗi firebase rồi");
         }
 
         return loginResponse;
@@ -392,6 +425,22 @@ public class UserService : IUserService
             _context.Users.Update(user);
             _context.PinCodes.Update(pin);
             _context.SaveChanges();
+            //Đổi mk FireBase
+            try
+            {
+                FirebaseInitializer.InitializeFirebaseApp();
+                var firebaseAuthManager = new FirebaseAuthManager();
+                firebaseAuthManager.ChangePasswordByEmailAsync(loginModel.Email, loginModel.Password);//chưa test
+
+            }
+            catch (Exception ex)
+            {
+                throw new BadRequestException("Kiểm tra lại tài khoản Firebase");
+            }
+
+
+            //
+
             return new AppResponse { message = "Đổi mật khẩu thành công", success = true };
 
         }
@@ -401,5 +450,6 @@ public class UserService : IUserService
         }
     }
 
+    
 }
 
