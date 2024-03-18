@@ -27,12 +27,11 @@ namespace SocialNetwork.Controller.User
 
         [HttpPost("create")]
         [SwaggerOperation(Summary = "Create Comment")]
-        public async Task<IActionResult> Create([FromForm] CommentDTO dto)
+        public Task<IActionResult> Create([FromForm] CommentDTO dto)
         {
             Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
             var response = commentService.create(dto, userid);
-            _commentHub.Clients.Group(dto.PostId.ToString()).SendAsync("ReceiveComment", userid, dto.Content);
-            return Ok(response);
+            return Task.FromResult<IActionResult>(Ok(response));
         }
         [HttpGet("getcmtPost/{id}")]
         [SwaggerOperation(Summary = "Get All Comment on Post")]
