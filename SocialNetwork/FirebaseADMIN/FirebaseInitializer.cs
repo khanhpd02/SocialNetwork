@@ -5,13 +5,19 @@ namespace SocialNetwork.Firebase
 {
     public class FirebaseInitializer
     {
+        public static FirebaseApp FirebaseAppInstance;
+
         public static void InitializeFirebaseApp()
         {
-            var firebaseCredential = GoogleCredential.FromFile("FirebaseADMIN/config.json");
-            var firebaseApp = FirebaseApp.Create(new AppOptions
+            if (FirebaseAppInstance == null)
             {
-                Credential = firebaseCredential
-            });
+                var firebaseCredential = GoogleCredential.FromFile("FirebaseADMIN/config.json");
+                FirebaseAppInstance = FirebaseApp.Create(new AppOptions
+                {
+                    Credential = firebaseCredential
+                });
+            }
         }
+
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SocialNetwork.Entity;
+using SocialNetwork.Firebase;
 using SocialNetwork.Mail;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Repository;
@@ -120,7 +121,7 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IShareRepository, ShareRepository>();
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
+    services.AddSingleton<FirebaseInitializer>();
 
     // Configure Cloudinary
     Account account = new Account(
