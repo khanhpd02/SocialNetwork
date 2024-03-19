@@ -7,7 +7,7 @@ namespace SocialNetwork.Firebase
     {
         public static void InitializeFirebaseApp()
         {
-            var firebaseCredential = GoogleCredential.FromFile("Firebase/config.json");
+            var firebaseCredential = GoogleCredential.FromFile("FirebaseADMIN/config.json");
             var firebaseApp = FirebaseApp.Create(new AppOptions
             {
                 Credential = firebaseCredential

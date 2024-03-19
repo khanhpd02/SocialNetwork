@@ -226,18 +226,20 @@ public class UserService : IUserService
         {
             if (pin.Pin == VerifyPin.Pin && pin.ExpiredTime >= DateTime.Now && user != null)
             {
-                user.IsDeleted = false;
-                pin.IsDeleted = true;
-                _context.Users.Update(user);
-                _context.PinCodes.Update(pin);
-                _context.SaveChanges();
-                //Tạo account firebase
+                
                 try
                 {
                     FirebaseInitializer.InitializeFirebaseApp();
                     var firebaseAuthManager = new FirebaseAuthManager();
                     var uid = firebaseAuthManager.CreateFirebaseUserAsync(user.Email, user.Password);
                     Console.WriteLine($"User created with UID: {uid}");
+
+                    user.IsDeleted = false;
+                    pin.IsDeleted = true;
+                    _context.Users.Update(user);
+                    _context.PinCodes.Update(pin);
+                    _context.SaveChanges();
+                    //Tạo account firebase
                 }
                 catch (Exception)
                 {
