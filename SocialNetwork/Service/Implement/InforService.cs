@@ -272,11 +272,11 @@ namespace SocialNetwork.Service.Implement
         }
 
         public AppResponse updateInfo(InforDTO inforDTO, Guid userId)
-        {
+        {/*
             if (inforDTO.FullName.IsNullOrEmpty())
             {
                 throw new BadRequestException("FullName field cannot be empty");
-            }
+            }*/
             if (!inforDTO.PhoneNumber.IsNullOrEmpty())
             {
                 string sdt = inforDTO.PhoneNumber;
@@ -288,16 +288,29 @@ namespace SocialNetwork.Service.Implement
 
             var infor = _inforRepository.FindByCondition(x => x.UserId == userId).FirstOrDefault();
             if (infor != null)
-            {
+            {   
                 String cloudinaryUrl = UploadFileToCloudinary(inforDTO.File);
                 //infor = mapper.Map<Infor>(inforDTO);
-                infor.FullName = inforDTO.FullName;
-                infor.PhoneNumber = inforDTO.PhoneNumber;
-                infor.WorkPlace = inforDTO.WorkPlace;
-                infor.Gender = inforDTO.Gender;
-                infor.Address = inforDTO.Address;
-                infor.DateOfBirth = inforDTO.DateOfBirth;
-                infor.UserId = userId;
+                if(inforDTO.FullName != null)
+                    infor.FullName = inforDTO.FullName;
+                if(inforDTO.PhoneNumber != null) 
+                    infor.PhoneNumber = inforDTO.PhoneNumber;
+                if (inforDTO.WorkPlace != null) 
+                    infor.WorkPlace = inforDTO.WorkPlace;
+                if (inforDTO.Gender != null)
+                    infor.Gender = inforDTO.Gender;
+                if (inforDTO.Address != null) 
+                    infor.Address = inforDTO.Address;
+                if (inforDTO.DateOfBirth != null) 
+                    infor.DateOfBirth = inforDTO.DateOfBirth;
+                if (inforDTO.Provinces != null)
+                    infor.Provinces = inforDTO.Provinces;
+                if(inforDTO.Districts != null)
+                    infor.Districts = inforDTO.Districts;
+                if(inforDTO.Wards != null)
+                    infor.Wards = inforDTO.Wards;
+                if(inforDTO.Direction != null)
+                    infor.Direction = inforDTO.Direction;   
                 infor.UpdateDate = DateTime.Now;
                 infor.UpdateBy = userId;
                 _inforRepository.Update(infor);
@@ -315,7 +328,11 @@ namespace SocialNetwork.Service.Implement
                         var link = cloudinaryUrl;
                         if (link != null)
                         {
-                            infor.Image = link;
+                            if (inforDTO.Image == null) 
+                                {
+                                    infor.Image = link; 
+                                }
+                            
                             _inforRepository.Update(infor);
                             _inforRepository.Save();
 
