@@ -3,8 +3,10 @@ using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Extensions.Hosting;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
+using SocialNetwork.DTO.UpdateDTO;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
 using SocialNetwork.Helpers;
@@ -129,9 +131,6 @@ namespace SocialNetwork.Service.Implement
                         {
                             PostId = post.Id,
                             LinkImage = cloudinaryUrl,
-                            CreateDate = DateTime.Now,
-                            CreateBy = _userService.UserId,
-                            IsDeleted = false
                         };
                         imageRepository.Create(image);
                         imageRepository.Save();
@@ -142,9 +141,6 @@ namespace SocialNetwork.Service.Implement
                         {
                             PostId = post.Id,
                             Link = cloudinaryUrl,
-                            CreateDate = DateTime.Now,
-                            CreateBy = _userService.UserId,
-                            IsDeleted = false
                         };
                         videoRepository.Create(video);
                         videoRepository.Save();
@@ -168,33 +164,37 @@ namespace SocialNetwork.Service.Implement
             }
             return dto;
         }
-        public PostDTO Update(PostDTO dto)
+        public async Task<PostDTO> Update(PostUpdateDTO dto)
         {
-            var postcheck = postRepository.FindByCondition(x => x.Id == dto.Id).FirstOrDefault();
+            var postcheck = postRepository.FindByCondition(x => x.Id == dto.postId).FirstOrDefault();
             if (postcheck == null)
             {
-                throw new PostNotFoundException(dto.Id);
+                throw new PostNotFoundException(dto.postId);
             }
-
-            // Xác định ảnh cuối cùng liên kết với bài đăng và đánh dấu nó là đã xóa
-            var imageLast = imageRepository.FindByCondition(x => x.PostId == dto.Id).FirstOrDefault();
-            if (dto.Images != null && imageLast != null)
+            if (dto.LevelView != null)
             {
-                imageLast.IsDeleted = true;
-                imageRepository.Update(imageLast);
-                imageRepository.Save();
+                postcheck.LevelView = (int)dto.LevelView;
+                postRepository.Update(postcheck);
+                postRepository.Save();
             }
-
-            // Cập nhật nội dung bài đăng
-            postcheck.Content = dto.Content;
-            postRepository.Update(postcheck);
-            postRepository.Save();
-
-            // Tải lên và liên kết các ảnh/video mới (nếu có)
+            if (dto.Content != null)
+            {
+                postcheck.Content = dto.Content;
+                postRepository.Update(postcheck);
+                postRepository.Save();
+            }
+            if (dto.ListImageDeleteId!=null)
+            {
+                var imagesToDelete = imageRepository.FindByCondition(x => dto.ListImageDeleteId.Contains(x.Id)).ToList();
+                foreach (var item in imagesToDelete)
+                {
+                    imageRepository.Delete(item);
+                    imageRepository.Save();
+                }
+            }
             if (dto.File != null && dto.File.Any())
             {
                 List<string> cloudinaryUrls = UploadFilesToCloudinary(dto.File);
-
                 foreach (var cloudinaryUrl in cloudinaryUrls)
                 {
                     if (!string.IsNullOrEmpty(cloudinaryUrl))
@@ -205,37 +205,29 @@ namespace SocialNetwork.Service.Implement
                             fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
                             fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
                         {
-                            var link = cloudinaryUrl;
-                            Image image = new Image
+                            var image = new Image
                             {
-                                PostId = dto.Id,
-                                LinkImage = link,
-                                CreateDate = DateTime.Now,
-                                CreateBy = _userService.UserId,
-                                IsDeleted = false
+                                PostId = dto.postId,
+                                LinkImage = cloudinaryUrl,
                             };
                             imageRepository.Create(image);
                             imageRepository.Save();
                         }
                         else if (fileExtension.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
                         {
-                            var link = cloudinaryUrl;
-                            Video video = new Video
+                            var video = new Video
                             {
-                                PostId = dto.Id,
-                                Link = link,
-                                CreateDate = DateTime.Now,
-                                CreateBy = _userService.UserId,
-                                IsDeleted = false
+                                PostId = dto.postId,
+                                Link = cloudinaryUrl,
                             };
                             videoRepository.Create(video);
                             videoRepository.Save();
                         }
                     }
                 }
-            }
-
-            return dto;
+                }
+            var dtoPost=GetById((Guid)dto.postId);
+            return dtoPost;
         }
         public ShareDTO SharePost(ShareDTO sharePostDTO)
         {
@@ -672,7 +664,7 @@ namespace SocialNetwork.Service.Implement
         }
         private void DeletePostAndRelationShip(Guid id)
         {
-            Post post = postRepository.FindByConditionWithTracking(x => x.Id == id,  x => x.Reports, x => x.TagPosts, x => x.Videos).FirstOrDefault()!;
+            Post post = postRepository.FindByConditionWithTracking(x => x.Id == id, x => x.Reports, x => x.TagPosts, x => x.Videos).FirstOrDefault()!;
             post.IsDeleted = true;
 
         }

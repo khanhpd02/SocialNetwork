@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using SocialNetwork.DTO;
+using SocialNetwork.DTO.UpdateDTO;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
 using SocialNetwork.Socket;
@@ -60,7 +61,7 @@ namespace SocialNetwork.Controller.User
         }
         [HttpPut]
         [SwaggerOperation(Summary = "Update a Post")]
-        public IActionResult Update([FromForm] PostDTO postDTO)
+        public IActionResult Update([FromForm] PostUpdateDTO postDTO)
         {
 
             if (postDTO == null)

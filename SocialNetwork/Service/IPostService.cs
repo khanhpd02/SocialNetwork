@@ -1,4 +1,5 @@
 ﻿using SocialNetwork.DTO;
+using SocialNetwork.DTO.UpdateDTO;
 
 namespace SocialNetwork.Service
 {
@@ -7,7 +8,7 @@ namespace SocialNetwork.Service
         List<PostDTO> GetPostsAndShareByUserId(Guid userId);
         List<string> UploadFilesToCloudinary(List<IFormFile> files);
         PostDTO Create(PostDTO dto);
-        PostDTO Update(PostDTO dto);
+        Task<PostDTO> Update(PostUpdateDTO dto);
         ShareDTO SharePost(ShareDTO sharePostDTO);
         PostDTO GetById(Guid id);
         void Delete(Guid id);
