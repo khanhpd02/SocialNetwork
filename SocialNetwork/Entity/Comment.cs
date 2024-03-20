@@ -28,6 +28,4 @@ public partial class Comment : IEntity
     public virtual ICollection<Comment> InverseParent { get; set; } = new List<Comment>();
 
     public virtual Comment Parent { get; set; }
-
-    public virtual User User { get; set; }
 }

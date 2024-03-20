@@ -25,8 +25,6 @@ public partial class User : IEntity
 
     public string UserName { get; set; }
 
-    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
-
     public virtual ICollection<Friend> FriendUserAcceptNavigations { get; set; } = new List<Friend>();
 
     public virtual ICollection<Friend> FriendUserToNavigations { get; set; } = new List<Friend>();
@@ -38,8 +36,6 @@ public partial class User : IEntity
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
-
-    public virtual ICollection<Share> Shares { get; set; } = new List<Share>();
 
     public virtual ICollection<UserGroupChat> UserGroupChats { get; set; } = new List<UserGroupChat>();
 

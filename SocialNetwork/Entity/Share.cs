@@ -26,6 +26,4 @@ public partial class Share : IEntity
     public string Link { get; set; }
 
     public int? LevelView { get; set; }
-
-    public virtual User User { get; set; }
 }
