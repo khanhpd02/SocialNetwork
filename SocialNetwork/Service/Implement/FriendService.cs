@@ -67,8 +67,6 @@ namespace SocialNetwork.Service.Implement
 
                 Notify notify = new Notify();
                 notify.UserTo = _userService.UserId;
-                //User user = userRepository.FindByCondition(x => x.Id == _userService.UserId).FirstOrDefault();
-                //Infor infor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
                 notify.UserNotify = userIdReceive;
                 var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Kết bạn").FirstOrDefault();
                 notify.Content = $" đã gửi lời mời kết bạn cho bạn";

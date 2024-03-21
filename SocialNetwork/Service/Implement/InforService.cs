@@ -106,8 +106,8 @@ namespace SocialNetwork.Service.Implement
                 InforDTO dto = mapper.Map<InforDTO>(entity);
 
                 var checkFriend = _friendRepository.FindByCondition(x =>
-                    (x.UserTo == _userService.UserId && x.UserAccept == entity.Id) ||
-                    (x.UserAccept == _userService.UserId && x.UserTo == entity.Id)
+                    (x.UserTo == _userService.UserId && x.UserAccept == entity.UserId) ||
+                    (x.UserAccept == _userService.UserId && x.UserTo == entity.UserId)
                 ).FirstOrDefault();
 
                 if (checkFriend == null)
