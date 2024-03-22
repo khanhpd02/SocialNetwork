@@ -260,7 +260,7 @@ namespace SocialNetwork.Service.Implement
                 friendRepository.Delete(friends);
                 friendRepository.Save();
 
-                return new AppResponse { message = "Accept Friend Success", success = true };
+                return new AppResponse { message = "Reject Friend Success", success = true };
             }
         }
 
