@@ -22,5 +22,12 @@ namespace SocialNetwork.Controller.User
             var response = await realService.MergeImageWithAudio(mergeImageAndAudio);
             return Ok(response);
         }
+        [HttpPost("MergeVideoWithAudio")]
+        [SwaggerOperation(Summary = "MergeVideoWithAudio To Real")]
+        public async Task<IActionResult> MergeAudioWithAudio([FromForm] MergVideoAndAudioDTO mergVideoAndAudio)
+        {
+            var response = await realService.MergeVideoWithAudio(mergVideoAndAudio);
+            return Ok(response);
+        }
     }
 }

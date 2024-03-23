@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.DTO;
+﻿using SocialNetwork.Entity;
+
+namespace SocialNetwork.DTO;
 
 public class RealDTO
 {
@@ -19,4 +21,13 @@ public class RealDTO
     public bool IsDeleted { get; set; }
 
     public int LevelView { get; set; }
+    public List<Video> Videos { get; set; }
+    public List<Like> Likes { get; set; }
+    public List<Comment> Comments { get; set; }
+    public string? FullName { get; set; }
+    public string? AvatarUrl { get; set; }
+    public int CountLike { get; set; }
+    public int CountComment { get; set; }
+    public bool islike { get; set; }
+
 }

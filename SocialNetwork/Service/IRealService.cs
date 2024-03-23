@@ -5,6 +5,9 @@ namespace SocialNetwork.Service
 {
     public interface IRealService
     {
-        Task<string> MergeImageWithAudio(MergeImageAndAudioDTO mergeImageAndAudioDTO);
+        Task<RealDTO> MergeImageWithAudio(MergeImageAndAudioDTO mergeImageAndAudioDTO);
+        Task<RealDTO> MergeVideoWithAudio(MergVideoAndAudioDTO mergVideoAndAudio);
+        List<RealDTO> GetRealByUserId(Guid id);
+        RealDTO GetById(Guid id);
     }
 }
