@@ -15,9 +15,9 @@ namespace SocialNetwork.Controller.User
         private readonly IRealService realService;
         public RealController(
             IRealService realService) { this.realService = realService; }
-        [HttpPost("create")]
-        [SwaggerOperation(Summary = "Create Real")]
-        public async Task<IActionResult> Create([FromForm] MergeImageAndAudioDTO mergeImageAndAudio)
+        [HttpPost("MergeImageWithAudio")]
+        [SwaggerOperation(Summary = "MergeImageWithAudio To Real")]
+        public async Task<IActionResult> MergeImageWithAudio([FromForm] MergeImageAndAudioDTO mergeImageAndAudio)
         {
             var response = await realService.MergeImageWithAudio(mergeImageAndAudio);
             return Ok(response);
