@@ -60,3 +60,4 @@
 *.exe filter=lfs diff=lfs merge=lfs -text
 FFMPEG/bin/*.exe filter=lfs diff=lfs merge=lfs -text
 SocialNetwork/FFMPEG/bin/*.exe filter=lfs diff=lfs merge=lfs -text
+D:/BackEnd/SocialNetwork/SocialNetwork/FFMPEG/*.exe filter=lfs diff=lfs merge=lfs -text
