@@ -190,8 +190,17 @@ namespace SocialNetwork.Service.Implement
                 string ffmpegPath = @"FFMPEG\bin\ffmpeg.exe";
 
                 string outputVideoPath = Path.GetTempFileName() + ".mp4";
+                string arguments = "";
+                if (mergVideoAndAudio.DisableVoice==true)
+                {
+                    arguments = $"-i \"{videoPath}\" -i \"{audioLink}\" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest \"{outputVideoPath}\"";
 
-                string arguments = $"-i \"{videoPath}\" -i \"{audioLink}\" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest \"{outputVideoPath}\"";
+                }
+                else
+                {
+                    arguments = $"-i \"{videoPath}\" -i \"{audioLink}\" -filter_complex \"[0:a]volume=1.0[a1]; [1:a]volume=0.5[a2]; [a1][a2]amix=inputs=2:duration=first:dropout_transition=2\" -c:v copy -c:a aac -shortest \"{outputVideoPath}\"";
+
+                }
 
                 await Task.Run(() =>
                 {
