@@ -119,6 +119,8 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IMasterDataRepository, MasterDataRepository>();
     services.AddScoped<IFriendRepository, FriendRepository>();
     services.AddScoped<IShareRepository, ShareRepository>();
+    services.AddScoped<IAudioRepository, AudioRepository>();
+    services.AddScoped<IRealRepository, RealRepository>();
 
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     services.AddSingleton<FirebaseInitializer>();

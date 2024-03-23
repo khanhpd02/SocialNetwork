@@ -38,6 +38,8 @@ namespace Service.Implement.ObjectMapping
             CreateMap<Video, VideoDTO>();
             CreateMap<Notify, NotifyDTO>();
             CreateMap<Share, ShareDTO>();
+            CreateMap<Audio, AudioDTO>();
+            CreateMap<Real, RealDTO>();
             CreateMap<MasterDatum, MasterDatumDTO>();
 
             CreateMap<User, UserDTO>().ReverseMap();
@@ -62,6 +64,8 @@ namespace Service.Implement.ObjectMapping
             CreateMap<RegisterModel, User>();
             CreateMap<NotifyDTO, Notify>();
             CreateMap<ShareDTO, Share>();
+            CreateMap<AudioDTO, Audio>();
+            CreateMap<RealDTO, Real>();
             CreateMap<MasterDatumDTO, MasterDatum>();
 
 
