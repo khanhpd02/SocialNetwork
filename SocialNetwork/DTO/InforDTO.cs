@@ -15,6 +15,7 @@ public class InforDTO
     public string? PhoneNumber { get; set; }
 
     public IFormFile? File { get; set; }
+    public IFormFile? FileBackground { get; set; }
     public string? Image { get; set; }
 
     public string? Address { get; set; }
@@ -31,5 +32,10 @@ public class InforDTO
     public string Wards { get; set; }
 
     public string Direction { get; set; }
+    public string Background { get; set; }
+
+    public string Career { get; set; }
+
+    public string Nickname { get; set; }
 
 }

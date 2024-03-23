@@ -231,32 +231,25 @@ namespace SocialNetwork.Service.Implement
             if (infor == null)
             {
                 String cloudinaryUrl = UploadFileToCloudinary(inforDTO.File);
+                String cloudinaryUrlBackground = UploadFileToCloudinary(inforDTO.FileBackground);
                 Infor info = mapper.Map<Infor>(inforDTO);
                 info.UserId = userId;
                 info.Address = inforDTO.Direction + ", " + inforDTO.Wards + ", " + inforDTO.Districts + ", " + inforDTO.Provinces;
                 _inforRepository.Create(info);
                 _inforRepository.Save();
 
-                if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
+                if ((cloudinaryUrl != null && cloudinaryUrl.Length > 0) && (cloudinaryUrlBackground != null && cloudinaryUrlBackground.Length > 0))
                 {
-                    string fileExtension = Path.GetExtension(cloudinaryUrl);
-                    if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                           fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                           fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-                           fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                    var link = cloudinaryUrl;
+                    var linkBackground = cloudinaryUrlBackground;
+                    if (link != null)
                     {
-                        var link = cloudinaryUrl;
-                        if (link != null)
-                        {
-                            info.Image = link;
-                            _inforRepository.Update(info);
-                            _inforRepository.Save();
+                        info.Image = link;
+                        info.Background = linkBackground;
+                        _inforRepository.Update(info);
+                        _inforRepository.Save();
 
-
-
-                        }
                     }
-
                 }
                 return new AppResponse { message = "Create Info Sucess!", success = true };
             }
@@ -288,31 +281,29 @@ namespace SocialNetwork.Service.Implement
 
             var infor = _inforRepository.FindByCondition(x => x.UserId == userId).FirstOrDefault();
             if (infor != null)
-            {   
+            {
                 String cloudinaryUrl = UploadFileToCloudinary(inforDTO.File);
                 //infor = mapper.Map<Infor>(inforDTO);
-                if(inforDTO.FullName != null)
+                if (inforDTO.FullName != null)
                     infor.FullName = inforDTO.FullName;
-                if(inforDTO.PhoneNumber != null) 
+                if (inforDTO.PhoneNumber != null)
                     infor.PhoneNumber = inforDTO.PhoneNumber;
-                if (inforDTO.WorkPlace != null) 
+                if (inforDTO.WorkPlace != null)
                     infor.WorkPlace = inforDTO.WorkPlace;
                 if (inforDTO.Gender != null)
                     infor.Gender = inforDTO.Gender;
-                if (inforDTO.Address != null) 
+                if (inforDTO.Address != null)
                     infor.Address = inforDTO.Address;
-                if (inforDTO.DateOfBirth != null) 
+                if (inforDTO.DateOfBirth != null)
                     infor.DateOfBirth = inforDTO.DateOfBirth;
                 if (inforDTO.Provinces != null)
                     infor.Provinces = inforDTO.Provinces;
-                if(inforDTO.Districts != null)
+                if (inforDTO.Districts != null)
                     infor.Districts = inforDTO.Districts;
-                if(inforDTO.Wards != null)
+                if (inforDTO.Wards != null)
                     infor.Wards = inforDTO.Wards;
-                if(inforDTO.Direction != null)
-                    infor.Direction = inforDTO.Direction;   
-                infor.UpdateDate = DateTime.Now;
-                infor.UpdateBy = userId;
+                if (inforDTO.Direction != null)
+                    infor.Direction = inforDTO.Direction;
                 _inforRepository.Update(infor);
                 _inforRepository.Save();
 
@@ -328,11 +319,11 @@ namespace SocialNetwork.Service.Implement
                         var link = cloudinaryUrl;
                         if (link != null)
                         {
-                            if (inforDTO.Image == null) 
-                                {
-                                    infor.Image = link; 
-                                }
-                            
+                            if (inforDTO.Image == null)
+                            {
+                                infor.Image = link;
+                            }
+
                             _inforRepository.Update(infor);
                             _inforRepository.Save();
 
