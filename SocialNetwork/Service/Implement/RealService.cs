@@ -63,7 +63,7 @@ namespace SocialNetwork.Service.Implement
             }
             try
             {
-                string ffmpegPath = @"D:\BackEnd\SocialNetwork\SocialNetwork\ffmpeg-6.1.1-full_build\bin\ffmpeg.exe"; 
+                string ffmpegPath = @"FFMPEG\bin\ffmpeg.exe"; 
 
                 string outputVideoPath = Path.GetTempFileName() + ".mp4";
 
