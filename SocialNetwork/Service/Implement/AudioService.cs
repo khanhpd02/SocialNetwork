@@ -8,6 +8,7 @@ using SocialNetwork.Repository;
 using Service.Implement.ObjectMapping;
 using Audio = SocialNetwork.Entity.Audio;
 using Microsoft.Extensions.Hosting;
+using NAudio.Wave;
 
 namespace SocialNetwork.Service.Implement
 {
@@ -32,25 +33,47 @@ namespace SocialNetwork.Service.Implement
             {
                 if (file != null && file.Length > 0)
                 {
-                    if (Path.GetExtension(file.FileName).Equals(".mp3", StringComparison.OrdinalIgnoreCase)||
-                        Path.GetExtension(file.FileName).Equals(".wav", StringComparison.OrdinalIgnoreCase)||
+                    if (Path.GetExtension(file.FileName).Equals(".mp3", StringComparison.OrdinalIgnoreCase) ||
+                        Path.GetExtension(file.FileName).Equals(".wav", StringComparison.OrdinalIgnoreCase) ||
                         Path.GetExtension(file.FileName).Equals(".m4a", StringComparison.OrdinalIgnoreCase))
                     {
-                        var uploadParamsVideo = new VideoUploadParams
+                        // Tạo một đường dẫn tạm thời để lưu file
+                        var tempFilePath = Path.GetTempFileName();
+
+                        using (var stream = System.IO.File.Create(tempFilePath))
                         {
-                            File = new FileDescription(file.FileName, file.OpenReadStream()),
-                            Folder = "SocialNetwork/Audio/",
-                        };
+                            file.CopyTo(stream);
+                        }
 
-                        var uploadResult = _cloudinary.Upload(uploadParamsVideo);
-                        uploadedUrls.Add(uploadResult.SecureUrl.AbsoluteUri);
+                        using (var reader = new AudioFileReader(tempFilePath))
+                        {
+                            if (reader.TotalTime.TotalSeconds <= 30)
+                            {
+                                var uploadParamsVideo = new VideoUploadParams
+                                {
+                                    File = new FileDescription(file.FileName, file.OpenReadStream()),
+                                    Folder = "SocialNetwork/Audio/",
+                                };
 
+                                var uploadResult = _cloudinary.Upload(uploadParamsVideo);
+                                uploadedUrls.Add(uploadResult.SecureUrl.AbsoluteUri);
+                            }
+                            else
+                            {
+                                throw new Exception("Video chưa đúng định dạng");
+                            }
+                        }
+
+                        // Xóa file tạm thời sau khi đã sử dụng
+                        System.IO.File.Delete(tempFilePath);
                     }
                 }
             }
 
             return uploadedUrls;
         }
+
+
 
         public AudioDTO Create(AudioDTO dto)
         {
