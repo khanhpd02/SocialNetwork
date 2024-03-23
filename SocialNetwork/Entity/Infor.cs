@@ -41,5 +41,11 @@ public partial class Infor : IEntity
 
     public string Direction { get; set; }
 
+    public string Background { get; set; }
+
+    public string Career { get; set; }
+
+    public string Nickname { get; set; }
+
     public virtual User User { get; set; }
 }
