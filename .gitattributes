@@ -59,3 +59,4 @@
 #*.RTF   diff=astextplain
 *.exe filter=lfs diff=lfs merge=lfs -text
 FFMPEG/bin/*.exe filter=lfs diff=lfs merge=lfs -text
+SocialNetwork/FFMPEG/bin/*.exe filter=lfs diff=lfs merge=lfs -text
