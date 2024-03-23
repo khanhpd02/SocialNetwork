@@ -65,7 +65,7 @@ namespace SocialNetwork.Service.Implement
                         }
 
                         // Xóa file tạm thời sau khi đã sử dụng
-                        System.IO.File.Delete(tempFilePath);
+                        
                     }
                 }
             }

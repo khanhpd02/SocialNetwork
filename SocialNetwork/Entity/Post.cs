@@ -28,6 +28,4 @@ public partial class Post : IEntity
     public virtual ICollection<TagPost> TagPosts { get; set; } = new List<TagPost>();
 
     public virtual User User { get; set; }
-
-    public virtual ICollection<Video> Videos { get; set; } = new List<Video>();
 }

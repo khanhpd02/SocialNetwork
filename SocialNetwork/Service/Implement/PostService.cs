@@ -664,7 +664,7 @@ namespace SocialNetwork.Service.Implement
         }
         private void DeletePostAndRelationShip(Guid id)
         {
-            Post post = postRepository.FindByConditionWithTracking(x => x.Id == id, x => x.Reports, x => x.TagPosts, x => x.Videos).FirstOrDefault()!;
+            Post post = postRepository.FindByConditionWithTracking(x => x.Id == id, x => x.Reports, x => x.TagPosts).FirstOrDefault()!;
             post.IsDeleted = true;
 
         }

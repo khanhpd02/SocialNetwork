@@ -17,9 +17,9 @@ namespace SocialNetwork.Controller.User
             IRealService realService) { this.realService = realService; }
         [HttpPost("create")]
         [SwaggerOperation(Summary = "Create Real")]
-        public async Task<IActionResult> Create([FromForm] Guid id, IFormFile file)
+        public async Task<IActionResult> Create([FromForm] MergeImageAndAudioDTO mergeImageAndAudio)
         {
-            var response = await realService.Create(id,file);
+            var response = await realService.MergeImageWithAudio(mergeImageAndAudio);
             return Ok(response);
         }
     }
