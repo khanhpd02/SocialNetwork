@@ -8,7 +8,8 @@ using System.Text;
 using WebApi.Helpers;
 
 public interface IJwtUtils
-{
+{ 
+    string ValidateJwtTokenPasswordFirebase(string jwtToken);
     string GenerateJwtToken(User user);
     Guid? ValidateJwtToken(string token);
     string? ValidateJwtTokenEmail(string token);
@@ -82,13 +83,13 @@ public class JwtUtils : IJwtUtils
         }
 
         var roleClaims = roles.Select(role => new Claim("role", role)).ToList();
-
+        var passfirebase= new Claim("passFirebase", user.Password);
         // Thêm claim về email vào danh sách các claims
         var emailClaim = new Claim("email", user.Email);
         var allClaims = new List<Claim>
     {
         new Claim("id", user.Id.ToString()),
-        emailClaim
+        emailClaim,passfirebase
     }.Concat(roleClaims);
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -158,6 +159,44 @@ public class JwtUtils : IJwtUtils
 
             var jwtToken = (JwtSecurityToken)validatedToken;
             var userEmailClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "email");
+
+            if (userEmailClaim != null)
+            {
+                var userEmail = userEmailClaim.Value;
+                return userEmail;
+            }
+
+            return null;
+        }
+        catch (Exception)
+        {
+            // Log or handle the exception
+            return null;
+        }
+    }
+    public string? ValidateJwtTokenPasswordFirebase(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+            return null;
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+
+        try
+        {
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+
+            var jwtToken = (JwtSecurityToken)validatedToken;
+            var userEmailClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "passFirebase");
 
             if (userEmailClaim != null)
             {

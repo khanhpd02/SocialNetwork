@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SocialNetwork.Entity;
-using SocialNetwork.Firebase;
+using SocialNetwork.FirebaseAD;
 using SocialNetwork.Mail;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Repository;
@@ -137,7 +137,7 @@ builder.Services.AddSwaggerGen(option =>
 }
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "FirebaseAD/config.json");
 //Authorization
 var secretKey = builder.Configuration["AppSettings:Secret"];
 var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey!);

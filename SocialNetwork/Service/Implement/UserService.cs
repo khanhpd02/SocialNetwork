@@ -2,6 +2,8 @@
 
 using AutoMapper;
 using BCrypt.Net;
+using DocumentFormat.OpenXml.Spreadsheet;
+using FirebaseAdmin.Auth;
 using firstapi.Service;
 using global::Service.Implement.ObjectMapping;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +13,8 @@ using SocialNetwork.DTO.Auth;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
-using SocialNetwork.Firebase;
+using SocialNetwork.FirebaseAD  ;
+using SocialNetwork.Helpers;
 using SocialNetwork.Mail;
 using SocialNetwork.Model.User;
 using System.Text.RegularExpressions;
@@ -29,6 +32,7 @@ public class UserService : IUserService
     private User _loggedInUser; // Add a field to store the logged-in user
     public Guid UserId { get; set; }
     public string UserEmail { get; set; }
+    public string PasswordFirebase { get; set; }
 
     private readonly IMapper mapper = new MapperConfiguration(cfg =>
     {
@@ -51,7 +55,7 @@ public class UserService : IUserService
 
         UserId = GetLoggedInUserId(httpContextAccessor.HttpContext);
         UserEmail = GetLoggedInUserEmail(httpContextAccessor.HttpContext);
-
+        PasswordFirebase = GetLoggedInPasswordFirebase(httpContextAccessor.HttpContext);
 
     }
     public Guid GetLoggedInUserId(HttpContext httpContext)
@@ -81,6 +85,22 @@ public class UserService : IUserService
             if (userEmail != null)
             {
                 return userEmail;
+            }
+        }
+
+        return null; // No valid token or user not found
+    }
+    public string GetLoggedInPasswordFirebase(HttpContext httpContext)
+    {
+        var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            var passwordFb = _jwtUtils.ValidateJwtTokenPasswordFirebase(token);
+
+            if (passwordFb != null)
+            {
+                return passwordFb;
             }
         }
 
@@ -229,10 +249,7 @@ public class UserService : IUserService
                 
                 try
                 {
-                    FirebaseInitializer.InitializeFirebaseApp();
-                    var firebaseAuthManager = new FirebaseAuthManager();
-                    var uid = firebaseAuthManager.CreateFirebaseUserAsync(user.Email, user.Password);
-                    Console.WriteLine($"User created with UID: {uid}");
+                    
 
                     user.IsDeleted = false;
                     pin.IsDeleted = true;
@@ -241,9 +258,9 @@ public class UserService : IUserService
                     _context.SaveChanges();
                     //Tạo account firebase
                 }
-                catch (Exception)
+                catch ( Exception ex)
                 {
-                    throw new BadRequestException("Kiểm tra lại tk firebase");
+                    throw new BadRequestException("Kiểm tra lại tk firebase"+ex.Message);
                 }
 
                 //
@@ -316,7 +333,7 @@ public class UserService : IUserService
         {
             loginDataResponse.HasInfor = true;
         }
-        //firebase tokeen
+       /* //firebase tokeen
         FirebaseInitializer.InitializeFirebaseApp();
         var firebaseAuthManager = new FirebaseAuthManager();
 
@@ -330,7 +347,7 @@ public class UserService : IUserService
         catch (BadRequestException ex)
         {
             throw new BadRequestException("Lỗi firebase rồi");
-        }
+        }*/
 
         return loginResponse;
     }
@@ -432,7 +449,7 @@ public class UserService : IUserService
             {
                 FirebaseInitializer.InitializeFirebaseApp();
                 var firebaseAuthManager = new FirebaseAuthManager();
-                firebaseAuthManager.ChangePasswordByEmailAsync(loginModel.Email, loginModel.Password);//chưa test
+                firebaseAuthManager.ChangePasswordByEmailAsync(loginModel.Email, user.Password);//chưa test
 
             }
             catch (Exception ex)
@@ -452,6 +469,25 @@ public class UserService : IUserService
         }
     }
 
+    public void Test()
+    {
+        try
+        {
+            throw new BadRequestException(SupportFunction.RemoveAccentsAndSpaces("Phước Công   ád"));
+            /*FirebaseAuthManager authManager = new FirebaseAuthManager();
+
+            // Thông tin của người dùng mới
+            string displayName = "Khanh";
+            string email = "duykhanhphan20022@gmail.com";
+            string password = "123123";
+            string photoUrl = "https://res.cloudinary.com/khanhpd/image/upload/v1711113415/Avatar%20KCT/gjsek9jh65e0boofhixx.jpg";
+            authManager.CreateUserAsync(displayName, email, password, photoUrl);*/
+        }
+        catch (Exception ex)
+        {
+            throw new BadRequestException(ex.Message);
+        }
+    }
     
 }
 

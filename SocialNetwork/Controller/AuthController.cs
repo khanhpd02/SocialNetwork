@@ -49,6 +49,7 @@ namespace SocialNetwork.Controller
 
 
         }
+
         [AllowAnonymous]
         [HttpPost("VerifyPinForgotPassword")]
         public async Task<IActionResult> VerifyPinForgotPassword([FromBody] VerifyPin rsg)
@@ -63,7 +64,7 @@ namespace SocialNetwork.Controller
 
 
         }
-
+        
         [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register(RegisterModel rsg)
@@ -157,6 +158,17 @@ namespace SocialNetwork.Controller
                 _userService.SendPinForgotPassword(mailDTO);
                 return Ok("Send Pin ForgotPassword successful");
             }
+            // Gọi AuthService để xử lý việc đăng ký tài khoản
+
+
+        }
+        [AllowAnonymous]
+        [SwaggerOperation(Summary = "API test hàm")]
+        [HttpPost("test")]
+        public async Task<IActionResult> Test()
+        {
+            _userService.Test();
+            return Ok("Thành công");
             // Gọi AuthService để xử lý việc đăng ký tài khoản
 
 

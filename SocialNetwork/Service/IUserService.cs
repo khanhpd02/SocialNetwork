@@ -8,6 +8,7 @@ namespace SocialNetwork.Service
     {
         Guid UserId { get; set; }
         string UserEmail { get; set; }
+        string PasswordFirebase { get; set; }
         //Task<bool> SendPinEmail(SendPinEmailModel rsg);
         Task<bool> VerifyPin(VerifyPin VerifyPin);
         AppResponse VerifyPinForgotPassword(VerifyPin VerifyPin);
@@ -16,5 +17,6 @@ namespace SocialNetwork.Service
         AppResponse SendPinForgotPassword(MailDTO mailDTO);
         Task<LoginResponse> Authenticate(LoginModel loginModel);
         void SendPinEmail(String Email, String content);
+        void Test();
     }
 }

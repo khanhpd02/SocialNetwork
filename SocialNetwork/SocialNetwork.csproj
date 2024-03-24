@@ -30,6 +30,9 @@
 		<PackageReference Include="CloudinaryDotNet" Version="1.22.0" />
 		<PackageReference Include="FirebaseAdmin" Version="2.4.0" />
 		<PackageReference Include="FirebaseAuthentication.net" Version="4.1.0" />
+		<PackageReference Include="Google.Cloud.Firestore" Version="3.5.1" />
+		<PackageReference Include="Google.Cloud.Firestore.V1" Version="3.5.1" />
+		<PackageReference Include="Google.Cloud.Storage.V1" Version="4.9.0" />
 		<PackageReference Include="MailKit" Version="4.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11" />
@@ -52,6 +55,14 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EditorConfigFiles Remove="D:\TLCN\22_03_2024\SocialNetwork\Helpers\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="D:\TLCN\22_03_2024\SocialNetwork\Helpers\.editorconfig" />
 	</ItemGroup>
 
 </Project>

@@ -7,8 +7,12 @@ using SocialNetwork.DTO;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
+using SocialNetwork.FirebaseAD;
+using SocialNetwork.Helpers;
+using SocialNetwork.Model.User;
 using SocialNetwork.Repository;
 using System.Text.RegularExpressions;
+using static Google.Rpc.Help.Types;
 
 namespace SocialNetwork.Service.Implement
 {
@@ -226,7 +230,7 @@ namespace SocialNetwork.Service.Implement
                     throw new BadRequestException("Số điện thoại không hợp lệ.");
                 }
             }
-
+            var user = userRepository.FindByCondition(x=>x.Id == userId).FirstOrDefault();
             var infor = _inforRepository.FindByCondition(x => x.UserId == userId).FirstOrDefault();
             if (infor == null)
             {
@@ -238,19 +242,53 @@ namespace SocialNetwork.Service.Implement
                 _inforRepository.Create(info);
                 _inforRepository.Save();
 
-                if ((cloudinaryUrl != null && cloudinaryUrl.Length > 0) && (cloudinaryUrlBackground != null && cloudinaryUrlBackground.Length > 0))
+                if (cloudinaryUrl != null && cloudinaryUrl.Length > 0)
                 {
-                    var link = cloudinaryUrl;
-                    var linkBackground = cloudinaryUrlBackground;
-                    if (link != null)
+                    string fileExtension = Path.GetExtension(cloudinaryUrl);
+                    if (fileExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                           fileExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                           fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                           fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
                     {
-                        info.Image = link;
-                        info.Background = linkBackground;
-                        _inforRepository.Update(info);
-                        _inforRepository.Save();
+                        var link = cloudinaryUrl;
+                        if (link != null)
+                        {
+                            info.Image = link;
+                            //
+                            FirebaseAuthManager authManager = new FirebaseAuthManager();
 
+                            // Thông tin của người dùng mới
+                            string displayName = info.FullName;
+                            string email = user.Email;
+                            string password = user.Password;
+                            string photoUrl = link;
+                            authManager.CreateUserAsync(displayName, email, password, photoUrl);
+
+                            _inforRepository.Update(info);
+                            _inforRepository.Save();
+
+
+
+                        }
                     }
+
                 }
+                else
+                {
+                    info.Image = "https://res.cloudinary.com/khanhpd/image/upload/v1711113415/Avatar%20KCT/gjsek9jh65e0boofhixx.jpg";
+                    _inforRepository.Update(info);
+                    _inforRepository.Save();
+
+                    FirebaseAuthManager authManager = new FirebaseAuthManager();
+
+                    // Thông tin của người dùng mới
+                    string displayName = info.FullName;
+                    string email = user.Email;
+                    string password = user.Password;
+                    string photoUrl = "https://res.cloudinary.com/khanhpd/image/upload/v1711113415/Avatar%20KCT/gjsek9jh65e0boofhixx.jpg";
+                    authManager.CreateUserAsync(displayName, email, password, photoUrl);
+                }
+                
                 return new AppResponse { message = "Create Info Sucess!", success = true };
             }
             else
@@ -278,15 +316,19 @@ namespace SocialNetwork.Service.Implement
                     throw new BadRequestException("Số điện thoại không hợp lệ.");
                 }
             }
-
+            var user=userRepository.FindByCondition(x=>x.Id==userId).FirstOrDefault();
             var infor = _inforRepository.FindByCondition(x => x.UserId == userId).FirstOrDefault();
             if (infor != null)
             {
                 String cloudinaryUrl = UploadFileToCloudinary(inforDTO.File);
                 //infor = mapper.Map<Infor>(inforDTO);
-                if (inforDTO.FullName != null)
+                if(inforDTO.FullName != null) 
+                {
                     infor.FullName = inforDTO.FullName;
-                if (inforDTO.PhoneNumber != null)
+                    
+                }
+                    
+                if(inforDTO.PhoneNumber != null) 
                     infor.PhoneNumber = inforDTO.PhoneNumber;
                 if (inforDTO.WorkPlace != null)
                     infor.WorkPlace = inforDTO.WorkPlace;
@@ -319,11 +361,13 @@ namespace SocialNetwork.Service.Implement
                         var link = cloudinaryUrl;
                         if (link != null)
                         {
-                            if (inforDTO.Image == null)
-                            {
-                                infor.Image = link;
-                            }
-
+                            if (inforDTO.Image == null) 
+                                {
+                                    
+                                    infor.Image = link; 
+                                    
+                                }
+                            
                             _inforRepository.Update(infor);
                             _inforRepository.Save();
 
@@ -331,6 +375,8 @@ namespace SocialNetwork.Service.Implement
                     }
 
                 }
+                FirebaseAuthManager authManager = new FirebaseAuthManager();
+                authManager.UpdateUserAsync(infor.FullName, user.Email, infor.Image);
                 return new AppResponse { message = "Update Info Sucess!", success = true };
 
 
