@@ -5,7 +5,6 @@ using SocialNetwork.DTO;
 using SocialNetwork.DTO.UpdateDTO;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
-using SocialNetwork.Socket;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SocialNetwork.Controller.User
@@ -15,13 +14,10 @@ namespace SocialNetwork.Controller.User
     [Route("api/post")]
     public class PostController : ControllerBase
     {
-        private readonly IHubContext<CommentHub> _commentHub;
-
         private readonly IPostService postService;
-        public PostController(IPostService postService, IHubContext<CommentHub> commentHub)
+        public PostController(IPostService postService)
         {
             this.postService = postService;
-            _commentHub = commentHub;
         }
 
         [HttpGet("{id}")]
@@ -85,11 +81,6 @@ namespace SocialNetwork.Controller.User
         public IActionResult GetAll()
         {
             var posts = postService.GetAllPostsAndShare();
-            foreach (var post in posts)
-            {
-                _commentHub.Clients.Group(post.Id.ToString()).SendAsync("JoinPostGroup", post.Id);
-            }
-
             return Ok(posts);
         }
         [HttpGet("user/{id}")]

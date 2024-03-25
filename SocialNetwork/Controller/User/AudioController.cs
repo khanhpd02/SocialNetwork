@@ -3,7 +3,6 @@ using SocialNetwork.DTO;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
 using SocialNetwork.Service.Implement;
-using SocialNetwork.Socket;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SocialNetwork.Controller.User

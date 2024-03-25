@@ -4,7 +4,6 @@ using SocialNetwork.DTO;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
-using SocialNetwork.Socket;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SocialNetwork.Controller.User
@@ -15,13 +14,11 @@ namespace SocialNetwork.Controller.User
     [Route("api/cmt")]
     public class CommentController : ControllerBase
     {
-        private readonly IHubContext<CommentHub> _commentHub;
         private readonly ICommentService commentService;
         private IUserService _userService;
-        public CommentController(ICommentService commentService, IHubContext<CommentHub> commentHub, IUserService userService)
+        public CommentController(ICommentService commentService, IUserService userService)
         {
             this.commentService = commentService;
-            _commentHub = commentHub;
             _userService = userService;
         }
 

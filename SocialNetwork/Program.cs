@@ -8,7 +8,6 @@ using SocialNetwork.Mail;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Repository;
 using SocialNetwork.Repository.Implement;
-using SocialNetwork.Socket;
 //using SocialNetwork.Socket;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -75,12 +74,6 @@ builder.Services.AddSwaggerGen(option =>
                 .AllowCredentials());
     });
     services.AddSignalR();
-
-
-    services.AddSignalR().AddHubOptions<VideoHub>(options =>
-    {
-        options.EnableDetailedErrors = true;
-    });
 
     services.AddControllers()
         .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
