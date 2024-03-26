@@ -5,6 +5,7 @@ using SocialNetwork.DTO;
 using SocialNetwork.DTO.Response;
 using SocialNetwork.Entity;
 using SocialNetwork.ExceptionModel;
+using SocialNetwork.Helpers;
 using SocialNetwork.Repository;
 using System.Linq;
 
@@ -162,7 +163,7 @@ namespace SocialNetwork.Service.Implement
 
         public List<MasterDatumDTO> GetAllLevel()
         {
-            List<MasterDatum> level = masterDataRepository.FindByCondition(x => x.Name == "Bạn thường" || x.Name == "Thân thiết").ToList();
+            List<MasterDatum> level = masterDataRepository.FindByCondition(x => x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.friend) || x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.bestfriend)).ToList();
             List<MasterDatumDTO> masterDatumDTOs = new List<MasterDatumDTO>();
             foreach (var item in level)
             {
@@ -174,7 +175,9 @@ namespace SocialNetwork.Service.Implement
         public FriendDTO UpdateLevelFriend(FriendDTO dto)
         {
             var friends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == dto.User2) || (x.UserTo == dto.User2 && x.UserAccept == _userService.UserId)).FirstOrDefault();
-            friends.Level = dto.Level;
+            var idMaster = masterDataRepository.FindByCondition(x => x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.friend)||
+            x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.bestfriend) && x.IsDeleted==false).FirstOrDefault().Id;
+            friends.Level = idMaster;
             friendRepository.Update(friends);
             friendRepository.Save();
             return dto;
@@ -270,7 +273,7 @@ namespace SocialNetwork.Service.Implement
                 .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
                 .ToList();
             var userSuggest = userRepository
-                .FindByCondition(x => x.IsDeleted == false && !idOfFriends.Contains(x.Id) && x. Id!= _userService.UserId)
+                .FindByCondition(x => x.IsDeleted == false && !idOfFriends.Contains(x.Id) && x.Id != _userService.UserId)
                 .ToList();
             List<User> listUserSuggest = new List<User>();
             var itemsToRemove = new List<User>();
@@ -341,11 +344,11 @@ namespace SocialNetwork.Service.Implement
                 var userItem = userRepository.FindByCondition(x => x.Id == item.UserId).FirstOrDefault();
                 listUserSuggest.Add(userItem);
             }
-            List<Infor> listInforSuggest=new List<Infor>();
+            List<Infor> listInforSuggest = new List<Infor>();
             foreach (var item in listUserSuggest)
             {
-                var iteminfor=inforRepository.FindByCondition(x=>x.UserId==item.Id).FirstOrDefault();
-                if (iteminfor!=null)
+                var iteminfor = inforRepository.FindByCondition(x => x.UserId == item.Id).FirstOrDefault();
+                if (iteminfor != null)
                 {
                     listInforSuggest.Add(iteminfor);
                 }

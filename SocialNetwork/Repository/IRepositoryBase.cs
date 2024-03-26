@@ -4,6 +4,7 @@ namespace SocialNetwork.Repository
 {
     public interface IRepositoryBase<T>
     {
+        string GetEnumDescription(Enum value);
         List<T> FindAll(params Expression<Func<T, object>>[] includes);
 
         List<T> FindByCondition(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes);

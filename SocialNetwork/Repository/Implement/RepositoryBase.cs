@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialNetwork.Entity;
 using SocialNetwork.Service;
+using System.ComponentModel;
 using System.Linq.Expressions;
 
 namespace SocialNetwork.Repository.Implement
@@ -15,7 +16,12 @@ namespace SocialNetwork.Repository.Implement
             this.context = context;
             this._userService = userService;
         }
-
+        public string GetEnumDescription(Enum value)
+        {
+            var field = value.GetType().GetField(value.ToString());
+            var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
+            return attribute == null ? value.ToString() : attribute.Description;
+        }
         public List<T> FindAll(params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = context.Set<T>().Where(x => x.IsDeleted == false);

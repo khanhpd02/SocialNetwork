@@ -8,6 +8,13 @@ namespace SocialNetwork.Helpers
         publicview = 1
         ,
         [Description("Bạn bè")]
-        friendview= 2 
+        friendview = 2
+        ,
+        [Description("Cá nhân")]
+        privately = 3,
+        [Description("Bạn thường")]
+        friend = 4,
+        [Description("Thân thiết")]
+        bestfriend = 5
     }
 }

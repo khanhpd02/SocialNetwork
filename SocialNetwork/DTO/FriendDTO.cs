@@ -8,7 +8,7 @@ public class FriendDTO
 
     public Guid User2 { get; set; }
 
-    public Guid Level { get; set; }
+    public int Level { get; set; }
 
     public DateTime? CreateDate { get; set; }
 
