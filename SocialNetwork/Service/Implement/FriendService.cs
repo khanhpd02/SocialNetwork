@@ -175,8 +175,15 @@ namespace SocialNetwork.Service.Implement
         public FriendDTO UpdateLevelFriend(FriendDTO dto)
         {
             var friends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == dto.User2) || (x.UserTo == dto.User2 && x.UserAccept == _userService.UserId)).FirstOrDefault();
-            var idMaster = masterDataRepository.FindByCondition(x => x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.friend)||
-            x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.bestfriend) && x.IsDeleted==false).FirstOrDefault().Id;
+            Guid? idMaster=null;
+            var enumDescription = dto.Level == (int)EnumLevelView.friend ? masterDataRepository.GetEnumDescription(EnumLevelView.friend) :
+                     dto.Level == (int)EnumLevelView.bestfriend ? masterDataRepository.GetEnumDescription(EnumLevelView.bestfriend) :
+                     null;
+
+            if (enumDescription != null)
+            {
+                idMaster = masterDataRepository.FindByCondition(x => x.Name == enumDescription && !x.IsDeleted).FirstOrDefault()?.Id;
+            }
             friends.Level = idMaster;
             friendRepository.Update(friends);
             friendRepository.Save();
