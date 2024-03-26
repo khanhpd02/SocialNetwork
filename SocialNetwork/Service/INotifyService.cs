@@ -6,5 +6,6 @@ namespace SocialNetwork.Service
     {
         List<NotifyDTO> GetNotifyAcceptFriendAlongToUser();
         List<NotifyDTO> GetNotifyPostAlongToUser();
+        List<NotifyDTO> GetNotifyAlongToUser();
     }
 }

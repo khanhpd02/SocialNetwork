@@ -26,8 +26,7 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "Create Comment")]
         public Task<IActionResult> Create([FromForm] CommentDTO dto)
         {
-            Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
-            var response = commentService.create(dto, userid);
+            var response = commentService.create(dto);
             return Task.FromResult<IActionResult>(Ok(response));
         }
         [HttpGet("getcmtPost/{id}")]
@@ -41,11 +40,9 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "Update Comment")]
         public IActionResult Update([FromBody] CommentDTO dto)
         {
-            Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
-            AppResponse response = commentService.update(dto, userid);
+            AppResponse response = commentService.update(dto);
             return Ok(response);
         }
-
 
         [HttpGet("getmycmt")]
         [SwaggerOperation(Summary = "Get my CMT at all Post")]
@@ -59,8 +56,7 @@ namespace SocialNetwork.Controller.User
         [SwaggerOperation(Summary = "delete Or Undo CmT")]
         public IActionResult deleteOrUndo(Guid id)
         {
-            Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
-            var response = commentService.deleteOfUndo(id, userid);
+            var response = commentService.deleteOfUndo(id);
             return Ok(response);
         }
     }

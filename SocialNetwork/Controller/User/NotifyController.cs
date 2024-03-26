@@ -24,11 +24,11 @@ namespace SocialNetwork.Controller.User
             return Ok(notifies);
         }
 
-        [HttpGet("getPostNotifies")]
-        [SwaggerOperation(Summary = "Get Notifications for Posted Content")]
+        [HttpGet("getNotifies")]
+        [SwaggerOperation(Summary = "Get Notifications")]
         public IActionResult GetPostNotifies()
         {
-            var notifies = _notifyService.GetNotifyPostAlongToUser();
+            var notifies = _notifyService.GetNotifyAlongToUser();
 
             return Ok(notifies);
         }

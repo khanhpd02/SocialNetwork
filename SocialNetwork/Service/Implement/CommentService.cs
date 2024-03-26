@@ -10,12 +10,15 @@ using SocialNetwork.ExceptionModel;
 using SocialNetwork.Repository;
 using Comment = SocialNetwork.Entity.Comment;
 using Video = SocialNetwork.Entity.Video;
+using DocumentFormat.OpenXml.EMMA;
+using SocialNetwork.Repository.Implement;
 
 namespace SocialNetwork.Service.Implement
 {
     public class CommentService : ICommentService
     {
         private readonly IImageRepository imageRepository;
+        private readonly IUserRepository userRepository;
         private readonly IVideoRepository videoRepository;
         private readonly ICommentRepository _commentRepository;
         private readonly IInforRepository inforRepository;
@@ -24,6 +27,8 @@ namespace SocialNetwork.Service.Implement
         private SocialNetworkContext _context;
         private readonly Cloudinary _cloudinary;
         private IUserService _userService;
+        private readonly IMasterDataRepository masterDataRepository;
+        private readonly INotifyRepository notifyRepository;
 
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
@@ -33,7 +38,9 @@ namespace SocialNetwork.Service.Implement
         public CommentService(ICommentRepository commentRepository, IPostRepository postRepository, 
             SocialNetworkContext context, IInforRepository inforRepository,
             IShareRepository shareRepository, Cloudinary cloudinary, IUserService userService,
-            IImageRepository imageRepository, IVideoRepository videoRepository)
+            IImageRepository imageRepository, IVideoRepository videoRepository, IUserRepository userRepository, 
+            IMasterDataRepository masterDataRepository, 
+            INotifyRepository notifyRepository)
         {
             _commentRepository = commentRepository;
             this.postRepository = postRepository;
@@ -44,6 +51,9 @@ namespace SocialNetwork.Service.Implement
             _userService = userService;
             this.imageRepository = imageRepository;
             this.videoRepository = videoRepository;
+            this.userRepository = userRepository;
+            this.masterDataRepository = masterDataRepository;
+            this.notifyRepository = notifyRepository;
         }
         public List<string> UploadFilesToCloudinary(List<IFormFile> files)
         {
@@ -94,7 +104,7 @@ namespace SocialNetwork.Service.Implement
 
             return uploadedUrls;
         }
-        public AppResponse create(CommentDTO commentDTO, Guid userId)
+        public AppResponse create(CommentDTO commentDTO)
         {
             List<string> cloudinaryUrls = UploadFilesToCloudinary(commentDTO.File);
 
@@ -103,15 +113,28 @@ namespace SocialNetwork.Service.Implement
                 throw new BadRequestException("Content Không được để trống");
             }
             var post = postRepository.FindById(commentDTO.PostId);
-            var share = shareRepository.FindById(commentDTO.PostId);
-            
+            var share = shareRepository.FindById(commentDTO.PostId); 
+            var userPost = userRepository.FindByCondition(x=>x.Id==post.UserId).FirstOrDefault().Id;
+            var userShare = userRepository.FindByCondition(x => x.Id == share.UserId).FirstOrDefault().Id;
+            var userPostInfor = inforRepository.FindByCondition(x => x.UserId == userPost).FirstOrDefault();
+            var userShareInfor = inforRepository.FindByCondition(x => x.UserId == userShare).FirstOrDefault();
             if (post == null && share != null)
             {
                 Comment cmt = mapper.Map<Comment>(commentDTO);
                 cmt.PostId = share.Id;
-                cmt.UserId = userId;
+                cmt.UserId = _userService.UserId;
                 _commentRepository.Create(cmt);
                 _commentRepository.Save();
+
+                Notify notify = new Notify();
+                notify.UserTo = _userService.UserId;
+                notify.UserNotify = userShare;
+                var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
+                notify.Content = $"{userShareInfor.FullName} đã bình luận bài post của bạn";
+                notify.NotifyType = notifyType.Id;
+                notifyRepository.Create(notify);
+                notifyRepository.Save();
+
                 if (cloudinaryUrls != null)
                 {
                     foreach (var cloudinaryUrl in cloudinaryUrls)
@@ -128,9 +151,6 @@ namespace SocialNetwork.Service.Implement
                                 {
                                     PostId = share.Id,
                                     LinkImage = cloudinaryUrl,
-                                    CreateDate = DateTime.Now,
-                                    CreateBy = _userService.UserId,
-                                    IsDeleted = false
                                 };
                                 imageRepository.Create(image);
                                 imageRepository.Save();
@@ -141,9 +161,6 @@ namespace SocialNetwork.Service.Implement
                                 {
                                     PostId = share.Id,
                                     Link = cloudinaryUrl,
-                                    CreateDate = DateTime.Now,
-                                    CreateBy = _userService.UserId,
-                                    IsDeleted = false
                                 };
                                 videoRepository.Create(video);
                                 videoRepository.Save();
@@ -158,9 +175,19 @@ namespace SocialNetwork.Service.Implement
             {
                 Comment cmt = mapper.Map<Comment>(commentDTO);
                 cmt.PostId = post.Id;
-                cmt.UserId = userId;
+                cmt.UserId = _userService.UserId;
                 _commentRepository.Create(cmt);
                 _commentRepository.Save();
+
+                Notify notify = new Notify();
+                notify.UserTo = _userService.UserId;
+                notify.UserNotify = userPost;
+                var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
+                notify.Content = $"{userPostInfor.FullName} đã bình luận bài post của bạn";
+                notify.NotifyType = notifyType.Id;
+                notifyRepository.Create(notify);
+                notifyRepository.Save();
+
                 if (cloudinaryUrls != null)
                 {
                     foreach (var cloudinaryUrl in cloudinaryUrls)
@@ -177,9 +204,6 @@ namespace SocialNetwork.Service.Implement
                                 {
                                     PostId = post.Id,
                                     LinkImage = cloudinaryUrl,
-                                    CreateDate = DateTime.Now,
-                                    CreateBy = _userService.UserId,
-                                    IsDeleted = false
                                 };
                                 imageRepository.Create(image);
                                 imageRepository.Save();
@@ -190,9 +214,6 @@ namespace SocialNetwork.Service.Implement
                                 {
                                     PostId = post.Id,
                                     Link = cloudinaryUrl,
-                                    CreateDate = DateTime.Now,
-                                    CreateBy = _userService.UserId,
-                                    IsDeleted = false
                                 };
                                 videoRepository.Create(video);
                                 videoRepository.Save();
@@ -267,7 +288,7 @@ namespace SocialNetwork.Service.Implement
             }
             return dtoList;
         }
-        public AppResponse deleteOfUndo(Guid commentId, Guid userId)
+        public AppResponse deleteOfUndo(Guid commentId)
         {
             var cmt = _commentRepository.FindByCondition(i => i.Id == commentId).FirstOrDefault();
             if (cmt == null)
@@ -275,11 +296,9 @@ namespace SocialNetwork.Service.Implement
                 throw new BadRequestException("IdComment Không tồn tại");
 
             }
-            else if (cmt.UserId == userId)
+            else if (cmt.UserId == _userService.UserId)
             {
                 cmt.IsDeleted = !cmt.IsDeleted;
-                cmt.UpdateDate = DateTime.Now;
-                cmt.UpdateBy = userId;
                 _commentRepository.Update(cmt);
                 _commentRepository.Save();
                 if (cmt.IsDeleted)
@@ -299,12 +318,12 @@ namespace SocialNetwork.Service.Implement
 
         }
 
-        public List<CommentDTO> getallofUseronPost(Guid postId, Guid userId)
+        public List<CommentDTO> getallofUseronPost(Guid postId)
         {
             throw new NotImplementedException();
         }
 
-        public AppResponse update(CommentDTO commentDTO, Guid userID)
+        public AppResponse update(CommentDTO commentDTO)
         {
             if (commentDTO.Content.IsNullOrEmpty())
             {
@@ -315,13 +334,11 @@ namespace SocialNetwork.Service.Implement
             {
                 throw new BadRequestException("ID Comment sai hoặc không tồn tại");
             }
-            else if (cmtcheck.UserId == userID)
+            else if (cmtcheck.UserId == _userService.UserId)
             {
                 // var cmtcheck= _commentRepository.FindById
 
                 cmtcheck.Content = commentDTO.Content;
-                cmtcheck.UpdateDate = DateTime.Now;
-                cmtcheck.UpdateBy = userID;
                 _commentRepository.Update(cmtcheck);
                 _commentRepository.Save();
                 return new AppResponse { message = "Update Comment Success", success = true };

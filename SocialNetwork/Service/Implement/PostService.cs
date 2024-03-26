@@ -148,14 +148,16 @@ namespace SocialNetwork.Service.Implement
                 }
             }
             var friendType = masterDataRepository.FindByCondition(x => x.Name == "Thân thiết").FirstOrDefault();
-            List<Friend> friends = friendRepository.FindByCondition(x => x.UserTo == _userService.UserId && x.Level == friendType.Id).ToList();
-            foreach (var item in friends)
+            List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false && x.Level == friendType.Id)
+                 .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
+                 .ToList();
+            foreach (var item in idOfFriends)
             {
                 Notify notify = new Notify();
                 notify.UserTo = _userService.UserId;
                 User user = userRepository.FindByCondition(x => x.Id == _userService.UserId).FirstOrDefault();
                 Infor infor = inforRepository.FindByCondition(x => x.UserId == user.Id).FirstOrDefault();
-                notify.UserNotify = item.UserAccept;
+                notify.UserNotify = item;
                 var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Đăng post").FirstOrDefault();
                 notify.Content = $"{infor.FullName} đã đăng bài post";
                 notify.NotifyType = notifyType.Id;

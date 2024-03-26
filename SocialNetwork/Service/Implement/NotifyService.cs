@@ -55,6 +55,26 @@ namespace SocialNetwork.Service.Implement
             }
             return notifyDTOs;
         }
+        public List<NotifyDTO> GetNotifyCommentAlongToUser()
+        {
+            var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
+            List<Notify> notify = notifyRepository.FindByCondition(x => x.UserNotify == _userService.UserId && x.NotifyType == notifyType.Id).ToList();
+            List<NotifyDTO> notifyDTOs = new List<NotifyDTO>();
+            foreach (var item in notify)
+            {
+                NotifyDTO dto = mapper.Map<NotifyDTO>(item);
+                notifyDTOs.Add(dto);
+            }
+            return notifyDTOs;
+        }
+        public List<NotifyDTO> GetNotifyAlongToUser()
+        {
+            var notifyPost = GetNotifyPostAlongToUser();
+            var notifyComment = GetNotifyCommentAlongToUser();
 
+            var combinedNotifications = notifyPost.Concat(notifyComment);
+
+            return combinedNotifications.OrderByDescending(dto => dto.CreateDate).ToList();
+        }
     }
 }
