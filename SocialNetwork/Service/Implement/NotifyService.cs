@@ -14,6 +14,8 @@ namespace SocialNetwork.Service.Implement
         private readonly IMasterDataRepository masterDataRepository;
         private IUserService _userService;
         private readonly INotifyRepository notifyRepository;
+        private readonly IPostRepository postRepository;
+        private readonly ICommentRepository commentRepository;
 
         private readonly IMapper mapper = new MapperConfiguration(cfg =>
         {
@@ -22,13 +24,15 @@ namespace SocialNetwork.Service.Implement
 
         public NotifyService(SocialNetworkContext context, IFriendRepository friendRepository,
             IMasterDataRepository masterDataRepository, IUserService userService,
-            INotifyRepository notifyRepository)
+            INotifyRepository notifyRepository, IPostRepository postRepository, ICommentRepository commentRepository)
         {
             _context = context;
             this.friendRepository = friendRepository;
             this.masterDataRepository = masterDataRepository;
             _userService = userService;
             this.notifyRepository = notifyRepository;
+            this.postRepository = postRepository;
+            this.commentRepository = commentRepository;
         }
         public List<NotifyDTO> GetNotifyAcceptFriendAlongToUser()
         {
@@ -51,6 +55,7 @@ namespace SocialNetwork.Service.Implement
             foreach (var item in notify)
             {
                 NotifyDTO dto = mapper.Map<NotifyDTO>(item);
+                dto.PostId = item.IdObject;
                 notifyDTOs.Add(dto);
             }
             return notifyDTOs;
@@ -62,7 +67,11 @@ namespace SocialNetwork.Service.Implement
             List<NotifyDTO> notifyDTOs = new List<NotifyDTO>();
             foreach (var item in notify)
             {
+                var comment = commentRepository.FindByCondition(x => x.IsDeleted == false && x.Id == item.IdObject).FirstOrDefault();
+                var post=postRepository.FindByCondition(x=>x.IsDeleted==false && x.Id== comment.PostId).FirstOrDefault();
                 NotifyDTO dto = mapper.Map<NotifyDTO>(item);
+                dto.PostId = post.Id;
+                dto.CommentId = item.IdObject;
                 notifyDTOs.Add(dto);
             }
             return notifyDTOs;

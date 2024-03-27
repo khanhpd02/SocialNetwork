@@ -25,5 +25,7 @@ public partial class Notify : IEntity
 
     public Guid? NotifyType { get; set; }
 
-    public string Link { get; set; }
+    public Guid? IdObject { get; set; }
+
+    public string Image { get; set; }
 }
