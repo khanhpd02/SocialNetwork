@@ -24,4 +24,6 @@ public partial class Notify : IEntity
     public bool IsDeleted { get; set; }
 
     public Guid? NotifyType { get; set; }
+
+    public string Link { get; set; }
 }
