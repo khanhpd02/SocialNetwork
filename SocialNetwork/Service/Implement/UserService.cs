@@ -333,20 +333,23 @@ public class UserService : IUserService
         {
             loginDataResponse.HasInfor = true;
         }
-       /* //firebase tokeen
+        //firebase tokeen
         FirebaseInitializer.InitializeFirebaseApp();
         var firebaseAuthManager = new FirebaseAuthManager();
 
-        try
-        {
-            var tokenfirebase = await firebaseAuthManager.GetFirebaseTokenByEmailAsync(loginModel.Email);
+        /*try
+        {*/
+            var firebaseResponse = await firebaseAuthManager.GetFirebaseTokenByEmailAsync(loginModel.Email);
             //Console.WriteLine($"User created with UID: {uid}");
-            loginDataResponse.FirebaseToken = tokenfirebase;
-           
-        }
-        catch (BadRequestException ex)
+            if (firebaseResponse != null)
+            {
+                loginResponse.FirebaseData = firebaseResponse;
+            }
+                      
+        /*}
+        catch (Exception ex)
         {
-            throw new BadRequestException("Lỗi firebase rồi");
+            throw new BadRequestException("Lỗi firebase rồi :"+ex.Message);
         }*/
 
         return loginResponse;

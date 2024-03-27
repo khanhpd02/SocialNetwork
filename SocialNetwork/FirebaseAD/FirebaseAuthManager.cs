@@ -14,6 +14,7 @@ using MimeKit.Cryptography;
 using System.Security.AccessControl;
 using SocialNetwork.Helpers;
 using DocumentFormat.OpenXml.Wordprocessing;
+using SocialNetwork.DTO.Response;
 
 
 namespace SocialNetwork.FirebaseAD
@@ -213,10 +214,11 @@ namespace SocialNetwork.FirebaseAD
 
             await FirebaseAuth.DefaultInstance.UpdateUserAsync(args);
         }
-        public async Task<string> GetFirebaseTokenByEmailAsync(string email)
+        public async Task<FirebaseResponse> GetFirebaseTokenByEmailAsync(string email)
         {
             try
             {
+                FirebaseResponse firebaseResponse=new FirebaseResponse();
                 // Lấy thông tin người dùng từ Firebase Authentication bằng email
                 var user = await FirebaseAuth.DefaultInstance.GetUserByEmailAsync(email);
 
@@ -227,14 +229,18 @@ namespace SocialNetwork.FirebaseAD
 
                 // Tạo custom token cho người dùng
                 var customToken = await FirebaseAuth.DefaultInstance.CreateCustomTokenAsync(user.Uid);
-
+                firebaseResponse.FirebaseToken = customToken;
+                firebaseResponse.Uid = user.Uid;
+                firebaseResponse.DisplayName = user.DisplayName;
+                firebaseResponse.PhotoUrl=user.PhotoUrl;
                 // Trả về custom token
-                return customToken;
+                return firebaseResponse;
             }
             catch (Exception ex)
-            {
+            {   
+                var firebaseResponseEmpty = new FirebaseResponse();
                 // Xử lý khi có lỗi xảy ra
-                throw new BadRequestException("Không thể tạo Firebase token. Lỗi: " + ex.Message);
+                return firebaseResponseEmpty;
             }
         }
 
