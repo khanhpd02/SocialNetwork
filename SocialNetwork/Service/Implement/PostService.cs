@@ -161,6 +161,8 @@ namespace SocialNetwork.Service.Implement
                 var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Đăng post").FirstOrDefault();
                 notify.Content = $"{infor.FullName} đã đăng bài post";
                 notify.NotifyType = notifyType.Id;
+                notify.IdObject = post.Id;
+                notify.Image = infor.Image;
                 notifyRepository.Create(notify);
                 notifyRepository.Save();
             }

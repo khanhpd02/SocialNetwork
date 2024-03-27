@@ -24,4 +24,8 @@ public partial class Notify : IEntity
     public bool IsDeleted { get; set; }
 
     public Guid? NotifyType { get; set; }
+
+    public Guid? IdObject { get; set; }
+
+    public string Image { get; set; }
 }

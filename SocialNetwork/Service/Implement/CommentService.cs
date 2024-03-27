@@ -132,6 +132,8 @@ namespace SocialNetwork.Service.Implement
                 var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
                 notify.Content = $"{userShareInfor.FullName} đã bình luận bài post của bạn";
                 notify.NotifyType = notifyType.Id;
+                notify.IdObject = cmt.Id;
+                notify.Image = userShareInfor.Image;
                 notifyRepository.Create(notify);
                 notifyRepository.Save();
 
@@ -185,6 +187,8 @@ namespace SocialNetwork.Service.Implement
                 var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
                 notify.Content = $"{userPostInfor.FullName} đã bình luận bài post của bạn";
                 notify.NotifyType = notifyType.Id;
+                notify.IdObject = cmt.Id;
+                notify.Image = userPostInfor.Image;
                 notifyRepository.Create(notify);
                 notifyRepository.Save();
 

@@ -21,5 +21,10 @@
         public bool IsDeleted { get; set; }
 
         public Guid? NotifyType { get; set; }
+        public Guid? PostId { get; set; }
+        public Guid? CommentId { get; set; }
+
+        public string Image { get; set; }
+
     }
 }
