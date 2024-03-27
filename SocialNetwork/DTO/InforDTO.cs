@@ -2,6 +2,7 @@
 
 public class InforDTO
 {
+    public object FirebaseData { get; set; }
     public Guid? Id { get; set; }
 
     public Guid? UserId { get; set; }

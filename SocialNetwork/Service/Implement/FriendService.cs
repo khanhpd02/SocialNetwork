@@ -368,5 +368,111 @@ namespace SocialNetwork.Service.Implement
             }
             return listInforDTO;
         }
+
+        public AppResponse Block(Guid userIdBlocked)
+        {
+            var checkBlook = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == userIdBlocked) || ((x.UserTo == userIdBlocked && x.UserAccept == _userService.UserId))).FirstOrDefault();
+            var checkUser = userRepository.FindByCondition(x => x.Id == userIdBlocked && x.IsDeleted == false).FirstOrDefault();
+            var materdata= masterDataRepository.FindByCondition(x=>x.Name==masterDataRepository.GetEnumDescription(EnumLevelView.Block)).FirstOrDefault();  
+            if (checkUser == null)
+            {
+                throw new BadRequestException("UserId không tồn tại");
+
+            }
+            else if (checkBlook != null)
+            {
+                checkBlook.Level = materdata.Id;
+                friendRepository.Update(checkBlook);
+                friendRepository.Save();
+                return new AppResponse { message = "Block success", success = true };
+            }
+            else
+            {
+                Friend friend = new Friend
+                {
+                    UserTo = _userService.UserId,
+                    UserAccept = userIdBlocked,
+                    IsDeleted = false,
+                    CreateBy = _userService.UserId,
+                    CreateDate = DateTime.Now,
+                    Level = materdata.Id
+                   
+                };
+                friendRepository.Create(friend);
+                friendRepository.Save();
+
+               
+                return new AppResponse { message = "Block success", success = true };
+            }
+        }
+
+        public List<InforDTO> GetListBlock()
+        {
+            var masterdataBlock= masterDataRepository.FindByCondition(x=>x.Name==masterDataRepository.GetEnumDescription(EnumLevelView.Block)).FirstOrDefault();  
+
+            List<Guid> idOfFriend = friendRepository.FindByCondition(x => x.UserTo == _userService.UserId && x.IsDeleted == false && x.Level==masterdataBlock.Id)
+                .Select(x => x.UserAccept)
+                .ToList();
+            List<Infor> infors = new List<Infor>();
+
+            foreach (var friendId in idOfFriend)
+            {
+                User user = userRepository.FindByCondition(x => x.Id == friendId && x.IsDeleted == false).FirstOrDefault();
+
+                if (user != null)
+                {
+                    Infor infor = inforRepository.FindByCondition(x => x.UserId == user.Id).FirstOrDefault();
+
+                    if (infor != null)
+                    {
+                        infors.Add(infor);
+                    }
+                }
+            }
+            List<InforDTO> inforDTOs = new List<InforDTO>();
+
+            foreach (var infor in infors)
+            {
+
+
+                InforDTO inforDTO = mapper.Map<InforDTO>(infor);
+
+                inforDTOs.Add(inforDTO);
+            }
+
+            return inforDTOs;
+        }
+
+        public AppResponse UnBlock(Guid userIdBlocked)
+        {
+            var checkBlook = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == userIdBlocked) || ((x.UserTo == userIdBlocked && x.UserAccept == _userService.UserId))).FirstOrDefault();
+            var checkUser = userRepository.FindByCondition(x => x.Id == userIdBlocked && x.IsDeleted == false).FirstOrDefault();
+            var masterdata = masterDataRepository.FindByCondition(x => x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.Block)).FirstOrDefault();
+            if (checkUser == null)
+            {
+                throw new BadRequestException("UserId không tồn tại");
+
+            }
+            else if (checkBlook != null)
+            {
+                if (checkBlook.Level==masterdata.Id)
+                {
+                    friendRepository.Delete(checkBlook);
+                    friendRepository.Save();
+                    return new AppResponse { message = "Unblock success", success = true };
+
+                }
+                else
+                {
+                    throw new BadRequestException("UserId này không có trong danh sách chặn");
+
+                }
+                
+            }
+            else
+            {
+                throw new BadRequestException("UserId này không có trong danh sách chặn");
+            }
+        }
     }
 }

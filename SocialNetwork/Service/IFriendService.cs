@@ -14,5 +14,10 @@ namespace SocialNetwork.Service
         List<InforDTO> GetAllFriendsRequests();
         List<MasterDatumDTO> GetAllLevel();
         FriendDTO UpdateLevelFriend(FriendDTO dto);
+        //Block
+        AppResponse Block(Guid userIdBlocked);
+        AppResponse UnBlock(Guid userIdBlocked);
+        List<InforDTO> GetListBlock();
+
     }
 }

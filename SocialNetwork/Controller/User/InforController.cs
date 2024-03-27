@@ -65,9 +65,9 @@ namespace SocialNetwork.Controller.User
         }
         [HttpGet("myinfor")]
         [SwaggerOperation(Summary = "Get My Infor")]
-        public IActionResult GetMyInfor()
+        public async Task<IActionResult> GetMyInfor()
         {
-            var infor = inforService.GetMyInfor();
+            var infor = await inforService.GetMyInfor();
             if (infor == null)
             {
                 return NotFound();

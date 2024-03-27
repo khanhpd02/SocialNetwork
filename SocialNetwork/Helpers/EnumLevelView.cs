@@ -15,6 +15,10 @@ namespace SocialNetwork.Helpers
         [Description("Bạn thường")]
         friend = 4,
         [Description("Thân thiết")]
-        bestfriend = 5
+        bestfriend = 5,
+        [Description("Chặn")]
+        Block = 6,
+
+       
     }
 }

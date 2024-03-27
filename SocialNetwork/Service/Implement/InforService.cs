@@ -61,6 +61,7 @@ namespace SocialNetwork.Service.Implement
         {
             Infor entity = _inforRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(_userService.UserId);
             InforDTO dto = mapper.Map<InforDTO>(entity);
+            
             return dto;
         }
         public InforDTO GetInforByUserId(Guid id)
@@ -427,6 +428,23 @@ namespace SocialNetwork.Service.Implement
             }
 
             return null;
+        }
+
+        async Task<InforDTO> IInforService.GetMyInfor()
+        {
+            Infor entity = _inforRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(_userService.UserId);
+            InforDTO dto = mapper.Map<InforDTO>(entity);
+            FirebaseInitializer.InitializeFirebaseApp();
+            var firebaseAuthManager = new FirebaseAuthManager();
+            var firebaseResponse = await firebaseAuthManager.GetFirebaseTokenByEmailAsync(_userService.UserEmail);
+            //Console.WriteLine($"User created with UID: {uid}");
+            if (firebaseResponse != null)
+            {
+                dto.FirebaseData = firebaseResponse;
+            }
+            return dto;
+
+            
         }
     }
 }

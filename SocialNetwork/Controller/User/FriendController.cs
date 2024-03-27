@@ -85,6 +85,27 @@ namespace SocialNetwork.Controller.User
             var response = _friendService.UpdateLevelFriend(dto);
             return Ok(response);
         }
+        [HttpPost("block/{id}")]
+        [SwaggerOperation(Summary = "Block User")]
+        public IActionResult Block(Guid id)
+        {
+            var response = _friendService.Block(id);
+            return Ok(response);
+        }
+        [HttpPost("unblock/{id}")]
+        [SwaggerOperation(Summary = "UnBlock User")]
+        public IActionResult UnBlock(Guid id)
+        {
+            var response = _friendService.UnBlock(id);
+            return Ok(response);
+        }
+        [HttpGet("GetBlockUser")]
+        [SwaggerOperation(Summary = "Get Block User")]
+        public IActionResult GetblockUser()
+        {
+            var blockuser = _friendService.GetListBlock();
+            return Ok(blockuser);
+        }
     }
 
 }
