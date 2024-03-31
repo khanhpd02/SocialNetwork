@@ -71,6 +71,8 @@ namespace SocialNetwork.Service.Implement
                 {
                     checklike.IsDeleted = !checklike.IsDeleted;
                     likeRepository.Update(checklike);
+                    likeRepository.Save();
+
                     return new AppResponse { message = checklike.IsDeleted ? "Unlike Success!" : "Like Success!", success = true };
                 }
             }
@@ -79,7 +81,6 @@ namespace SocialNetwork.Service.Implement
                 return new AppResponse { message = "PostId Not Valid", success = false };
             }
 
-            return new AppResponse { message = "Action Success!", success = true };
         }
 
         public AppResponse deleteLike(Guid idLike)
