@@ -15,6 +15,7 @@ using System.Security.AccessControl;
 using SocialNetwork.Helpers;
 using DocumentFormat.OpenXml.Wordprocessing;
 using SocialNetwork.DTO.Response;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 
 namespace SocialNetwork.FirebaseAD
@@ -130,6 +131,47 @@ namespace SocialNetwork.FirebaseAD
 
                 // Thực hiện cập nhật tài liệu người dùng
                 await userDocRef.UpdateAsync(userUpdates);
+                // update avatar userchats
+
+                // Lấy tham chiếu đến bộ sưu tập userChats
+                CollectionReference userChatsCollectionRef = firestoreDb.Collection("userChats");
+
+                // Lấy tất cả các tài liệu trong bộ sưu tập
+                QuerySnapshot querySnapshot = await userChatsCollectionRef.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+                {
+                    Dictionary<string, object> userData = documentSnapshot.ToDictionary();
+
+                    // Duyệt qua từng cặp key-value trong userData
+                    foreach (KeyValuePair<string, object> kvp in userData)
+                    {   
+                        
+                        string key = kvp.Key;
+                        object value = kvp.Value;
+                        Dictionary<string, object> kvpDictonary = (Dictionary<string, object>)value;
+                        if (kvpDictonary.ContainsKey("userInfo") && kvpDictonary["userInfo"] is Dictionary<string, object>)
+                        {
+                            Dictionary<string, object> userInfo = (Dictionary<string, object>)kvpDictonary["userInfo"];
+                            if (userInfo.ContainsKey("uid") && userInfo["uid"].ToString() == uid.Uid)
+                            {
+                                // Thay đổi giá trị của displayName và photoURL
+                                userInfo["displayName"] = displayName;
+                                userInfo["photoURL"] = photoPath;
+
+                                // Lưu lại userInfo vào userInfo22
+                                kvpDictonary["userInfo"] = userInfo;
+                                // Cập nhật lại tài liệu Firestore
+                                await documentSnapshot.Reference.UpdateAsync(kvp.Key, kvpDictonary);
+
+                            }
+                        }
+                        
+                    }
+                }
+
+
+
 
                 /*// Create empty user chats in Firestore
                 var userChatsDocRef = firestoreDb.Collection("userChats").Document(userfb.Uid);
