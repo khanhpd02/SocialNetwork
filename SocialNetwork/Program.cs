@@ -8,6 +8,10 @@ using SocialNetwork.Mail;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Repository;
 using SocialNetwork.Repository.Implement;
+using SocialNetwork.Service;
+using SocialNetwork.Service.Implement;
+
+
 //using SocialNetwork.Socket;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -114,7 +118,7 @@ builder.Services.AddSwaggerGen(option =>
     services.AddScoped<IShareRepository, ShareRepository>();
     services.AddScoped<IAudioRepository, AudioRepository>();
     services.AddScoped<IRealRepository, RealRepository>();
-
+    services.AddScoped<IAdminService,AdminService>();
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     services.AddSingleton<FirebaseInitializer>();
 

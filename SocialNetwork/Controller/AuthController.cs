@@ -6,6 +6,7 @@ using SocialNetwork.DTO.Response;
 using SocialNetwork.Model.User;
 using SocialNetwork.Repository;
 using SocialNetwork.Service;
+using SocialNetwork.Service.Implement;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SocialNetwork.Controller
@@ -17,15 +18,16 @@ namespace SocialNetwork.Controller
     public class AuthController : ControllerBase
     {
         private readonly IRefreshTokenService refreshTokenService;
-
+        private IAdminService _adminService;
         private IUserService _userService;
         private IEmailService _emailService;
         private readonly IUserRepository userRepository;
 
-        public AuthController(IUserService userService, IEmailService emailService)
+        public AuthController(IUserService userService, IEmailService emailService, IAdminService adminService)
         {
             _userService = userService;
             _emailService = emailService;
+            _adminService = adminService;
         }
 
         [AllowAnonymous]
@@ -49,6 +51,17 @@ namespace SocialNetwork.Controller
 
 
         }
+
+        [AllowAnonymous]
+        [HttpPost("createAD")]
+        public IActionResult createAD()
+        {
+
+            var response = _adminService.CreateAdmin();
+
+            return Ok(response);
+        }
+
 
         [AllowAnonymous]
         [HttpPost("VerifyPinForgotPassword")]

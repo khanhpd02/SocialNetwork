@@ -18,5 +18,7 @@ namespace SocialNetwork.Service
         Task<LoginResponse> Authenticate(LoginModel loginModel);
         void SendPinEmail(String Email, String content);
         void Test();
+
+
     }
 }
