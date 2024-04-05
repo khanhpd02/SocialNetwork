@@ -118,7 +118,7 @@ namespace SocialNetwork.Service.Implement
             if (post == null && share != null)
             {
                 var userShare = userRepository.FindByCondition(x => x.Id == share.UserId).FirstOrDefault().Id;
-                var userShareInfor = inforRepository.FindByCondition(x => x.UserId == userShare).FirstOrDefault();
+                var userShareInfor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
 
                 Comment cmt = mapper.Map<Comment>(commentDTO);
                 cmt.PostId = share.Id;
@@ -176,7 +176,7 @@ namespace SocialNetwork.Service.Implement
             if (post != null && share == null)
             {
                 var userPost = userRepository.FindByCondition(x => x.Id == post.UserId).FirstOrDefault().Id;
-                var userPostInfor = inforRepository.FindByCondition(x => x.UserId == userPost).FirstOrDefault();
+                var userPostInfor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
                 Comment cmt = mapper.Map<Comment>(commentDTO);
                 cmt.PostId = post.Id;
                 cmt.UserId = _userService.UserId;
