@@ -274,7 +274,7 @@ namespace SocialNetwork.FirebaseAD
                 firebaseResponse.FirebaseToken = customToken;
                 firebaseResponse.Uid = user.Uid;
                 firebaseResponse.DisplayName = user.DisplayName;
-                firebaseResponse.PhotoUrl=user.PhotoUrl;
+                firebaseResponse.PhotoURL=user.PhotoUrl;
                 // Trả về custom token
                 return firebaseResponse;
             }
