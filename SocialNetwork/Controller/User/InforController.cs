@@ -43,9 +43,9 @@ namespace SocialNetwork.Controller.User
         }
         [HttpGet("user/{id}")]
         [SwaggerOperation(Summary = "Get Infor By UserId")]
-        public IActionResult GetInforByUserId(Guid id)
+        public async Task<IActionResult> GetInforByUserId(Guid id)
         {
-            var infor = inforService.GetInforByUserId(id);
+            var infor =await inforService.GetInforByUserId(id);
             if (infor == null)
             {
                 return NotFound();

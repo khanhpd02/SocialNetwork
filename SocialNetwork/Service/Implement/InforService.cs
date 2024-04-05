@@ -64,7 +64,7 @@ namespace SocialNetwork.Service.Implement
             
             return dto;
         }
-        public InforDTO GetInforByUserId(Guid id)
+        async Task<InforDTO> IInforService.GetInforByUserId(Guid id)
         {
             Infor entity = _inforRepository.FindByCondition(x => x.UserId == id && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(id);
             InforDTO dto = mapper.Map<InforDTO>(entity);
@@ -96,6 +96,17 @@ namespace SocialNetwork.Service.Implement
             if (id == _userService.UserId)
             {
                 dto.StatusFriend = "My Infor";
+            }
+            var user= userRepository.FindByCondition(x => x.Id==id).FirstOrDefault();
+            FirebaseInitializer.InitializeFirebaseApp();
+            var firebaseAuthManager = new FirebaseAuthManager();
+            var firebaseResponse = await firebaseAuthManager.GetFirebaseTokenByEmailAsync(user.Email);
+            //Console.WriteLine($"User created with UID: {uid}");
+            if (firebaseResponse != null)
+            {
+                firebaseResponse.FirebaseToken = null;
+                dto.FirebaseData = firebaseResponse;
+                
             }
 
             return dto;

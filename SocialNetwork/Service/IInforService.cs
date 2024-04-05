@@ -6,7 +6,7 @@ namespace SocialNetwork.Service
     public interface IInforService
     {
         Task<InforDTO> GetMyInfor();
-        InforDTO GetInforByUserId(Guid id);
+        Task<InforDTO> GetInforByUserId(Guid id);
         AppResponse createInfo(InforDTO inforDTO, Guid userId);
         AppResponse updateInfo(InforDTO inforDTO, Guid userId);
         AppResponse deleteInfo(Guid id, Guid userId);
