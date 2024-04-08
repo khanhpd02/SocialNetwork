@@ -346,6 +346,7 @@ namespace SocialNetwork.Service.Implement
                     postShareDTO.UserIdSharePost = infor.UserId;
                     postShareDTO.CreateDateShare = share.CreateDate;
                     postShareDTO.IdShare = share.Id;
+                    postShareDTO.ContentShare = share.Content;
                     if (like == null)
                     {
                         postShareDTO.islikeShare = false;
@@ -446,6 +447,7 @@ namespace SocialNetwork.Service.Implement
                     postShareDTO.LevelViewShare = share.LevelView;
                     postShareDTO.CreateDateShare = share.CreateDate;
                     postShareDTO.IdShare = share.Id;
+                    postShareDTO.ContentShare = share.Content;
 
                     if (like == null)
                     {
