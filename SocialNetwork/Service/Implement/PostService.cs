@@ -315,6 +315,7 @@ namespace SocialNetwork.Service.Implement
                 if (postShare != null)
                 {
                     var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == share.Id).FirstOrDefault();
+                    var likepost = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == postShare.Id).FirstOrDefault();
 
                     var userShare = userRepository.FindByCondition(x => x.Id == postShare.UserId).FirstOrDefault();
                     var inforUserPost = inforRepository.FindByCondition(x => x.UserId == userShare.Id).FirstOrDefault();
@@ -361,6 +362,14 @@ namespace SocialNetwork.Service.Implement
                     else
                     {
                         postShareDTO.islikeShare = true;
+                    }
+                    if (likepost == null)
+                    {
+                        postShareDTO.islike = false;
+                    }
+                    else
+                    {
+                        postShareDTO.islike = true;
                     }
                     listPostShareDTO.Add(postShareDTO);
                 }
@@ -413,11 +422,13 @@ namespace SocialNetwork.Service.Implement
             foreach (var share in shares)
             {
                 var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == share.Id).FirstOrDefault();
+                
 
                 var postShare = postRepository.FindByCondition(x => x.Id == share.PostId && x.IsDeleted == false).FirstOrDefault();
 
                 if (postShare != null)
                 {
+                    var likepost = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == postShare.Id).FirstOrDefault();
                     var userShare = userRepository.FindByCondition(x => x.Id == postShare.UserId).FirstOrDefault();
                     var inforUserPost = inforRepository.FindByCondition(x => x.UserId == userShare.Id).FirstOrDefault();
                     List<Image> images = imageRepository.FindByCondition(img => img.PostId == postShare.Id && img.IsDeleted == false).ToList();
@@ -464,6 +475,16 @@ namespace SocialNetwork.Service.Implement
                     {
                         postShareDTO.islikeShare = true;
                     }
+
+                    if (likepost == null)
+                    {
+                        postShareDTO.islike = false;
+                    }
+                    else
+                    {
+                        postShareDTO.islike = true;
+                    }
+                    
                     listPostShareDTO.Add(postShareDTO);
                 }
             }
