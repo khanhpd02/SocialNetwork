@@ -262,7 +262,7 @@ namespace SocialNetwork.Service.Implement
             }
         }
 
-        public PostDTO GetById(Guid id)
+        public PostDTO  GetById(Guid id)
         {
             var CountLike = 0;
             var CountComment = 0;
@@ -273,6 +273,8 @@ namespace SocialNetwork.Service.Implement
             List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == id && vid.IsDeleted == false).ToList();
             List<Like> likes = likeRepository.FindByCondition(img => img.PostId == id && img.IsDeleted == false).ToList();
             List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == id && vid.IsDeleted == false).ToList();
+            Like checkyourlikes = likeRepository.FindByCondition(img => img.PostId == id && img.IsDeleted == false&&img.UserId==_userService.UserId).FirstOrDefault();
+
             CountLike = likes.Count();
             CountComment = comments.Count();
             PostDTO dto = mapper.Map<PostDTO>(entity);
@@ -280,6 +282,11 @@ namespace SocialNetwork.Service.Implement
             dto.AvatarUrl = infor.Image;
             dto.Images = images;
             dto.Videos = videos;
+            if (checkyourlikes != null)
+            {
+                dto.islike = true;
+            }
+            else { dto.islike = false; }
             dto.Likes = likes;
             dto.Comments = comments;
             dto.CountLike = CountLike;
@@ -322,8 +329,8 @@ namespace SocialNetwork.Service.Implement
                     List<Video> videosShare = videoRepository.FindByCondition(vid => vid.PostId == share.Id && vid.IsDeleted == false).ToList();
                     List<Like> likesShare = likeRepository.FindByCondition(img => img.PostId == share.Id && img.IsDeleted == false).ToList();
                     List<Comment> commentsShare = commentRepository.FindByCondition(vid => vid.PostId == share.Id && vid.IsDeleted == false).ToList();
-                    CountLikeShare = likes.Count();
-                    CountCommentShare = comments.Count();
+                    CountLikeShare = likesShare.Count();
+                    CountCommentShare = commentsShare.Count();
 
                     var postShareDTO = mapper.Map<PostDTO>(postShare);
                     postShareDTO.FullName = inforUserPost.FullName;
@@ -424,8 +431,8 @@ namespace SocialNetwork.Service.Implement
                     List<Video> videosShare = videoRepository.FindByCondition(vid => vid.PostId == share.Id && vid.IsDeleted == false).ToList();
                     List<Like> likesShare = likeRepository.FindByCondition(img => img.PostId == share.Id && img.IsDeleted == false).ToList();
                     List<Comment> commentsShare = commentRepository.FindByCondition(vid => vid.PostId == share.Id && vid.IsDeleted == false).ToList();
-                    CountLikeShare = likes.Count();
-                    CountCommentShare = comments.Count();
+                    CountLikeShare = likesShare.Count();
+                    CountCommentShare = commentsShare.Count();
 
                     var postShareDTO = mapper.Map<PostDTO>(postShare);
                     postShareDTO.FullName = inforUserPost.FullName;
