@@ -12,6 +12,6 @@ namespace SocialNetwork.Service
         ShareDTO SharePost(ShareDTO sharePostDTO);
         PostDTO GetById(Guid id);
         void Delete(Guid id);
-        List<PostDTO> GetAllPostsAndShare();
+        List<PostDTO> GetAllPostsAndShare(int numberOfPosts);
     }
 }

@@ -78,9 +78,9 @@ namespace SocialNetwork.Controller.User
 
         [HttpGet]
         [SwaggerOperation(Summary = "Get All Posts")]
-        public IActionResult GetAll()
+        public IActionResult GetAll(int numberOfPosts)
         {
-            var posts = postService.GetAllPostsAndShare();
+            var posts = postService.GetAllPostsAndShare(numberOfPosts);
             return Ok(posts);
         }
         [HttpGet("user/{id}")]

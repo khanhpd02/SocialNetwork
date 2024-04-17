@@ -605,14 +605,16 @@ namespace SocialNetwork.Service.Implement
             return allPosts;
         }
 
-        public List<PostDTO> GetAllPostsAndShare()
+        public List<PostDTO> GetAllPostsAndShare(int numberOfPosts)
         {
             var sharedPosts = GetAllPostShare();
             var userPosts = GetAllPost();
             var allPosts = sharedPosts.Concat(userPosts).ToList();
             allPosts = allPosts.OrderByDescending(post => post.CreateDateShare).ToList();
-            return allPosts;
+            var firstNPosts = allPosts.Take(numberOfPosts).ToList();
+            return firstNPosts;
         }
+
         public void Delete(Guid id)
         {
             if (postRepository.FindById(id) == null)
