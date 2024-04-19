@@ -378,6 +378,76 @@ namespace SocialNetwork.Service.Implement
             }
             return dtoList;
         }
+        public List<RealDTO> GetAllReal()
+        {
+            List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
+                .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
+                .ToList();
+            List<Real> postsToRemove = new List<Real>();
 
+            List<Real> entityList = realRepository.FindByCondition(x => x.IsDeleted == false).ToList();
+
+            List<RealDTO> dtoList = new List<RealDTO>();
+            var CountLike = 0;
+            var CountComment = 0;
+            foreach (Real post in entityList)
+            {
+                int has = 0;
+                if (post.UserId == _userService.UserId && post.IsDeleted == false)
+                {
+                    continue;
+                }
+                if (idOfFriends.Count != 0)
+                {
+                    foreach (Guid idfriend in idOfFriends)
+                    {
+                        if ((idfriend == post.UserId || post.LevelView == (int)(EnumLevelView.publicview)) && post.IsDeleted == false)
+                        {
+                            has = 1; break;
+                        }
+                    }
+                    if (has == 0)
+                    {
+                        postsToRemove.Add(post);
+                    }
+                }
+                else if (post.LevelView == (int)(EnumLevelView.friendview))
+                { postsToRemove.Add(post); }
+            }
+
+            foreach (var postToRemove in postsToRemove)
+            {
+                entityList.Remove(postToRemove);
+            }
+            foreach (Real entity in entityList)
+            {
+                var infor = inforRepository.FindByCondition(x => x.UserId == entity.UserId && x.IsDeleted == false).FirstOrDefault();
+                var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == entity.Id).FirstOrDefault();
+
+                List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
+                List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
+                List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
+                CountLike = likes.Count();
+                CountComment = comments.Count();
+                RealDTO dto = mapper.Map<RealDTO>(entity);
+                dto.AvatarUrl = infor.Image;
+                dto.FullName = infor.FullName;
+                dto.Videos = videos;
+                dto.Likes = likes;
+                dto.Comments = comments;
+                dto.CountLike = CountLike;
+                dto.CountComment = CountComment;
+                if (like == null)
+                {
+                    dto.islike = false;
+                }
+                else
+                {
+                    dto.islike = true;
+                }
+                dtoList.Add(dto);
+            }
+            return dtoList;
+        }
     }
 }

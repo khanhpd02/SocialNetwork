@@ -9,5 +9,7 @@ namespace SocialNetwork.Service
         Task<RealDTO> MergeVideoWithAudio(MergVideoAndAudioDTO mergVideoAndAudio);
         List<RealDTO> GetRealByUserId(Guid id);
         RealDTO GetById(Guid id);
+        List<RealDTO> GetAllReal();
+
     }
 }

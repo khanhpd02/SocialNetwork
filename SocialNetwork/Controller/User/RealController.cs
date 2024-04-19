@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.DTO;
+using SocialNetwork.ExceptionModel;
 using SocialNetwork.Middlewares;
 using SocialNetwork.Service;
 using SocialNetwork.Service.Implement;
@@ -28,6 +29,43 @@ namespace SocialNetwork.Controller.User
         {
             var response = await realService.MergeVideoWithAudio(mergVideoAndAudio);
             return Ok(response);
+        }
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get Real By Id")]
+        public IActionResult GetById(Guid id)
+        {
+            try
+            {
+                var result = realService.GetById(id);
+                return Ok(result);
+            }
+            catch (PostNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("user/{userId}")]
+        [SwaggerOperation(Summary = "Get Real By UserId")]
+        public IActionResult GetRealByUserId(Guid userId)
+        {
+            try
+            {
+                var result = realService.GetRealByUserId(userId);
+                return Ok(result);
+            }
+            catch (PostNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get All Real")]
+        public IActionResult GetAllReal()
+        {
+            var result = realService.GetAllReal();
+            return Ok(result);
         }
     }
 }
