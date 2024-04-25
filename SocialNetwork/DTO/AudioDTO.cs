@@ -16,5 +16,7 @@ public class AudioDTO
 
     public string Link { get; set; }
     public List<IFormFile?> File { get; set; }
+    public string Name { get; set; }
+
 
 }
