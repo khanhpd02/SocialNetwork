@@ -18,4 +18,6 @@ public partial class Audio: IEntity
     public bool IsDeleted { get; set; }
 
     public string Link { get; set; }
+
+    public string Name { get; set; }
 }
