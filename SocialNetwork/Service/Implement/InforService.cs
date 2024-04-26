@@ -57,13 +57,6 @@ namespace SocialNetwork.Service.Implement
             _userService = userService;
             this.userRepository = userRepository;
         }
-        public InforDTO GetMyInfor()
-        {
-            Infor entity = _inforRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(_userService.UserId);
-            InforDTO dto = mapper.Map<InforDTO>(entity);
-            
-            return dto;
-        }
         async Task<InforDTO> IInforService.GetInforByUserId(Guid id)
         {
             Infor entity = _inforRepository.FindByCondition(x => x.UserId == id && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(id);
@@ -268,7 +261,15 @@ namespace SocialNetwork.Service.Implement
                             info.Image = link;
                             //
                             FirebaseAuthManager authManager = new FirebaseAuthManager();
-
+                            if (cloudinaryUrlBackground==null)
+                            {
+                                info.Background = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/6-anh-dai-dien-trang-inkythuatso-03-15-26-36.jpg";
+                            }
+                            else
+                            {
+                                info.Background = cloudinaryUrlBackground;
+                            }
+                            
                             // Thông tin của người dùng mới
                             string displayName = info.FullName;
                             string email = user.Email;
