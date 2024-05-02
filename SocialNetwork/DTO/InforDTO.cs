@@ -3,6 +3,8 @@
 public class InforDTO
 {
     public object FirebaseData { get; set; }
+    public int CountFriend { get; set; }
+    public int CountPost { get; set; }
     public Guid? Id { get; set; }
 
     public Guid? UserId { get; set; }
@@ -38,5 +40,6 @@ public class InforDTO
     public string Career { get; set; }
 
     public string Nickname { get; set; }
+   
 
 }

@@ -22,6 +22,7 @@ namespace SocialNetwork.Service.Implement
         private readonly IFriendRepository _friendRepository;
         private readonly IUserRepository userRepository;
         private readonly IMasterDataRepository _masterDataRepository;
+        private readonly IPostRepository _postRepository;
         private SocialNetworkContext _context;
         private readonly Cloudinary _cloudinary;
         private IUserService _userService;
@@ -30,33 +31,18 @@ namespace SocialNetwork.Service.Implement
             cfg.AddProfile(new MappingProfile());
         }).CreateMapper();
 
-        public InforService(IInforRepository inforRepository, SocialNetworkContext context, Cloudinary cloudinary)
-        {
-            _inforRepository = inforRepository;
-            _context = context;
-            _cloudinary = cloudinary;
-        }
-
-        public InforService(IInforRepository inforRepository, IFriendRepository friendRepository, IMasterDataRepository masterDataRepository, SocialNetworkContext context, Cloudinary cloudinary)
+        public InforService(IInforRepository inforRepository, IFriendRepository friendRepository, IUserRepository userRepository, IMasterDataRepository masterDataRepository, IPostRepository postRepository, SocialNetworkContext context, Cloudinary cloudinary, IUserService userService)
         {
             _inforRepository = inforRepository;
             _friendRepository = friendRepository;
+            this.userRepository = userRepository;
             _masterDataRepository = masterDataRepository;
-            _context = context;
-            _cloudinary = cloudinary;
-        }
-
-        public InforService(IInforRepository inforRepository, IFriendRepository friendRepository, IMasterDataRepository masterDataRepository, SocialNetworkContext context, Cloudinary cloudinary, IUserService userService,
-            IUserRepository userRepository)
-        {
-            _inforRepository = inforRepository;
-            _friendRepository = friendRepository;
-            _masterDataRepository = masterDataRepository;
+            _postRepository = postRepository;
             _context = context;
             _cloudinary = cloudinary;
             _userService = userService;
-            this.userRepository = userRepository;
         }
+
         async Task<InforDTO> IInforService.GetInforByUserId(Guid id)
         {
             Infor entity = _inforRepository.FindByCondition(x => x.UserId == id && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(id);
@@ -90,6 +76,10 @@ namespace SocialNetwork.Service.Implement
             {
                 dto.StatusFriend = "My Infor";
             }
+            List<Guid> idOfFriends = _friendRepository.FindByCondition(x => (x.UserTo == id || x.UserAccept == id) && x.IsDeleted == false)
+                .Select(x => x.UserTo == id ? x.UserAccept : x.UserTo)
+                .ToList();
+            var post = _postRepository.FindByCondition(x => x.UserId == id && x.IsDeleted == false).ToList();
             var user= userRepository.FindByCondition(x => x.Id==id).FirstOrDefault();
             FirebaseInitializer.InitializeFirebaseApp();
             var firebaseAuthManager = new FirebaseAuthManager();
@@ -101,6 +91,8 @@ namespace SocialNetwork.Service.Implement
                 dto.FirebaseData = firebaseResponse;
                 
             }
+            dto.CountFriend= idOfFriends.Count();
+            dto.CountPost=post.Count();
 
             return dto;
         }
@@ -447,9 +439,15 @@ namespace SocialNetwork.Service.Implement
             Infor entity = _inforRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(_userService.UserId);
             InforDTO dto = mapper.Map<InforDTO>(entity);
             FirebaseInitializer.InitializeFirebaseApp();
+            List<Guid> idOfFriends = _friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
+                .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
+                .ToList();
+            var mypost=_postRepository.FindByCondition(x=>x.UserId==_userService.UserId&&x.IsDeleted==false).ToList();
             var firebaseAuthManager = new FirebaseAuthManager();
             var firebaseResponse = await firebaseAuthManager.GetFirebaseTokenByEmailAsync(_userService.UserEmail);
             //Console.WriteLine($"User created with UID: {uid}");
+            dto.CountFriend=idOfFriends.Count();
+            dto.CountPost=mypost.Count();
             if (firebaseResponse != null)
             {
                 dto.FirebaseData = firebaseResponse;
