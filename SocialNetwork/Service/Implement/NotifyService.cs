@@ -68,11 +68,15 @@ namespace SocialNetwork.Service.Implement
             foreach (var item in notify)
             {
                 var comment = commentRepository.FindByCondition(x => x.IsDeleted == false && x.Id == item.IdObject).FirstOrDefault();
-                var post=postRepository.FindByCondition(x=>x.IsDeleted==false && x.Id== comment.PostId).FirstOrDefault();
-                NotifyDTO dto = mapper.Map<NotifyDTO>(item);
-                dto.PostId = post.Id;
-                dto.CommentId = item.IdObject;
-                notifyDTOs.Add(dto);
+                if (comment!=null)
+                {
+                    var post = postRepository.FindByCondition(x => x.IsDeleted == false && x.Id == comment.PostId).FirstOrDefault();
+                    NotifyDTO dto = mapper.Map<NotifyDTO>(item);
+                    dto.PostId = post.Id;
+                    dto.CommentId = item.IdObject;
+                    notifyDTOs.Add(dto);
+                }
+                
             }
             return notifyDTOs;
         }
