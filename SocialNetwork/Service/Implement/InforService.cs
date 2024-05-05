@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using DocumentFormat.OpenXml.EMMA;
 using Microsoft.IdentityModel.Tokens;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
@@ -326,8 +327,9 @@ namespace SocialNetwork.Service.Implement
             if (infor != null)
             {
                 String cloudinaryUrl = UploadFileToCloudinary(inforDTO.File);
+                String cloudinaryUrlBackground = UploadFileToCloudinary(inforDTO.FileBackground);
                 //infor = mapper.Map<Infor>(inforDTO);
-                if(inforDTO.FullName != null) 
+                if (inforDTO.FullName != null) 
                 {
                     infor.FullName = inforDTO.FullName;
                     
@@ -351,6 +353,12 @@ namespace SocialNetwork.Service.Implement
                     infor.Wards = inforDTO.Wards;
                 if (inforDTO.Direction != null)
                     infor.Direction = inforDTO.Direction;
+                if (inforDTO.Career != null)
+                    infor.Career = inforDTO.Career;
+                if (inforDTO.Nickname != null)
+                    infor.Nickname = inforDTO.Nickname;
+
+                infor.Address = inforDTO.Direction + ", " + inforDTO.Wards + ", " + inforDTO.Districts + ", " + inforDTO.Provinces;
                 _inforRepository.Update(infor);
                 _inforRepository.Save();
 
@@ -363,25 +371,39 @@ namespace SocialNetwork.Service.Implement
                            fileExtension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
                            fileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
                     {
-                        var link = cloudinaryUrl;
-                        if (link != null)
-                        {
-                            if (inforDTO.Image == null) 
-                                {
+                            var link = cloudinaryUrl;                                         
+                            if (inforDTO.File != null) 
+                            {
                                     
                                     infor.Image = link; 
                                     
-                                }
+                            }
                             
                             _inforRepository.Update(infor);
                             _inforRepository.Save();
-
-                        }
                     }
 
                 }
+                //Update image firebase
                 FirebaseAuthManager authManager = new FirebaseAuthManager();
                 authManager.UpdateUserAsync(infor.FullName, user.Email, infor.Image);
+
+                if (cloudinaryUrlBackground != null && cloudinaryUrlBackground.Length > 0)
+                {
+                    string fileExtension = Path.GetExtension(cloudinaryUrlBackground);
+                    
+                        var link = cloudinaryUrlBackground;
+                        
+
+                            infor.Background = link;
+
+                        
+
+                        _inforRepository.Update(infor);
+                        _inforRepository.Save();
+                    
+
+                }
                 return new AppResponse { message = "Update Info Sucess!", success = true };
 
 
