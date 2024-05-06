@@ -147,6 +147,32 @@ namespace SocialNetwork.Service.Implement
             }
             return new AppResponse { message = "Delete success",success=true };
         }
+        public AppResponse DeleteUserById(Guid userId)
+        {
+            var user = userRepository.FindById(userId);
+            if (user == null)
+            {
+                return new AppResponse { message = "User not found", success = false };
+            }
+
+            var userPosts = postRepository.FindByCondition(x=>x.UserId== userId);
+            foreach (var post in userPosts)
+            {
+                postRepository.Delete(post);
+            }
+
+            var userFriends = friendRepository.FindByCondition(x=>x.UserTo== userId ||x.UserAccept== userId);
+            foreach (var friend in userFriends)
+            {
+                friendRepository.Delete(friend);
+            }
+
+            userRepository.Delete(user);
+            userRepository.Save();
+
+            return new AppResponse { message = "Delete success", success = true };
+        }
+
         public AppResponse DeletePostById(Guid postId)
         {
             var post = postRepository.FindByCondition(x => x.Id == postId).FirstOrDefault();
