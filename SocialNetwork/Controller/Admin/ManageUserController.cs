@@ -64,6 +64,22 @@ namespace SocialNetwork.Controller.Admin
 
             return Ok(response);
         }
+        [HttpPost("DeletePostAdmin")]
+        [SwaggerOperation(Summary = "Delete Post By Id")]
+        public IActionResult DeletePostById(Guid postId)
+        {
+            var response = adminService.DeletePostById(postId);
+
+            return Ok(response);
+        }
+        [HttpPost("GetAllPostsAdmin")]
+        [SwaggerOperation(Summary = "Get All Posts")]
+        public IActionResult GetAllPosts()
+        {
+            var response = adminService.GetAllPosts();
+
+            return Ok(response);
+        }
 
     }
 }

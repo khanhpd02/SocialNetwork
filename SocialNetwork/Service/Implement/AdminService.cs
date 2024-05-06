@@ -147,5 +147,25 @@ namespace SocialNetwork.Service.Implement
             }
             return new AppResponse { message = "Delete success",success=true };
         }
+        public AppResponse DeletePostById(Guid postId)
+        {
+            var post = postRepository.FindByCondition(x => x.Id == postId).FirstOrDefault();
+            if (post == null)
+            {
+                throw new BadRequestException("Không tìm thấy bài viết có Id: " + postId);
+            }
+            else
+            {
+                postRepository.Delete(post);
+                postRepository.Save();
+                return new AppResponse { message = "Delete success", success = true };
+            }
+        }
+        public List<PostDTO> GetAllPosts()
+        {
+            List<Post> entityList = postRepository.FindAll();
+            List<PostDTO> dtoList = mapper.Map<List<PostDTO>>(entityList);
+            return dtoList;
+        }
     }
 }
