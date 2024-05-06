@@ -2,6 +2,7 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using DocumentFormat.OpenXml.EMMA;
+using Firebase.Auth;
 using Microsoft.IdentityModel.Tokens;
 using Service.Implement.ObjectMapping;
 using SocialNetwork.DTO;
@@ -24,6 +25,7 @@ namespace SocialNetwork.Service.Implement
         private readonly IUserRepository userRepository;
         private readonly IMasterDataRepository _masterDataRepository;
         private readonly IPostRepository _postRepository;
+        private readonly IRoleRepository roleRepository;
         private SocialNetworkContext _context;
         private readonly Cloudinary _cloudinary;
         private IUserService _userService;
@@ -85,7 +87,6 @@ namespace SocialNetwork.Service.Implement
             FirebaseInitializer.InitializeFirebaseApp();
             var firebaseAuthManager = new FirebaseAuthManager();
             var firebaseResponse = await firebaseAuthManager.GetFirebaseTokenByEmailAsync(user.Email);
-            //Console.WriteLine($"User created with UID: {uid}");
             if (firebaseResponse != null)
             {
                 firebaseResponse.FirebaseToken = null;
@@ -460,6 +461,14 @@ namespace SocialNetwork.Service.Implement
         {
             Infor entity = _inforRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false).FirstOrDefault() ?? throw new UserNotFoundException(_userService.UserId);
             InforDTO dto = mapper.Map<InforDTO>(entity);
+            List<UserRole> userRole = _context.UserRoles.Where(u => u.UserId == _userService.UserId).ToList();
+            List<string> roles = new List<string>();
+            foreach (var UserRole in userRole)
+            {
+                var role = _context.Roles.Where(u => u.Id == UserRole.RoleId).FirstOrDefault();
+                roles.Add(role.RoleName.ToString());
+            }
+            dto.RoleName = roles;
             FirebaseInitializer.InitializeFirebaseApp();
             List<Guid> idOfFriends = _friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
                 .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
@@ -467,7 +476,6 @@ namespace SocialNetwork.Service.Implement
             var mypost=_postRepository.FindByCondition(x=>x.UserId==_userService.UserId&&x.IsDeleted==false).ToList();
             var firebaseAuthManager = new FirebaseAuthManager();
             var firebaseResponse = await firebaseAuthManager.GetFirebaseTokenByEmailAsync(_userService.UserEmail);
-            //Console.WriteLine($"User created with UID: {uid}");
             dto.CountFriend=idOfFriends.Count();
             dto.CountPost=mypost.Count();
             if (firebaseResponse != null)

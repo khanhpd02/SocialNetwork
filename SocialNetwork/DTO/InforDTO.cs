@@ -40,6 +40,8 @@ public class InforDTO
     public string Career { get; set; }
 
     public string Nickname { get; set; }
-   
+
+    public List<string> RoleName { get; set; }
+
 
 }
