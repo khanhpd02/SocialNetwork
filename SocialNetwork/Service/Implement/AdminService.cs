@@ -12,6 +12,8 @@ using Org.BouncyCastle.Crypto.Generators;
 using FirebaseAdmin.Auth.Hash;
 using SocialNetwork.DTO.Response;
 using DocumentFormat.OpenXml.Spreadsheet;
+using SocialNetwork.Helpers;
+using SocialNetwork.Repository.Implement;
 
 namespace SocialNetwork.Service.Implement
 {
@@ -21,14 +23,21 @@ namespace SocialNetwork.Service.Implement
         private readonly IUserRoleRepository userRoleRepository;
         private readonly IPostRepository postRepository;
         private readonly IFriendRepository friendRepository;
-
-        public AdminService(IRoleRepository roleRepository, IUserRoleRepository userRoleRepository, IPostRepository postRepository, IFriendRepository friendRepository, IUserRepository userRepository)
+        private readonly IInforRepository inforRepository;
+        private readonly IImageRepository imageRepository;
+        private readonly IVideoRepository videoRepository;
+        public AdminService(IRoleRepository roleRepository, IUserRoleRepository userRoleRepository, 
+            IPostRepository postRepository, IFriendRepository friendRepository, 
+            IUserRepository userRepository, IVideoRepository videoRepository, IImageRepository imageRepository, IInforRepository inforRepository)
         {
             this.roleRepository = roleRepository;
             this.userRoleRepository = userRoleRepository;
             this.postRepository = postRepository;
             this.friendRepository = friendRepository;
             this.userRepository = userRepository;
+            this.imageRepository= imageRepository;
+            this.videoRepository= videoRepository;
+            this.inforRepository= inforRepository;
         }
 
         private readonly IUserRepository userRepository;
@@ -104,13 +113,13 @@ namespace SocialNetwork.Service.Implement
             }
         }
 
-        List<UserDTO> IAdminService.GetAllUser()
+        List<InforDTO> IAdminService.GetAllUser()
         {
-            List<User> entityList = userRepository.FindByCondition(l => l.IsDeleted == false);
-            List<UserDTO> dtoList = new List<UserDTO>();
-            foreach (User entity in entityList)
+            List<Infor> entityList = inforRepository.FindByCondition(l => l.IsDeleted == false);
+            List<InforDTO> dtoList = new List<InforDTO>();
+            foreach (Infor entity in entityList)
             {
-                UserDTO dto = mapper.Map<UserDTO>(entity);
+                InforDTO dto = mapper.Map<InforDTO>(entity);
                 dtoList.Add(dto);
             }
             return dtoList;
@@ -189,8 +198,33 @@ namespace SocialNetwork.Service.Implement
         }
         public List<PostDTO> GetAllPosts()
         {
+           
             List<Post> entityList = postRepository.FindAll();
-            List<PostDTO> dtoList = mapper.Map<List<PostDTO>>(entityList);
+            List<PostDTO> dtoList = new List<PostDTO>();
+            var CountLike = 0;
+            var CountComment = 0;
+            
+            foreach (Post entity in entityList)
+            {
+                var infor = inforRepository.FindByCondition(x => x.UserId == entity.UserId && x.IsDeleted == false).FirstOrDefault();
+    
+                List<Image> images = imageRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
+                List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
+               
+           
+                PostDTO dto = mapper.Map<PostDTO>(entity);
+                dto.FullName = infor.FullName;
+                dto.AvatarUrl = infor.Image;
+                dto.Images = images;
+                dto.Videos = videos;
+                dto.CountLike = CountLike;
+                dto.CountComment = CountComment;
+                dto.CreateDateShare = dto.CreateDate;
+               
+
+                dtoList.Add(dto);
+            }
+
             return dtoList;
         }
     }

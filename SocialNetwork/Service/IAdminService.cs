@@ -9,7 +9,7 @@ namespace SocialNetwork.Service
         AppResponse DeletePostById(Guid postId);
         UserDTO GetUserById(Guid userId);
         UserDTO GetUserByEmail(string Email);
-        List<UserDTO> GetAllUser();
+        List<InforDTO> GetAllUser();
         AppResponse CreateAdmin();
         AppResponse DeleteAllUser();
         AppResponse DeleteUserById(Guid userId);
