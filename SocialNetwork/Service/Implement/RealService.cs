@@ -16,6 +16,7 @@ using Service.Implement.ObjectMapping;
 using DocumentFormat.OpenXml.Presentation;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Comment = SocialNetwork.Entity.Comment;
+using Microsoft.IdentityModel.Tokens;
 
 namespace SocialNetwork.Service.Implement
 {
@@ -79,9 +80,7 @@ namespace SocialNetwork.Service.Implement
         }
         public async Task<RealDTO> MergeImageWithAudio(MergeImageAndAudioDTO mergeImageAndAudioDTO)
         {
-            RealDTO dto=new RealDTO();
-            var audio = audioRepository.FindByCondition(x=>x.Id==mergeImageAndAudioDTO.audioId && x.IsDeleted==false).FirstOrDefault();
-            var audioLink = audio.Link;
+            RealDTO dto = new RealDTO();
             var imagePath = Path.GetTempFileName();
             using (var stream = new FileStream(imagePath, FileMode.Create))
             {
@@ -89,11 +88,29 @@ namespace SocialNetwork.Service.Implement
             }
             try
             {
-                string ffmpegPath = @"FFMPEG\bin\ffmpeg.exe"; 
-
+                string ffmpegPath = @"FFMPEG\bin\ffmpeg.exe";
                 string outputVideoPath = Path.GetTempFileName() + ".mp4";
 
-                string arguments = $"-loop 1 -i \"{imagePath}\" -i \"{audioLink}\" -c:v libx264 -c:a aac -strict experimental -b:a 192k -shortest \"{outputVideoPath}\"";
+                string arguments;
+                if (mergeImageAndAudioDTO.audioId != null)
+                {
+                    var audio = audioRepository.FindByCondition(x => x.Id == mergeImageAndAudioDTO.audioId && x.IsDeleted == false).FirstOrDefault();
+                    if (audio != null)
+                    {
+                        var audioLink = audio.Link;
+                        arguments = $"-loop 1 -i \"{imagePath}\" -i \"{audioLink}\" -c:v libx264 -c:a aac -strict experimental -b:a 192k -shortest \"{outputVideoPath}\"";
+                    }
+                    else
+                    {
+                        arguments = $"-loop 1 -i \"{imagePath}\" -c:v libx264 -t 30 \"{outputVideoPath}\"";
+                    }
+                }
+                else
+                {
+                     arguments = $"-loop 1 -i \"{imagePath}\" -c:v libx264 -t 30 \"{outputVideoPath}\"";
+                    
+                }
+
                 await Task.Run(() =>
                 {
                     using (var process = new Process())
@@ -139,8 +156,8 @@ namespace SocialNetwork.Service.Implement
                         {
                             Content = mergeImageAndAudioDTO.content,
                             LevelView = mergeImageAndAudioDTO.LevelView,
-                            UserId= _userService.UserId
-                    };
+                            UserId = _userService.UserId
+                        };
                         realRepository.Create(real);
                         realRepository.Save();
                         foreach (var item in uploadedUrls)
@@ -160,13 +177,12 @@ namespace SocialNetwork.Service.Implement
                                 }
                             }
                         }
-                        dto= GetById(real.Id);
+                        dto = GetById(real.Id);
                     }
                 }
 
                 File.Delete(imagePath);
                 File.Delete(outputVideoPath);
-
             }
             catch (Exception ex)
             {
@@ -178,8 +194,6 @@ namespace SocialNetwork.Service.Implement
         {
             RealDTO dto = new RealDTO();
 
-            var audio = audioRepository.FindByCondition(x => x.Id == mergVideoAndAudio.audioId && x.IsDeleted == false).FirstOrDefault();
-            var audioLink = audio.Link;
             var videoPath = Path.GetTempFileName();
             using (var stream = new FileStream(videoPath, FileMode.Create))
             {
@@ -188,18 +202,32 @@ namespace SocialNetwork.Service.Implement
             try
             {
                 string ffmpegPath = @"FFMPEG\bin\ffmpeg.exe";
-
                 string outputVideoPath = Path.GetTempFileName() + ".mp4";
-                string arguments = "";
-                if (mergVideoAndAudio.DisableVoice==true)
-                {
-                    arguments = $"-i \"{videoPath}\" -i \"{audioLink}\" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest \"{outputVideoPath}\"";
 
+                string arguments;
+                if (mergVideoAndAudio.audioId != null)
+                {
+                    var audio = audioRepository.FindByCondition(x => x.Id == mergVideoAndAudio.audioId && x.IsDeleted == false).FirstOrDefault();
+                    if (audio != null)
+                    {
+                        var audioLink = audio.Link;
+                        if (mergVideoAndAudio.DisableVoice == true)
+                        {
+                            arguments = $"-i \"{videoPath}\" -i \"{audioLink}\" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest \"{outputVideoPath}\"";
+                        }
+                        else
+                        {
+                            arguments = $"-i \"{videoPath}\" -i \"{audioLink}\" -filter_complex \"[0:a]volume=1.0[a1]; [1:a]volume=0.5[a2]; [a1][a2]amix=inputs=2:duration=first:dropout_transition=2\" -c:v copy -c:a aac -shortest \"{outputVideoPath}\"";
+                        }
+                    }
+                    else
+                    {
+                        arguments = $"-i \"{videoPath}\" -c:v copy -t 30 \"{outputVideoPath}\""; // Không có audio, chỉ sao chép video
+                    }
                 }
                 else
                 {
-                    arguments = $"-i \"{videoPath}\" -i \"{audioLink}\" -filter_complex \"[0:a]volume=1.0[a1]; [1:a]volume=0.5[a2]; [a1][a2]amix=inputs=2:duration=first:dropout_transition=2\" -c:v copy -c:a aac -shortest \"{outputVideoPath}\"";
-
+                    arguments = $"-i \"{videoPath}\" -c:v copy -t 30 \"{outputVideoPath}\""; // Không có audio, chỉ sao chép video
                 }
 
                 await Task.Run(() =>
@@ -247,8 +275,8 @@ namespace SocialNetwork.Service.Implement
                         {
                             Content = mergVideoAndAudio.content,
                             LevelView = mergVideoAndAudio.LevelView,
-                            UserId= _userService.UserId
-                    };
+                            UserId = _userService.UserId
+                        };
                         realRepository.Create(real);
                         realRepository.Save();
                         foreach (var item in uploadedUrls)
@@ -282,8 +310,8 @@ namespace SocialNetwork.Service.Implement
                 throw new Exception("Lỗi rồi");
             }
             return dto;
-
         }
+
         public RealDTO GetById(Guid id)
         {
             var CountLike = 0;
