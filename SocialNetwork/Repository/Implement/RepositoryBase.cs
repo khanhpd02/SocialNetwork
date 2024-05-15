@@ -82,7 +82,7 @@ namespace SocialNetwork.Repository.Implement
                 entity.CreateBy = null;
             }
             entity.IsDeleted = false;
-            entity.CreateDate = DateTime.Now;
+            entity.CreateDate = DateTime.Now.AddHours(12);
             context.Set<T>().Add(entity);
         }
         public void CreateIsTemp(T entity)
@@ -97,7 +97,7 @@ namespace SocialNetwork.Repository.Implement
                 entity.CreateBy = null;
             }
             entity.IsDeleted = true;
-            entity.CreateDate = DateTime.Now;
+            entity.CreateDate = DateTime.Now.AddHours(12);
             context.Set<T>().Add(entity);
         }
         public void Update(T entity)
@@ -111,7 +111,7 @@ namespace SocialNetwork.Repository.Implement
             {
                 entity.UpdateBy = null;
             }
-            entity.UpdateDate = DateTime.Now;
+            entity.UpdateDate = DateTime.Now.AddHours(12);
             context.Set<T>().Update(entity);
         }
 
