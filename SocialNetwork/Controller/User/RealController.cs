@@ -67,9 +67,9 @@ namespace SocialNetwork.Controller.User
             var result = realService.GetAllReal();
             return Ok(result);
         }
-        [HttpDelete("DeleteReels")]
+        [HttpPost("DeleteReels")]
         [SwaggerOperation(Summary = "Delete multiple reels by their IDs")]
-        public IActionResult DeleteReels([FromBody] List<Guid> reelIds)
+        public IActionResult DeleteReels(List<Guid> reelIds)
         {
             if (reelIds == null || !reelIds.Any())
             {
