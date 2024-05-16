@@ -477,5 +477,18 @@ namespace SocialNetwork.Service.Implement
             }
             return dtoList;
         }
+        public void DeleteReels(List<Guid> reelIds)
+        {
+            foreach (var reelId in reelIds)
+            {
+                var reel = realRepository.FindByCondition(x => x.Id == reelId && x.IsDeleted == false).FirstOrDefault();
+                if (reel != null)
+                {
+                    realRepository.Delete(reel);
+                }
+            }
+            realRepository.Save();
+        }
+
     }
 }

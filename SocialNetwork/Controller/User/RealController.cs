@@ -67,5 +67,16 @@ namespace SocialNetwork.Controller.User
             var result = realService.GetAllReal();
             return Ok(result);
         }
+        [HttpDelete("DeleteReels")]
+        [SwaggerOperation(Summary = "Delete multiple reels by their IDs")]
+        public IActionResult DeleteReels([FromBody] List<Guid> reelIds)
+        {
+            if (reelIds == null || !reelIds.Any())
+            {
+                return BadRequest("Reel IDs list cannot be null or empty.");
+            }
+            realService.DeleteReels(reelIds);
+            return Ok("Selected reels have been successfully deleted.");
+        }
     }
 }
