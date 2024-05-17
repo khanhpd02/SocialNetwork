@@ -36,9 +36,9 @@ namespace SocialNetwork.Service.Implement
             cfg.AddProfile(new MappingProfile());
         }).CreateMapper();
 
-        public RealService(IRealRepository realRepository, 
+        public RealService(IRealRepository realRepository,
             IAudioRepository audioRepository, Cloudinary _cloudinary, IVideoRepository videoRepository
-            , IUserService _userService, IInforRepository inforRepository, ILikeRepository likeRepository, 
+            , IUserService _userService, IInforRepository inforRepository, ILikeRepository likeRepository,
             ICommentRepository commentRepository, IFriendRepository friendRepository)
         {
             this.realRepository = realRepository;
@@ -107,8 +107,8 @@ namespace SocialNetwork.Service.Implement
                 }
                 else
                 {
-                     arguments = $"-loop 1 -i \"{imagePath}\" -c:v libx264 -t 30 \"{outputVideoPath}\"";
-                    
+                    arguments = $"-loop 1 -i \"{imagePath}\" -c:v libx264 -t 30 \"{outputVideoPath}\"";
+
                 }
 
                 await Task.Run(() =>
@@ -380,7 +380,7 @@ namespace SocialNetwork.Service.Implement
             {
                 var infor = inforRepository.FindByCondition(x => x.UserId == entity.UserId && x.IsDeleted == false).FirstOrDefault();
                 var like = likeRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false && x.PostId == entity.Id).FirstOrDefault();
-                
+
                 List<Video> videos = videoRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
                 List<Like> likes = likeRepository.FindByCondition(img => img.PostId == entity.Id && img.IsDeleted == false).ToList();
                 List<Comment> comments = commentRepository.FindByCondition(vid => vid.PostId == entity.Id && vid.IsDeleted == false).ToList();
@@ -477,15 +477,13 @@ namespace SocialNetwork.Service.Implement
             }
             return dtoList;
         }
-        public void DeleteReels(List<Guid> reelIds)
+        public void DeleteReels(Guid reelIds)
         {
-            foreach (var reelId in reelIds)
+
+            var reel = realRepository.FindByCondition(x => x.Id == reelIds && x.IsDeleted == false).FirstOrDefault();
+            if (reel != null)
             {
-                var reel = realRepository.FindByCondition(x => x.Id == reelId && x.IsDeleted == false).FirstOrDefault();
-                if (reel != null)
-                {
-                    realRepository.Delete(reel);
-                }
+                realRepository.Delete(reel);
             }
             realRepository.Save();
         }

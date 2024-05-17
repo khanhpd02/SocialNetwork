@@ -69,9 +69,9 @@ namespace SocialNetwork.Controller.User
         }
         [HttpPost("DeleteReels")]
         [SwaggerOperation(Summary = "Delete multiple reels by their IDs")]
-        public IActionResult DeleteReels(List<Guid> reelIds)
+        public IActionResult DeleteReels(Guid reelIds)
         {
-            if (reelIds == null || !reelIds.Any())
+            if (reelIds == null)
             {
                 return BadRequest("Reel IDs list cannot be null or empty.");
             }

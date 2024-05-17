@@ -10,7 +10,7 @@ namespace SocialNetwork.Service
         List<RealDTO> GetRealByUserId(Guid id);
         RealDTO GetById(Guid id);
         List<RealDTO> GetAllReal();
-        void DeleteReels(List<Guid> reelIds);
+        void DeleteReels(Guid reelIds);
 
     }
 }

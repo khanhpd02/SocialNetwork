@@ -24,9 +24,6 @@ namespace SocialNetwork.Controller.Admin
         [SwaggerOperation(Summary = "get user by Id")]
         public IActionResult getUserById(Guid id)
         {
-            //Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
-
-
             var response = adminService.GetUserById(id);
 
             return Ok(response);
@@ -35,8 +32,6 @@ namespace SocialNetwork.Controller.Admin
         [SwaggerOperation(Summary = "get user by Id")]
         public IActionResult getUserByEmail(string email)
         {
-            //Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
-
 
             var response = adminService.GetUserByEmail(email);
 
@@ -46,9 +41,6 @@ namespace SocialNetwork.Controller.Admin
         [SwaggerOperation(Summary = "Get All User")]
         public IActionResult GetAllUser ()
         {
-            //Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
-
-
             var response = adminService.GetAllUser();
 
             return Ok(response);
@@ -57,8 +49,6 @@ namespace SocialNetwork.Controller.Admin
         [SwaggerOperation(Summary = "Delete All User")]
         public IActionResult DeleteAllUser()
         {
-            //Guid userid = Guid.Parse(HttpContext.User.FindFirst("id").Value);
-
 
             var response = adminService.DeleteAllUser();
 
