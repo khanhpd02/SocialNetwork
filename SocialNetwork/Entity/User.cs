@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SocialNetwork.Entity;
 
-public partial class User : IEntity
+public partial class User
 {
     public Guid Id { get; set; }
 
@@ -24,6 +24,8 @@ public partial class User : IEntity
     public bool IsDeleted { get; set; }
 
     public string UserName { get; set; }
+
+    public bool? Baned { get; set; }
 
     public virtual ICollection<Friend> FriendUserAcceptNavigations { get; set; } = new List<Friend>();
 
