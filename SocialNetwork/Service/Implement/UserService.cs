@@ -303,12 +303,16 @@ public class UserService : IUserService
             throw new BadRequestException("Password field cannot be empty");
         }
 
-        var user = _context.Users.SingleOrDefault(u => u.Email == loginModel.Email);
+        User user = _context.Users.SingleOrDefault(u => u.Email == loginModel.Email);
 
         if (user == null || !VerifyPassword(loginModel.Password, user.Password) || user.IsDeleted == true)
         {
             throw new BadRequestException("Tài khoản hoặc mật khẩu không đúng");
 
+        }
+        if (user != null && user.IsDeleted == false && user.Baned == true)
+        {
+            throw new BadRequestException("Account Baned");
         }
         //lấy role
         List<UserRole> userRole = _context.UserRoles.Where(u => u.UserId == user.Id).ToList();

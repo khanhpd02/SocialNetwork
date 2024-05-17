@@ -26,18 +26,19 @@ namespace SocialNetwork.Service.Implement
         private readonly IInforRepository inforRepository;
         private readonly IImageRepository imageRepository;
         private readonly IVideoRepository videoRepository;
-        public AdminService(IRoleRepository roleRepository, IUserRoleRepository userRoleRepository, 
-            IPostRepository postRepository, IFriendRepository friendRepository, 
-            IUserRepository userRepository, IVideoRepository videoRepository, IImageRepository imageRepository, IInforRepository inforRepository)
+        private readonly IRealRepository reelRepository;
+
+        public AdminService(IRoleRepository roleRepository, IUserRoleRepository userRoleRepository, IPostRepository postRepository, IFriendRepository friendRepository, IInforRepository inforRepository, IImageRepository imageRepository, IVideoRepository videoRepository, IRealRepository reelRepository, IUserRepository userRepository)
         {
             this.roleRepository = roleRepository;
             this.userRoleRepository = userRoleRepository;
             this.postRepository = postRepository;
             this.friendRepository = friendRepository;
+            this.inforRepository = inforRepository;
+            this.imageRepository = imageRepository;
+            this.videoRepository = videoRepository;
+            this.reelRepository = reelRepository;
             this.userRepository = userRepository;
-            this.imageRepository= imageRepository;
-            this.videoRepository= videoRepository;
-            this.inforRepository= inforRepository;
         }
 
         private readonly IUserRepository userRepository;
@@ -156,7 +157,7 @@ namespace SocialNetwork.Service.Implement
             }
             return new AppResponse { message = "Delete success",success=true };
         }
-        public AppResponse DeleteUserById(Guid userId)
+        public AppResponse BandUserById(Guid userId)
         {
             var user = userRepository.FindById(userId);
             if (user == null)
@@ -164,22 +165,33 @@ namespace SocialNetwork.Service.Implement
                 return new AppResponse { message = "User not found", success = false };
             }
 
-            var userPosts = postRepository.FindByCondition(x=>x.UserId== userId);
+            var userPosts = postRepository.FindByCondition(x=>x.UserId== userId).ToList();
             foreach (var post in userPosts)
             {
-                postRepository.Delete(post);
+                post.IsDeleted = false;
+                postRepository.Update(post);
+                postRepository.Save();
             }
 
-            var userFriends = friendRepository.FindByCondition(x=>x.UserTo== userId ||x.UserAccept== userId);
+            var userFriends = friendRepository.FindByCondition(x=>x.UserTo== userId ||x.UserAccept== userId).ToList();
             foreach (var friend in userFriends)
             {
-                friendRepository.Delete(friend);
+                friend.IsDeleted = true;
+                friendRepository.Update(friend);
+                friendRepository.Save();
             }
-
-            userRepository.Delete(user);
+            var reelOfUser= reelRepository.FindByCondition(x=>x.UserId== userId).ToList();
+            foreach (var reel in reelOfUser)
+            {
+                reel.IsDeleted = true;
+                reelRepository.Update(reel);
+                reelRepository.Save();
+            }
+            user.Baned = true;
+            userRepository.Update(user);
             userRepository.Save();
 
-            return new AppResponse { message = "Delete success", success = true };
+            return new AppResponse { message = "Ban success", success = true };
         }
 
         public AppResponse DeletePostById(Guid postId)
@@ -191,7 +203,8 @@ namespace SocialNetwork.Service.Implement
             }
             else
             {
-                postRepository.Delete(post);
+                post.IsDeleted = true;
+                postRepository.Update(post);
                 postRepository.Save();
                 return new AppResponse { message = "Delete success", success = true };
             }
