@@ -157,7 +157,7 @@ namespace SocialNetwork.Service.Implement
             }
             return new AppResponse { message = "Delete success",success=true };
         }
-        public AppResponse BandUserById(Guid userId)
+        public AppResponse BanUserById(Guid userId)
         {
             var user = userRepository.FindById(userId);
             if (user == null)

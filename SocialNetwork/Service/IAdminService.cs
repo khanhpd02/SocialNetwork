@@ -12,6 +12,6 @@ namespace SocialNetwork.Service
         List<InforDTO> GetAllUser();
         AppResponse CreateAdmin();
         AppResponse DeleteAllUser();
-        AppResponse DeleteUserById(Guid userId);
+        AppResponse BanUserById(Guid userId);
     }
 }

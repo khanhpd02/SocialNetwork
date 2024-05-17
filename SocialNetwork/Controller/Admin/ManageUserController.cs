@@ -60,7 +60,7 @@ namespace SocialNetwork.Controller.Admin
         {
 
 
-            var response = adminService.DeleteUserById(userId);
+            var response = adminService.BanUserById(userId);
 
             return Ok(response);
         }
