@@ -74,7 +74,7 @@ namespace SocialNetwork.Controller.User
                 return BadRequest(ex.Message);
             }
         }
-        [HttpDelete("share/{shareId}")]
+        [HttpDelete("share/delete")]
         [SwaggerOperation(Summary = "Delete a Share")]
         public IActionResult DeleteShare(Guid shareId)
         {
