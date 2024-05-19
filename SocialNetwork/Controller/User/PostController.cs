@@ -55,6 +55,40 @@ namespace SocialNetwork.Controller.User
             var sharedPost = postService.SharePost(sharePostDTO);
             return Ok(sharedPost);
         }
+        [HttpPut("share/update")]
+        [SwaggerOperation(Summary = "Update a Share")]
+        public IActionResult UpdateShare([FromForm] ShareUpdateDTO shareUpdateDTO)
+        {
+            if (shareUpdateDTO == null)
+            {
+                return BadRequest("Invalid data");
+            }
+
+            try
+            {
+                var updatedShare = postService.UpdateShare(shareUpdateDTO);
+                return Ok(updatedShare);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpDelete("share/{shareId}")]
+        [SwaggerOperation(Summary = "Delete a Share")]
+        public IActionResult DeleteShare(Guid shareId)
+        {
+            try
+            {
+                postService.DeleteShare(shareId);
+                return Ok("Share deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPut]
         [SwaggerOperation(Summary = "Update a Post")]
         public IActionResult Update([FromForm] PostUpdateDTO postDTO)

@@ -261,6 +261,34 @@ namespace SocialNetwork.Service.Implement
                 throw new Exception("Level view of Post is not accept share");
             }
         }
+        public void DeleteShare(Guid shareId)
+        {
+            var share = shareRepository.FindByCondition(x => x.Id == shareId && x.IsDeleted==false).FirstOrDefault();
+            if (share == null)
+            {
+                throw new Exception("Id of Share is invalid");
+            }
+
+            shareRepository.Delete(share);
+            shareRepository.Save();
+        }
+        public ShareDTO UpdateShare(ShareUpdateDTO shareUpdateDTO)
+        {
+            var share = shareRepository.FindByCondition(x => x.Id == shareUpdateDTO.shareId && x.IsDeleted==false).FirstOrDefault();
+            if (share == null)
+            {
+                throw new Exception("Id of Share is invalid");
+            }
+
+            share.Content = shareUpdateDTO.Content;
+            share.LevelView = shareUpdateDTO.LevelView;
+
+            shareRepository.Update(share);
+            shareRepository.Save();
+
+            ShareDTO shareDTO = mapper.Map<ShareDTO>(share);
+            return shareDTO;
+        }
 
         public PostDTO  GetById(Guid id)
         {

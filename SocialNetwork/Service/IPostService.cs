@@ -13,5 +13,7 @@ namespace SocialNetwork.Service
         PostDTO GetById(Guid id);
         void Delete(Guid id);
         List<PostDTO> GetAllPostsAndShare(int numberOfPosts);
+        ShareDTO UpdateShare(ShareUpdateDTO shareUpdateDTO);
+        void DeleteShare(Guid shareId);
     }
 }
