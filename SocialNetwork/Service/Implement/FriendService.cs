@@ -44,6 +44,7 @@ namespace SocialNetwork.Service.Implement
         {
             var checkFriend = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == userIdReceive) || ((x.UserTo == userIdReceive && x.UserAccept == _userService.UserId))).FirstOrDefault();
             var checkUser = userRepository.FindByCondition(x => x.Id == userIdReceive && x.IsDeleted == false).FirstOrDefault();
+            var Infor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId && x.IsDeleted == false).FirstOrDefault();
             if (checkUser == null)
             {
                 throw new BadRequestException("UserId không tồn tại");
@@ -70,9 +71,10 @@ namespace SocialNetwork.Service.Implement
                 notify.UserTo = _userService.UserId;
                 notify.UserNotify = userIdReceive;
                 var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Kết bạn").FirstOrDefault();
-                notify.Content = $" đã gửi lời mời kết bạn cho bạn";
+                notify.Content = $"{Infor.FullName} đã gửi lời mời kết bạn cho bạn";
                 notify.NotifyType = notifyType.Id;
                 notify.CreateDate = DateTime.Now;
+                notify.Image = Infor.Image;
                 notifyRepository.Create(notify);
                 notifyRepository.Save();
                 return new AppResponse { message = "Gửi lời mời kết bạn thành công", success = true };

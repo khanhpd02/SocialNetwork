@@ -98,17 +98,16 @@ namespace SocialNetwork.Service.Implement
                     if (audio != null)
                     {
                         var audioLink = audio.Link;
-                        arguments = $"-loop 1 -i \"{imagePath}\" -i \"{audioLink}\" -c:v libx264 -c:a aac -strict experimental -b:a 192k -shortest \"{outputVideoPath}\"";
+                        arguments = $"-loop 1 -i \"{imagePath}\" -i \"{audioLink}\" -c:v libx264 -vf \"scale='min(1080,iw)':-2,zoompan=z='zoom+0.001':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=125\" -c:a aac -strict experimental -b:a 192k -shortest \"{outputVideoPath}\"";
                     }
                     else
                     {
-                        arguments = $"-loop 1 -i \"{imagePath}\" -c:v libx264 -t 30 \"{outputVideoPath}\"";
+                        arguments = $"-loop 1 -i \"{imagePath}\" -c:v libx264 -vf \"scale='min(1080,iw)':-2,zoompan=z='zoom+0.001':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=125\" -t 30 \"{outputVideoPath}\"";
                     }
                 }
                 else
                 {
-                    arguments = $"-loop 1 -i \"{imagePath}\" -c:v libx264 -t 30 \"{outputVideoPath}\"";
-
+                    arguments = $"-loop 1 -i \"{imagePath}\" -c:v libx264 -vf \"scale='min(1080,iw)':-2,zoompan=z='zoom+0.001':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=125\" -t 30 \"{outputVideoPath}\"";
                 }
 
                 await Task.Run(() =>
@@ -186,10 +185,12 @@ namespace SocialNetwork.Service.Implement
             }
             catch (Exception ex)
             {
-                throw new Exception("Lỗi rồi");
+                throw new Exception("Lỗi rồi", ex);
             }
             return dto;
         }
+
+
         public async Task<RealDTO> MergeVideoWithAudio(MergVideoAndAudioDTO mergVideoAndAudio)
         {
             RealDTO dto = new RealDTO();
