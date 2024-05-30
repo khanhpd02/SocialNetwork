@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.DTO;
+﻿using DocumentFormat.OpenXml.Presentation;
+
+namespace SocialNetwork.DTO;
 
 public class InforDTO
 {
@@ -42,6 +44,8 @@ public class InforDTO
     public string Nickname { get; set; }
 
     public List<string> RoleName { get; set; }
+
+    public bool Baned { get; set; }
 
 
 }

@@ -121,6 +121,8 @@ namespace SocialNetwork.Service.Implement
             foreach (Infor entity in entityList)
             {
                 InforDTO dto = mapper.Map<InforDTO>(entity);
+                var user=userRepository.FindById(dto.UserId);
+                dto.Baned= user.Baned.Value;
                 dtoList.Add(dto);
             }
             return dtoList;
@@ -168,7 +170,7 @@ namespace SocialNetwork.Service.Implement
             var userPosts = postRepository.FindByCondition(x=>x.UserId== userId).ToList();
             foreach (var post in userPosts)
             {
-                post.IsDeleted = false;
+                post.IsDeleted = true;
                 postRepository.Update(post);
                 postRepository.Save();
             }
@@ -239,6 +241,43 @@ namespace SocialNetwork.Service.Implement
             }
 
             return dtoList;
+        }
+
+        public AppResponse UnBanUserById(Guid userId)
+        {
+            var user = userRepository.FindByCondition(x=>x.Id == userId && x.Baned==true).FirstOrDefault();
+            if (user == null)
+            {
+                return new AppResponse { message = "User not found or not Baned", success = false };
+            }
+
+            var userPosts = postRepository.FindByCondition(x => x.UserId == userId).ToList();
+            foreach (var post in userPosts)
+            {
+                post.IsDeleted = false;
+                postRepository.Update(post);
+                postRepository.Save();
+            }
+
+            var userFriends = friendRepository.FindByCondition(x => x.UserTo == userId || x.UserAccept == userId).ToList();
+            foreach (var friend in userFriends)
+            {
+                friend.IsDeleted = false;
+                friendRepository.Update(friend);
+                friendRepository.Save();
+            }
+            var reelOfUser = reelRepository.FindByCondition(x => x.UserId == userId).ToList();
+            foreach (var reel in reelOfUser)
+            {
+                reel.IsDeleted = false;
+                reelRepository.Update(reel);
+                reelRepository.Save();
+            }
+            user.Baned = false;
+            userRepository.Update(user);
+            userRepository.Save();
+
+            return new AppResponse { message = "Ban success", success = true };
         }
     }
 }

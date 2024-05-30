@@ -13,5 +13,7 @@ namespace SocialNetwork.Service
         AppResponse CreateAdmin();
         AppResponse DeleteAllUser();
         AppResponse BanUserById(Guid userId);
+        AppResponse UnBanUserById(Guid userId);
+
     }
 }
