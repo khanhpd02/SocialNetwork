@@ -35,11 +35,11 @@ namespace SocialNetwork.Service.Implement
             cfg.AddProfile(new MappingProfile());
         }).CreateMapper();
 
-        public CommentService(ICommentRepository commentRepository, IPostRepository postRepository, 
+        public CommentService(ICommentRepository commentRepository, IPostRepository postRepository,
             SocialNetworkContext context, IInforRepository inforRepository,
             IShareRepository shareRepository, Cloudinary cloudinary, IUserService userService,
-            IImageRepository imageRepository, IVideoRepository videoRepository, IUserRepository userRepository, 
-            IMasterDataRepository masterDataRepository, 
+            IImageRepository imageRepository, IVideoRepository videoRepository, IUserRepository userRepository,
+            IMasterDataRepository masterDataRepository,
             INotifyRepository notifyRepository)
         {
             _commentRepository = commentRepository;
@@ -113,30 +113,14 @@ namespace SocialNetwork.Service.Implement
                 throw new BadRequestException("Content Không được để trống");
             }
             var post = postRepository.FindById(commentDTO.PostId);
-            var share = shareRepository.FindById(commentDTO.PostId); 
-            
+            var share = shareRepository.FindById(commentDTO.PostId);
             if (post == null && share != null)
             {
-                var userShare = userRepository.FindByCondition(x => x.Id == share.UserId).FirstOrDefault().Id;
-                var userShareInfor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
-
                 Comment cmt = mapper.Map<Comment>(commentDTO);
                 cmt.PostId = share.Id;
                 cmt.UserId = _userService.UserId;
                 _commentRepository.Create(cmt);
                 _commentRepository.Save();
-
-                Notify notify = new Notify();
-                notify.UserTo = _userService.UserId;
-                notify.UserNotify = userShare;
-                var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
-                notify.Content = $"{userShareInfor.FullName} đã bình luận bài post của bạn";
-                notify.NotifyType = notifyType.Id;
-                notify.IdObject = cmt.Id;
-                notify.Image = userShareInfor.Image;
-                notifyRepository.Create(notify);
-                notifyRepository.Save();
-
                 if (cloudinaryUrls != null)
                 {
                     foreach (var cloudinaryUrl in cloudinaryUrls)
@@ -170,30 +154,31 @@ namespace SocialNetwork.Service.Implement
                         }
                     }
                 }
-                
+                var userShare = userRepository.FindByCondition(x => x.Id == share.UserId).FirstOrDefault().Id;
+                if (userShare != _userService.UserId)
+                {
+                    var userShareInfor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
+                    Notify notify = new Notify();
+                    notify.UserTo = _userService.UserId;
+                    notify.UserNotify = userShare;
+                    var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
+                    notify.Content = $"{userShareInfor.FullName} đã bình luận bài post của bạn";
+                    notify.NotifyType = notifyType.Id;
+                    notify.IdObject = cmt.Id;
+                    notify.Image = userShareInfor.Image;
+                    notifyRepository.Create(notify);
+                    notifyRepository.Save();
+                }
+
                 return new AppResponse { message = "Comment Success", success = true };
             }
             if (post != null && share == null)
             {
-                var userPost = userRepository.FindByCondition(x => x.Id == post.UserId).FirstOrDefault().Id;
-                var userPostInfor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
                 Comment cmt = mapper.Map<Comment>(commentDTO);
                 cmt.PostId = post.Id;
                 cmt.UserId = _userService.UserId;
                 _commentRepository.Create(cmt);
                 _commentRepository.Save();
-
-                Notify notify = new Notify();
-                notify.UserTo = _userService.UserId;
-                notify.UserNotify = userPost;
-                var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
-                notify.Content = $"{userPostInfor.FullName} đã bình luận bài post của bạn";
-                notify.NotifyType = notifyType.Id;
-                notify.IdObject = cmt.Id;
-                notify.Image = userPostInfor.Image;
-                notifyRepository.Create(notify);
-                notifyRepository.Save();
-
                 if (cloudinaryUrls != null)
                 {
                     foreach (var cloudinaryUrl in cloudinaryUrls)
@@ -227,7 +212,22 @@ namespace SocialNetwork.Service.Implement
                         }
                     }
                 }
-                
+
+                var userPost = userRepository.FindByCondition(x => x.Id == post.UserId).FirstOrDefault().Id;
+                if (userPost != _userService.UserId)
+                {
+                    var userPostInfor = inforRepository.FindByCondition(x => x.UserId == _userService.UserId).FirstOrDefault();
+                    Notify notify = new Notify();
+                    notify.UserTo = _userService.UserId;
+                    notify.UserNotify = userPost;
+                    var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Bình luận").FirstOrDefault();
+                    notify.Content = $"{userPostInfor.FullName} đã bình luận bài post của bạn";
+                    notify.NotifyType = notifyType.Id;
+                    notify.IdObject = cmt.Id;
+                    notify.Image = userPostInfor.Image;
+                    notifyRepository.Create(notify);
+                    notifyRepository.Save();
+                }
                 return new AppResponse { message = "Comment Success", success = true };
             }
             else
