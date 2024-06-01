@@ -116,13 +116,16 @@ namespace SocialNetwork.Service.Implement
 
         List<InforDTO> IAdminService.GetAllUser()
         {
-            List<Infor> entityList = inforRepository.FindByCondition(l => l.IsDeleted == false);
+            var admin = userRepository.FindByCondition(x => x.Email == "Admin@gmail.com").FirstOrDefault();
+            List<Infor> entityList = inforRepository.FindByCondition(l => l.IsDeleted == false && l.UserId!=admin.Id);
             List<InforDTO> dtoList = new List<InforDTO>();
+      
             foreach (Infor entity in entityList)
             {
                 InforDTO dto = mapper.Map<InforDTO>(entity);
                 var user=userRepository.FindById(dto.UserId);
-                dto.Baned= user.Baned.Value;
+                if(user.Baned==true)
+                    dto.Baned= true;
                 dtoList.Add(dto);
             }
             return dtoList;
