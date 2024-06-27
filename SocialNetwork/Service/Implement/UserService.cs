@@ -136,8 +136,7 @@ public class UserService : IUserService
         else if (emailUSER != null && emailUSER.IsDeleted == true)
         {
             emailUSER.Password = HashPassword(dto.Password);
-            emailUSER.IsDeleted = false;
-            _context.Users.Add(emailUSER);
+            _context.Users.Update(emailUSER);
             _context.SaveChanges();
 
             try
