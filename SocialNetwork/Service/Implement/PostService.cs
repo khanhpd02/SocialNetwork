@@ -195,6 +195,12 @@ namespace SocialNetwork.Service.Implement
                     imageRepository.Delete(item);
                     imageRepository.Save();
                 }
+                var videosToDelete = videoRepository.FindByCondition(x => dto.ListImageDeleteId.Contains(x.Id)).ToList();
+                foreach (var item in videosToDelete)
+                {
+                    videoRepository.Delete(item);
+                    videoRepository.Save();
+                }
             }
             if (dto.File != null && dto.File.Any())
             {
