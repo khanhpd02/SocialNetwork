@@ -100,7 +100,7 @@ namespace SocialNetwork.Service.Implement
         }
         public List<InforDTO> GetInforByFullName(string fullname)
         {
-            List<Infor> entities = _inforRepository.FindByCondition(x => x.FullName.Contains(fullname) && x.IsDeleted == false && x.UserId != _userService.UserId).ToList();
+            List<Infor> entities = _inforRepository.FindByCondition(x => x.FullName.Contains(fullname) && x.IsDeleted == false && x.UserId != _userService.UserId && !x.FullName.ToLower().Contains("admin")).ToList();
 
             List<InforDTO> dtos = new List<InforDTO>();
 
