@@ -102,18 +102,24 @@ namespace SocialNetwork.Service.Implement
                 friends.IsDeleted = false;
                 friendRepository.Update(friends);
                 friendRepository.Save();
-                var notifyType = masterDataRepository.FindByCondition(x => x.Name == "AcceptFriend").FirstOrDefault();
-                Notify notify = new Notify
+                //var notifyType = masterDataRepository.FindByCondition(x => x.Name == "AcceptFriend").FirstOrDefault();
+                //Notify notify = new Notify
+                //{
+                //    UserTo = _userService.UserId,
+                //    UserNotify = userIdSender,
+                //    Content = $" đã chấp nhận lời mời kết bạn",
+                //    NotifyType = notifyType.Id,
+                //    CreateDate = DateTime.Now,
+                //    CreateBy = _userService.UserId
+                //};
+                //notifyRepository.Create(notify);
+                //notifyRepository.Save();
+                var notify = notifyRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserNotify == _userService.UserId && x.NotifyType == masterDataRepository.FindByCondition(x => x.Name == "Kết bạn").FirstOrDefault().Id);
+                foreach (var item in notify)
                 {
-                    UserTo = _userService.UserId,
-                    UserNotify = userIdSender,
-                    Content = $" đã chấp nhận lời mời kết bạn",
-                    NotifyType = notifyType.Id,
-                    CreateDate = DateTime.Now,
-                    CreateBy = _userService.UserId
-                };
-                notifyRepository.Create(notify);
-                notifyRepository.Save();
+                    notifyRepository.Delete(item);
+                    notifyRepository.Save();
+                }
                 return new AppResponse { message = "Accept Friend Success", success = true };
             }
 
@@ -177,7 +183,7 @@ namespace SocialNetwork.Service.Implement
         public FriendDTO UpdateLevelFriend(FriendDTO dto)
         {
             var friends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == dto.User2) || (x.UserTo == dto.User2 && x.UserAccept == _userService.UserId)).FirstOrDefault();
-            Guid? idMaster=null;
+            Guid? idMaster = null;
             var enumDescription = dto.Level == (int)EnumLevelView.friend ? masterDataRepository.GetEnumDescription(EnumLevelView.friend) :
                      dto.Level == (int)EnumLevelView.bestfriend ? masterDataRepository.GetEnumDescription(EnumLevelView.bestfriend) :
                      null;
@@ -375,7 +381,7 @@ namespace SocialNetwork.Service.Implement
         {
             var checkBlook = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId && x.UserAccept == userIdBlocked) || ((x.UserTo == userIdBlocked && x.UserAccept == _userService.UserId))).FirstOrDefault();
             var checkUser = userRepository.FindByCondition(x => x.Id == userIdBlocked && x.IsDeleted == false).FirstOrDefault();
-            var materdata= masterDataRepository.FindByCondition(x=>x.Name==masterDataRepository.GetEnumDescription(EnumLevelView.Block)).FirstOrDefault();  
+            var materdata = masterDataRepository.FindByCondition(x => x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.Block)).FirstOrDefault();
             if (checkUser == null)
             {
                 throw new BadRequestException("UserId không tồn tại");
@@ -398,21 +404,21 @@ namespace SocialNetwork.Service.Implement
                     CreateBy = _userService.UserId,
                     CreateDate = DateTime.Now,
                     Level = materdata.Id
-                   
+
                 };
                 friendRepository.Create(friend);
                 friendRepository.Save();
 
-               
+
                 return new AppResponse { message = "Block success", success = true };
             }
         }
 
         public List<InforDTO> GetListBlock()
         {
-            var masterdataBlock= masterDataRepository.FindByCondition(x=>x.Name==masterDataRepository.GetEnumDescription(EnumLevelView.Block)).FirstOrDefault();  
+            var masterdataBlock = masterDataRepository.FindByCondition(x => x.Name == masterDataRepository.GetEnumDescription(EnumLevelView.Block)).FirstOrDefault();
 
-            List<Guid> idOfFriend = friendRepository.FindByCondition(x => x.UserTo == _userService.UserId && x.IsDeleted == false && x.Level==masterdataBlock.Id)
+            List<Guid> idOfFriend = friendRepository.FindByCondition(x => x.UserTo == _userService.UserId && x.IsDeleted == false && x.Level == masterdataBlock.Id)
                 .Select(x => x.UserAccept)
                 .ToList();
             List<Infor> infors = new List<Infor>();
@@ -457,7 +463,7 @@ namespace SocialNetwork.Service.Implement
             }
             else if (checkBlook != null)
             {
-                if (checkBlook.Level==masterdata.Id)
+                if (checkBlook.Level == masterdata.Id)
                 {
                     friendRepository.Delete(checkBlook);
                     friendRepository.Save();
@@ -469,7 +475,7 @@ namespace SocialNetwork.Service.Implement
                     throw new BadRequestException("UserId này không có trong danh sách chặn");
 
                 }
-                
+
             }
             else
             {
