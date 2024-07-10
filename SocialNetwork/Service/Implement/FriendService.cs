@@ -115,10 +115,12 @@ namespace SocialNetwork.Service.Implement
                 //notifyRepository.Create(notify);
                 //notifyRepository.Save();
                 var notify = notifyRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserNotify == _userService.UserId && x.NotifyType == masterDataRepository.FindByCondition(x => x.Name == "Kết bạn").FirstOrDefault().Id);
-                foreach (var item in notify)
-                {
-                    notifyRepository.Delete(item);
-                    notifyRepository.Save();
+                if (notify != null) {
+                    foreach (var item in notify)
+                    {
+                        notifyRepository.Delete(item);
+                        notifyRepository.Save();
+                    }
                 }
                 return new AppResponse { message = "Accept Friend Success", success = true };
             }
