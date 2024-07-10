@@ -114,7 +114,8 @@ namespace SocialNetwork.Service.Implement
                 //};
                 //notifyRepository.Create(notify);
                 //notifyRepository.Save();
-                var notify = notifyRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserNotify == _userService.UserId && x.NotifyType == masterDataRepository.FindByCondition(x => x.Name == "Kết bạn").FirstOrDefault().Id);
+                var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Kết bạn").FirstOrDefault().Id;
+                var notify = notifyRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserNotify == _userService.UserId && x.NotifyType == notifyType).ToList();
                 if (notify != null) {
                     foreach (var item in notify)
                     {
@@ -279,7 +280,16 @@ namespace SocialNetwork.Service.Implement
             {
                 friendRepository.Delete(friends);
                 friendRepository.Save();
-
+                var notifyType = masterDataRepository.FindByCondition(x => x.Name == "Kết bạn").FirstOrDefault().Id;
+                var notify = notifyRepository.FindByCondition(x => x.UserTo == userIdSender && x.UserNotify == _userService.UserId && x.NotifyType == notifyType).ToList();
+                if (notify != null)
+                {
+                    foreach (var item in notify)
+                    {
+                        notifyRepository.Delete(item);
+                        notifyRepository.Save();
+                    }
+                }
                 return new AppResponse { message = "Reject Friend Success", success = true };
             }
         }
