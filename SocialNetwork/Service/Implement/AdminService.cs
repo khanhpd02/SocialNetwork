@@ -208,8 +208,8 @@ namespace SocialNetwork.Service.Implement
             }
             else
             {
-                post.IsDeleted = true;
-                postRepository.Update(post);
+                //post.IsDeleted = true;
+                postRepository.Delete(post);
                 postRepository.Save();
                 return new AppResponse { message = "Delete success", success = true };
             }
