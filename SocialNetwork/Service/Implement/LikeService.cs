@@ -52,6 +52,7 @@ namespace SocialNetwork.Service.Implement
                 {
                     checklike.IsDeleted = !checklike.IsDeleted;
                     likeRepository.Update(checklike);
+                    likeRepository.Save();
                     return new AppResponse { message = checklike.IsDeleted ? "Unlike Success!" : "Like Success!", success = true };
                 }
             }

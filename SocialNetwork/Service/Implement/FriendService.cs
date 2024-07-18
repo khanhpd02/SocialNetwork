@@ -130,7 +130,7 @@ namespace SocialNetwork.Service.Implement
         }
         public List<InforDTO> GetAllFriends()
         {
-            List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false)
+            List<Guid> idOfFriends = friendRepository.FindByCondition(x => (x.UserTo == _userService.UserId || x.UserAccept == _userService.UserId) && x.IsDeleted == false && x.Level!=null)
                 .Select(x => x.UserTo == _userService.UserId ? x.UserAccept : x.UserTo)
                 .ToList();
 
